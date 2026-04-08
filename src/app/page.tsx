@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useId, useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import React, { useEffect, useId, useRef, useState } from "react";
+import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { useRouter } from "next/navigation";
 import {
   Activity,
@@ -109,6 +109,143 @@ const revealFromRight = {
   viewport: textRevealViewport,
   transition: textRevealTransition,
 };
+const timezoneCountryFallbacks: Record<string, string> = {
+  "America/La_Paz": "BO",
+  "America/Argentina/Buenos_Aires": "AR",
+  "America/Bogota": "CO",
+  "America/Chicago": "US",
+  "America/Denver": "US",
+  "America/Lima": "PE",
+  "America/Los_Angeles": "US",
+  "America/Mexico_City": "MX",
+  "America/Miami": "US",
+  "America/Montevideo": "UY",
+  "America/New_York": "US",
+  "America/Phoenix": "US",
+  "America/Santiago": "CL",
+  "America/Sao_Paulo": "BR",
+  "Europe/Madrid": "ES",
+};
+
+const formatLocalClock = (date: Date) =>
+  [date.getHours(), date.getMinutes(), date.getSeconds()].map((value) => String(value).padStart(2, "0")).join(".");
+
+const getRegionFromLocale = (locale: string) => {
+  try {
+    return new Intl.Locale(locale).region?.toUpperCase();
+  } catch {
+    const match = locale.match(/[-_]([A-Za-z]{2})\b/);
+    return match?.[1]?.toUpperCase();
+  }
+};
+
+const getCountryLabel = (regionCode: string) => {
+  if (typeof Intl.DisplayNames !== "undefined") {
+    return new Intl.DisplayNames(["es"], { type: "region" }).of(regionCode) ?? regionCode;
+  }
+
+  return regionCode;
+};
+
+const resolveCountryLabel = (locales: string[], timeZone?: string) => {
+  for (const locale of locales) {
+    const regionCode = getRegionFromLocale(locale);
+
+    if (regionCode) {
+      return getCountryLabel(regionCode);
+    }
+  }
+
+  if (timeZone && timezoneCountryFallbacks[timeZone]) {
+    return getCountryLabel(timezoneCountryFallbacks[timeZone]);
+  }
+
+  return timeZone?.split("/").at(-1)?.replace(/_/g, " ") ?? "Local";
+};
+
+function AutoLocaleClock() {
+  const [clockLabel, setClockLabel] = useState("--.--.-- Local");
+
+  useEffect(() => {
+    const locales =
+      typeof navigator !== "undefined" && navigator.languages.length > 0
+        ? navigator.languages
+        : [typeof navigator !== "undefined" ? navigator.language : "es-BO"];
+
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const countryLabel = resolveCountryLabel(locales, timeZone);
+
+    const updateClock = () => {
+      setClockLabel(`${formatLocalClock(new Date())} ${countryLabel}`);
+    };
+
+    updateClock();
+
+    const intervalId = window.setInterval(updateClock, 1000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, []);
+
+  return <span className="hidden font-mono text-[9px] text-zinc-600 xl:block">{clockLabel}</span>;
+}
+
+function TypingAccentText({
+  text,
+  className,
+  delay = 0,
+}: {
+  text: string;
+  className?: string;
+  delay?: number;
+}) {
+  const containerRef = useRef<HTMLSpanElement | null>(null);
+  const isInView = useInView(containerRef, { once: true, amount: 0.8 });
+  const [visibleCount, setVisibleCount] = useState(0);
+
+  useEffect(() => {
+    if (!isInView) return;
+
+    setVisibleCount(0);
+
+    let currentIndex = 0;
+    let intervalId: number | undefined;
+
+    const timeoutId = window.setTimeout(() => {
+      intervalId = window.setInterval(() => {
+        currentIndex += 1;
+        setVisibleCount(currentIndex);
+
+        if (currentIndex >= text.length) {
+          window.clearInterval(intervalId);
+        }
+      }, 42);
+    }, delay * 1000);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+
+      if (intervalId) {
+        window.clearInterval(intervalId);
+      }
+    };
+  }, [delay, isInView, text]);
+
+  return (
+    <span ref={containerRef} aria-label={text} className={`${className ?? ""} inline-flex items-baseline whitespace-pre`}>
+      <span aria-hidden="true">{text.slice(0, visibleCount)}</span>
+      {visibleCount < text.length ? (
+        <motion.span
+          aria-hidden="true"
+          animate={{ opacity: [0, 1, 0] }}
+          transition={{ duration: 0.75, repeat: Infinity, ease: "easeInOut" }}
+          className="ml-px inline-block h-[0.92em] w-px bg-current align-middle"
+        />
+      ) : null}
+    </span>
+  );
+}
 
 const KineticLines = () => {
   return (
@@ -450,7 +587,7 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-3 sm:gap-5">
-            <span className="hidden font-mono text-[9px] text-zinc-600 xl:block">12.00.52 Bolivia</span>
+            <AutoLocaleClock />
             <button
               onClick={() => router.push("/login")}
               className="rounded-sm border border-white px-4 py-2 text-[9px] font-bold uppercase tracking-[0.24em] text-white transition-all duration-100 hover:bg-white hover:text-black sm:px-6 sm:text-[10px]"
@@ -473,7 +610,7 @@ export default function Home() {
               className="mb-8 text-[2.75rem] font-light leading-[0.95] tracking-[-0.04em] text-white sm:text-6xl lg:text-7xl xl:text-[5.25rem]"
             >
               Gestion de activos <br />
-              <span className="text-zinc-600">con precision </span>
+              <TypingAccentText text="con precision " className="text-zinc-600" delay={0.12} />
               <span className="font-serif italic text-white underline decoration-blue-500/30">atomica.</span>
             </motion.h1>
 
@@ -544,8 +681,8 @@ export default function Home() {
             <motion.div {...revealFromLeft} className="max-w-2xl">
               <span className="mb-4 block font-mono text-[10px] uppercase tracking-widest text-blue-500">01 // Otras Cosas</span>
               <h2 className="text-3xl font-light tracking-tighter text-white sm:text-4xl md:text-5xl">
-                Disenado para la <span className="text-zinc-600">velocidad</span>. <br />
-                Construido para la <span className="text-zinc-600">escala</span>.
+                Disenado para la <TypingAccentText text="velocidad." className="text-zinc-600" delay={0.1} /> <br />
+                Construido para la <TypingAccentText text="escala." className="text-zinc-600" delay={0.28} />
               </h2>
             </motion.div>
             <motion.p
@@ -589,7 +726,7 @@ export default function Home() {
               <span className="mb-4 block font-mono text-[10px] uppercase tracking-widest text-blue-500">02 // Control Surface</span>
               <h2 className="text-3xl font-light tracking-tight text-white sm:text-4xl lg:text-5xl">
                 Demo operativa mas real. <br />
-                Mucho mas fina en <span className="text-zinc-600">scroll y responsive</span>.
+                Mucho mas fina en <TypingAccentText text="scroll y responsive." className="text-zinc-600" delay={0.12} />
               </h2>
             </motion.div>
             <motion.p
