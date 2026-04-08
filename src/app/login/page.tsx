@@ -23,13 +23,13 @@ const KineticLines = () => {
             animate={{
               pathLength: [0, 1],
               opacity: [0, 0.8, 0],
-              pathOffset: [0, 1]
+              pathOffset: [0, 1],
             }}
             transition={{
               duration: 3 + i,
               repeat: Infinity,
               ease: "linear",
-              delay: i * 0.3
+              delay: i * 0.3,
             }}
           />
         ))}
@@ -37,7 +37,10 @@ const KineticLines = () => {
           {[...Array(6)].map((_, i) => (
             <linearGradient key={i} id={`grad${i}`}>
               <stop offset="0%" stopColor="transparent" />
-              <stop offset="50%" stopColor={i % 2 === 0 ? "#3b82f6" : "#6366f1"} />
+              <stop
+                offset="50%"
+                stopColor={i % 2 === 0 ? "#3b82f6" : "#6366f1"}
+              />
               <stop offset="100%" stopColor="transparent" />
             </linearGradient>
           ))}
@@ -54,7 +57,7 @@ const FloatingBrand = () => {
   useEffect(() => {
     const generated = [...Array(3)].map(() => ({
       x: Math.random() * 1000,
-      y: Math.random() * 800
+      y: Math.random() * 800,
     }));
     setPositions(generated);
   }, []);
@@ -67,7 +70,7 @@ const FloatingBrand = () => {
           className="absolute opacity-[0.05] flex items-center gap-4"
           initial={{
             x: positions[i]?.x || 0,
-            y: positions[i]?.y || 0
+            y: positions[i]?.y || 0,
           }}
           animate={{ y: [0, -40, 0], rotate: [0, 5, 0] }}
           transition={{ duration: 12 + i * 2, repeat: Infinity }}
@@ -81,13 +84,15 @@ const FloatingBrand = () => {
 
           {/* GITHUB */}
           <svg width="100" height="100" viewBox="0 0 24 24" fill="white">
-            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.4 9.8 8.2 11.3.6.1.8-.2.8-.5v-2
+            <path
+              d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.4 9.8 8.2 11.3.6.1.8-.2.8-.5v-2
             c-3.3.7-4-1.5-4-1.5-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 
             1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.7.4-1.2.7-1.5-2.6-.3-5.4-1.3-5.4-5.9 
             0-1.3.5-2.3 1.2-3.2-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2.9-.3 2-.4 
             3-.4s2 .1 3 .4c2.3-1.5 3.3-1.2 3.3-1.2.6 1.6.2 2.8.1 3.1.7.9 
             1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.4 5.9.4.3.8 1 .8 2v3c0 .3.2.6.8.5
-            C20.6 21.8 24 17.3 24 12c0-6.6-5.4-12-12-12z"/>
+            C20.6 21.8 24 17.3 24 12c0-6.6-5.4-12-12-12z"
+            />
           </svg>
         </motion.div>
       ))}
@@ -195,10 +200,13 @@ export default function LoginPage() {
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
             >
-              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              {showPassword ? (
+                <EyeOff className="w-5 h-5" />
+              ) : (
+                <Eye className="w-5 h-5" />
+              )}
             </button>
           </div>
-
 
           <button
             type="submit"
