@@ -147,7 +147,7 @@ const getCountryLabel = (regionCode: string) => {
   return regionCode;
 };
 
-const resolveCountryLabel = (locales: string[], timeZone?: string) => {
+const resolveCountryLabel = (locales: readonly string[], timeZone?: string) => {
   for (const locale of locales) {
     const regionCode = getRegionFromLocale(locale);
 
@@ -195,17 +195,20 @@ function TypingAccentText({
   text,
   className,
   delay = 0,
+  active,
 }: {
   text: string;
   className?: string;
   delay?: number;
+  active?: boolean;
 }) {
   const containerRef = useRef<HTMLSpanElement | null>(null);
   const isInView = useInView(containerRef, { once: true, amount: 0.8 });
+  const shouldStart = active ?? isInView;
   const [visibleCount, setVisibleCount] = useState(0);
 
   useEffect(() => {
-    if (!isInView) return;
+    if (!shouldStart) return;
 
     setVisibleCount(0);
 
@@ -230,19 +233,24 @@ function TypingAccentText({
         window.clearInterval(intervalId);
       }
     };
-  }, [delay, isInView, text]);
+  }, [delay, shouldStart, text]);
 
   return (
-    <span ref={containerRef} aria-label={text} className={`${className ?? ""} inline-flex items-baseline whitespace-pre`}>
-      <span aria-hidden="true">{text.slice(0, visibleCount)}</span>
-      {visibleCount < text.length ? (
-        <motion.span
-          aria-hidden="true"
-          animate={{ opacity: [0, 1, 0] }}
-          transition={{ duration: 0.75, repeat: Infinity, ease: "easeInOut" }}
-          className="ml-px inline-block h-[0.92em] w-px bg-current align-middle"
-        />
-      ) : null}
+    <span ref={containerRef} aria-label={text} className={`${className ?? ""} relative inline-block whitespace-pre`}>
+      <span aria-hidden="true" className="invisible">
+        {text}
+      </span>
+      <span aria-hidden="true" className="absolute left-0 top-0 inline-flex items-baseline whitespace-pre">
+        {shouldStart ? text.slice(0, visibleCount) : null}
+        {shouldStart && visibleCount < text.length ? (
+          <motion.span
+            aria-hidden="true"
+            animate={{ opacity: [0, 1, 0] }}
+            transition={{ duration: 0.75, repeat: Infinity, ease: "easeInOut" }}
+            className="ml-px inline-block h-[0.92em] w-px bg-current align-middle"
+          />
+        ) : null}
+      </span>
     </span>
   );
 }
@@ -521,6 +529,12 @@ export default function Home() {
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const dashboardRef = useRef<HTMLElement | null>(null);
+  const heroIntroRef = useRef<HTMLDivElement | null>(null);
+  const infraIntroRef = useRef<HTMLDivElement | null>(null);
+  const demoIntroRef = useRef<HTMLDivElement | null>(null);
+  const heroIntroInView = useInView(heroIntroRef, { once: true, amount: 0.45 });
+  const infraIntroInView = useInView(infraIntroRef, { once: true, amount: 0.45 });
+  const demoIntroInView = useInView(demoIntroRef, { once: true, amount: 0.45 });
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -604,19 +618,22 @@ export default function Home() {
 
       <section className="relative z-10 mx-auto flex min-h-[100svh] max-w-7xl items-center px-4 pb-16 pt-28 sm:px-6 sm:pb-20 sm:pt-36 lg:px-8 lg:pt-44">
         <div className="grid w-full items-center gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(340px,0.95fr)] lg:gap-20">
-          <motion.div style={{ y: heroTextY, opacity: heroOpacity }} className="max-w-xl">
+          <motion.div ref={heroIntroRef} style={{ y: heroTextY, opacity: heroOpacity }} className="max-w-xl">
             <motion.h1
-              {...revealFromLeft}
+              initial={{ opacity: 0, x: -72 }}
+              animate={heroIntroInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -72 }}
+              transition={textRevealTransition}
               className="mb-8 text-[2.75rem] font-light leading-[0.95] tracking-[-0.04em] text-white sm:text-6xl lg:text-7xl xl:text-[5.25rem]"
             >
               Gestion de activos <br />
-              <TypingAccentText text="con precision " className="text-zinc-600" delay={0.12} />
+              <TypingAccentText text="con precision " className="text-zinc-600" active={heroIntroInView} />
               <span className="font-serif italic text-white underline decoration-blue-500/30">atomica.</span>
             </motion.h1>
 
             <motion.p
-              {...revealFromRight}
-              transition={{ ...textRevealTransition, delay: 0.12 }}
+              initial={{ opacity: 0, x: 72 }}
+              animate={heroIntroInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 72 }}
+              transition={textRevealTransition}
               className="mb-10 max-w-md text-sm font-light leading-relaxed tracking-wide text-zinc-500 sm:text-base"
             >
               Arquitectura modular para la visualizacion de portafolios de alto impacto. Rendimiento optimizado mediante renderizado
@@ -677,17 +694,23 @@ export default function Home() {
 
       <section id="infraestructura" className="relative z-10 border-t border-white/5 py-24 sm:py-32 lg:py-40">
         <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8">
-          <div className="mb-16 flex flex-col gap-8 md:mb-24 md:flex-row md:items-end md:justify-between md:gap-10">
-            <motion.div {...revealFromLeft} className="max-w-2xl">
+          <div ref={infraIntroRef} className="mb-16 flex flex-col gap-8 md:mb-24 md:flex-row md:items-end md:justify-between md:gap-10">
+            <motion.div
+              initial={{ opacity: 0, x: -72 }}
+              animate={infraIntroInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -72 }}
+              transition={textRevealTransition}
+              className="max-w-2xl"
+            >
               <span className="mb-4 block font-mono text-[10px] uppercase tracking-widest text-blue-500">01 // Otras Cosas</span>
               <h2 className="text-3xl font-light tracking-tighter text-white sm:text-4xl md:text-5xl">
-                Disenado para la <TypingAccentText text="velocidad." className="text-zinc-600" delay={0.1} /> <br />
-                Construido para la <TypingAccentText text="escala." className="text-zinc-600" delay={0.28} />
+                Disenado para la <TypingAccentText text="velocidad." className="text-zinc-600" active={infraIntroInView} /> <br />
+                Construido para la <TypingAccentText text="escala." className="text-zinc-600" active={infraIntroInView} />
               </h2>
             </motion.div>
             <motion.p
-              {...revealFromRight}
-              transition={{ ...textRevealTransition, delay: 0.12 }}
+              initial={{ opacity: 0, x: 72 }}
+              animate={infraIntroInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 72 }}
+              transition={textRevealTransition}
               className="max-w-xs text-[11px] uppercase tracking-wider leading-loose text-zinc-500"
             >
               Nuestro motor de renderizado procesa mas de 14M de activos visuales diariamente con redundancia global.
@@ -699,21 +722,29 @@ export default function Home() {
               icon={<Database size={16} />}
               title="Storage Sharding"
               desc="Distribucion inteligente de datos para acceso instantaneo desde cualquier nodo."
+              enterFrom="left"
+              delay={0}
             />
             <FeatureCard
               icon={<Shield size={16} />}
               title="Identity Protocol"
               desc="Autenticacion biometrica y JWT avanzado para proteccion de propiedad intelectual."
+              enterFrom="right"
+              delay={0.08}
             />
             <FeatureCard
               icon={<Zap size={16} />}
               title="L2 Caching"
               desc="Capas de cache redundantes que reducen el Time-To-First-Byte a menos de 12 ms."
+              enterFrom="left"
+              delay={0.16}
             />
             <FeatureCard
               icon={<Terminal size={16} />}
               title="API-First"
               desc="Integracion total mediante GraphQL para arquitecturas headless modernas."
+              enterFrom="right"
+              delay={0.24}
             />
           </div>
         </div>
@@ -721,17 +752,23 @@ export default function Home() {
 
       <section ref={dashboardRef} id="demo" className="relative z-10 px-4 pb-28 pt-16 sm:px-6 sm:pb-36 sm:pt-20 lg:px-8 lg:pb-48 lg:pt-24">
         <div className="mx-auto max-w-6xl">
-          <div className="mb-10 flex flex-col gap-5 lg:mb-12 lg:flex-row lg:items-end lg:justify-between">
-            <motion.div {...revealFromLeft} className="max-w-2xl">
+          <div ref={demoIntroRef} className="mb-10 flex flex-col gap-5 lg:mb-12 lg:flex-row lg:items-end lg:justify-between">
+            <motion.div
+              initial={{ opacity: 0, x: -72 }}
+              animate={demoIntroInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -72 }}
+              transition={textRevealTransition}
+              className="max-w-2xl"
+            >
               <span className="mb-4 block font-mono text-[10px] uppercase tracking-widest text-blue-500">02 // Control Surface</span>
               <h2 className="text-3xl font-light tracking-tight text-white sm:text-4xl lg:text-5xl">
                 Demo operativa mas real. <br />
-                Mucho mas fina en <TypingAccentText text="scroll y responsive." className="text-zinc-600" delay={0.12} />
+                Mucho mas fina en <TypingAccentText text="scroll y responsive." className="text-zinc-600" active={demoIntroInView} />
               </h2>
             </motion.div>
             <motion.p
-              {...revealFromRight}
-              transition={{ ...textRevealTransition, delay: 0.12 }}
+              initial={{ opacity: 0, x: 72 }}
+              animate={demoIntroInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 72 }}
+              transition={textRevealTransition}
               className="max-w-sm text-[11px] uppercase tracking-[0.24em] leading-loose text-zinc-500"
             >
               Vista compartida entre administracion y cliente con trazas, actividad viva y una capa de insight que entra al hacer scroll.
@@ -1014,13 +1051,29 @@ export default function Home() {
   );
 }
 
-function FeatureCard({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
+function FeatureCard({
+  icon,
+  title,
+  desc,
+  enterFrom = "left",
+  delay = 0,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
+  enterFrom?: "left" | "right";
+  delay?: number;
+}) {
   const baseId = useId().replace(/:/g, "");
   const gradientOneId = `${baseId}-line-gradient-1`;
   const gradientTwoId = `${baseId}-line-gradient-2`;
 
   return (
     <motion.div
+      initial={{ opacity: 0, x: enterFrom === "left" ? -72 : 72 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      viewport={{ once: true, amount: 0.35 }}
+      transition={{ ...textRevealTransition, delay }}
       whileHover={{ backgroundColor: "rgba(255,255,255,0.02)" }}
       className="group relative cursor-default overflow-hidden bg-[#030303] p-6 transition-colors sm:p-8 lg:p-10"
     >
