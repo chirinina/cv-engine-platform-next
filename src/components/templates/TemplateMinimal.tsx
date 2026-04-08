@@ -1,12 +1,23 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
-import { motion, useScroll, useTransform, AnimatePresence, useSpring } from "framer-motion";
+import { useRef } from "react";
+import { motion, useScroll, useTransform, useSpring, type Variants } from "framer-motion";
 import {
-  Briefcase, MapPin, Mail, ExternalLink, GraduationCap,
-  Layers, Wrench, MonitorPlay, ArrowUpRight, ChevronRight,
-  Globe, Cpu, Code2
+  Briefcase,
+  Mail,
+  GraduationCap,
+  ArrowUpRight,
+  Cpu,
 } from "lucide-react";
+import PortfolioInquiryForm from "./PortfolioInquiryForm";
+import {
+  PortfolioCourse,
+  PortfolioData,
+  PortfolioExperience,
+  PortfolioProject,
+  PortfolioSection,
+  PortfolioSkillEntry,
+} from "@/types/portfolio";
 
 // --- ICONOS SOCIALES PERSONALIZADOS ---
 const GithubIcon = ({ className }: { className?: string }) => (
@@ -65,8 +76,14 @@ const ModernBackground = ({ color }: { color: string }) => {
   );
 };
 
-export default function TemplateProPremium({ portfolio, sections }: { portfolio: any; sections: any[] }) {
-  const containerRef = useRef(null);
+export default function TemplateProPremium({
+  portfolio,
+  sections,
+}: {
+  portfolio: PortfolioData;
+  sections: PortfolioSection[];
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -74,15 +91,17 @@ export default function TemplateProPremium({ portfolio, sections }: { portfolio:
   });
 
   const smoothProgress = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
-  const scaleProgress = useTransform(smoothProgress, [0, 0.2], [1, 0.95]);
+  useTransform(smoothProgress, [0, 0.2], [1, 0.95]);
 
   const heroSection = sections.find((s) => s.type === "hero");
   const primaryColor = portfolio.primaryColor || "#000000";
   const secondaryColor = portfolio.secondaryColor || "#ffffff";
   const textColor = portfolio.secondaryTextColor || "#444444";
-  const accentColor = `${primaryColor}15`;
-
-  const staggerContainer = {
+  const projects = portfolio.projects ?? [];
+  const experience = portfolio.experience ?? [];
+  const skills = portfolio.skills ?? [];
+  const courses = portfolio.courses ?? [];
+  const staggerContainer: Variants = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
@@ -90,9 +109,9 @@ export default function TemplateProPremium({ portfolio, sections }: { portfolio:
     }
   };
 
-  const itemFadeUp = {
+  const itemFadeUp: Variants = {
     hidden: { opacity: 0, y: 40, filter: "blur(10px)" },
-    show: { opacity: 1, y: 0, filter: "blur(0px)", transition: { type: "spring", bounce: 0.3, duration: 1 } }
+    show: { opacity: 1, y: 0, filter: "blur(0px)", transition: { type: "spring" as const, bounce: 0.3, duration: 1 } }
   };
 
   return (
@@ -181,7 +200,7 @@ export default function TemplateProPremium({ portfolio, sections }: { portfolio:
         </motion.section>
 
         {/* --- PROJECTS SECTION (BENTO GRID) --- */}
-        {portfolio.projects?.length > 0 && (
+        {projects.length > 0 && (
           <section className="mb-40">
             <motion.div
               initial={{ opacity: 0 }}
@@ -198,7 +217,7 @@ export default function TemplateProPremium({ portfolio, sections }: { portfolio:
             </motion.div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-              {portfolio.projects.map((proj: any, idx: number) => (
+              {projects.map((proj: PortfolioProject, idx: number) => (
                 <motion.div
                   key={idx}
                   initial={{ opacity: 0, y: 30 }}
@@ -208,7 +227,14 @@ export default function TemplateProPremium({ portfolio, sections }: { portfolio:
                   className="group relative h-[450px] rounded-[2.5rem] overflow-hidden border p-8 flex flex-col justify-end transition-all duration-500 hover:shadow-2xl hover:-translate-y-2"
                   style={{ borderColor: `${primaryColor}10`, backgroundColor: `${primaryColor}03` }}
                 >
-                  <div className="absolute top-8 right-8 flex gap-2">
+                  {proj.imageUrl && (
+                    <div className="absolute inset-0 z-0 overflow-hidden rounded-[2.5rem]">
+                      <img src={proj.imageUrl} alt={proj.name} className="w-full h-full object-cover opacity-30 group-hover:opacity-40 transition-opacity duration-700 group-hover:scale-105" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+                    </div>
+                  )}
+
+                  <div className="absolute top-8 right-8 flex gap-2 z-10">
                     {proj.link && (
                       <a href={proj.link} className="w-12 h-12 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-black hover:scale-110 transition-transform shadow-lg">
                         <ArrowUpRight className="w-5 h-5" />
@@ -221,7 +247,7 @@ export default function TemplateProPremium({ portfolio, sections }: { portfolio:
 
                   <div className="relative z-10">
                     <div className="flex gap-2 mb-4">
-                      {proj.tools && (typeof proj.tools === "string" ? proj.tools.split(",") : proj.tools).slice(0, 3).map((t: string, i: number) => (
+                      {(typeof proj.tools === "string" ? proj.tools.split(",") : proj.tools || []).slice(0, 3).map((t: string, i: number) => (
                         <span key={i} className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-md bg-white/50 backdrop-blur-sm border border-black/5">
                           {t.trim()}
                         </span>
@@ -239,7 +265,7 @@ export default function TemplateProPremium({ portfolio, sections }: { portfolio:
         )}
 
         {/* --- EXPERIENCE SECTION (MODERN TIMELINE) --- */}
-        {portfolio.experience?.length > 0 && (
+        {experience.length > 0 && (
           <section className="mb-40">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
               <div className="lg:col-span-4">
@@ -249,7 +275,7 @@ export default function TemplateProPremium({ portfolio, sections }: { portfolio:
                 </h2>
               </div>
               <div className="lg:col-span-8 space-y-12">
-                {portfolio.experience.map((exp: any, idx: number) => (
+                {experience.map((exp: PortfolioExperience, idx: number) => (
                   <motion.div
                     key={idx}
                     initial={{ opacity: 0, x: 20 }}
@@ -282,14 +308,14 @@ export default function TemplateProPremium({ portfolio, sections }: { portfolio:
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-40">
 
           {/* Habilidades con diseño moderno */}
-          {portfolio.skills?.length > 0 && (
+          {skills.length > 0 && (
             <div className="p-10 rounded-[3rem] border bg-white/40 backdrop-blur-xl" style={{ borderColor: `${primaryColor}10` }}>
               <div className="flex items-center gap-3 mb-10">
                 <div className="p-3 rounded-2xl bg-black text-white"><Cpu className="w-6 h-6" /></div>
                 <h3 className="text-2xl font-bold tracking-tight">Stack Tecnológico</h3>
               </div>
               <div className="flex flex-wrap gap-3">
-                {portfolio.skills.map((skill: any, idx: number) => {
+                {skills.map((skill: PortfolioSkillEntry, idx: number) => {
                   const name = typeof skill === "string" ? skill : skill.name;
                   return (
                     <motion.span
@@ -307,14 +333,14 @@ export default function TemplateProPremium({ portfolio, sections }: { portfolio:
           )}
 
           {/* Educación / Cursos */}
-          {portfolio.courses?.length > 0 && (
+          {courses.length > 0 && (
             <div className="p-10 rounded-[3rem] border bg-black" style={{ borderColor: `${primaryColor}10` }}>
               <div className="flex items-center gap-3 mb-10">
                 <div className="p-3 rounded-2xl bg-white text-black"><GraduationCap className="w-6 h-6" /></div>
                 <h3 className="text-2xl font-bold tracking-tight text-white">Formación</h3>
               </div>
               <div className="space-y-6">
-                {portfolio.courses.map((course: any, idx: number) => (
+                {courses.map((course: PortfolioCourse, idx: number) => (
                   <div key={idx} className="flex gap-4 items-start">
                     <div className="w-1 h-12 rounded-full bg-white/20" />
                     <div>
@@ -327,6 +353,15 @@ export default function TemplateProPremium({ portfolio, sections }: { portfolio:
             </div>
           )}
         </div>
+
+        <PortfolioInquiryForm
+          portfolioSlug={portfolio.slug}
+          primaryColor={primaryColor}
+          secondaryColor={secondaryColor}
+          textColor={textColor}
+          variant="minimal"
+          className="mb-40"
+        />
 
         {/* --- FOOTER --- */}
         <footer className="relative pt-20 border-t" style={{ borderColor: `${primaryColor}10` }}>

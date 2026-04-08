@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { toast } from "react-hot-toast";
-import { Mail, Lock, Loader2 } from "lucide-react";
+import { Mail, Lock, Loader2, Eye, EyeOff, LogIn } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import api from "@/lib/api";
 
@@ -118,6 +118,7 @@ const Clock = () => {
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
@@ -151,9 +152,15 @@ export default function LoginPage() {
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-md w-full p-8 rounded-2xl border border-white/20"
+        className="max-w-md w-full p-8 border border-white/20"
       >
         <div className="text-center mb-10">
+          <div className="mb-4">
+            <span className="text-[11px] font-black tracking-[0.3em] uppercase">
+              <span className="text-white">Dio</span>
+              <span className="text-blue-500">play</span>
+            </span>
+          </div>
           <h1 className="text-3xl font-bold text-white">Bienvenido</h1>
           <p className="text-gray-400 mt-2 text-sm">
             Inicie sesión para continuar
@@ -169,28 +176,43 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Correo Electronico"
-              className="w-full text-white rounded-xl py-3 pl-11 pr-4 bg-transparent border border-white/10 focus:ring-2 focus:ring-blue-500"
+              className="w-full text-white py-3 pl-11 pr-4 bg-transparent border border-white/10 focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Contraseña"
-              className="w-full text-white rounded-xl py-3 pl-11 pr-4 bg-transparent border border-white/10 focus:ring-2 focus:ring-blue-500"
+              className="w-full text-white py-3 pl-11 pr-12 bg-transparent border border-white/10 focus:ring-2 focus:ring-blue-500"
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+            >
+              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
           </div>
+
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full border border-white text-white py-2 hover:bg-white hover:text-black transition-all rounded-md flex justify-center items-center gap-2"
+            className="w-full text-white py-2 hover:bg-white hover:text-black transition-all rounded-md flex justify-center items-center gap-2"
           >
-            {loading ? <Loader2 className="animate-spin w-5 h-5" /> : "Acceder"}
+            {loading ? (
+              <Loader2 className="animate-spin w-5 h-5" />
+            ) : (
+              <>
+                <LogIn className="w-5 h-5" />
+                Acceder
+              </>
+            )}
           </button>
         </form>
       </motion.div>

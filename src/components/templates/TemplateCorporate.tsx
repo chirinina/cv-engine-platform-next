@@ -3,13 +3,22 @@
 
 import React from "react";
 import { motion } from "framer-motion";
+import PortfolioInquiryForm from "./PortfolioInquiryForm";
+import {
+  PortfolioCourse,
+  PortfolioData,
+  PortfolioExperience,
+  PortfolioProject,
+  PortfolioSection,
+  PortfolioSkillEntry,
+} from "@/types/portfolio";
 
 export default function TemplateCorporate({
   portfolio,
   sections,
 }: {
-  portfolio: any;
-  sections: any[];
+  portfolio: PortfolioData;
+  sections: PortfolioSection[];
 }) {
   const heroSection = sections.find((s) => s.type === "hero");
   const title = heroSection?.content?.title || "Professional Excellence";
@@ -19,6 +28,10 @@ export default function TemplateCorporate({
   const primaryColor = portfolio.primaryColor || "#1e3a8a";
   const secondaryColor = portfolio.secondaryColor || "#f8fafc";
   const logoPosition = portfolio.logoPosition || "left";
+  const courses = portfolio.courses ?? [];
+  const projects = portfolio.projects ?? [];
+  const experience = portfolio.experience ?? [];
+  const skills = portfolio.skills ?? [];
   const logoStyle: React.CSSProperties = {
     left: logoPosition === "left" ? 0 : undefined,
     right: logoPosition === "right" ? 0 : undefined,
@@ -45,23 +58,18 @@ export default function TemplateCorporate({
           style={logoStyle}
         />
       )}
-      <header className="w-full py-8 px-10 border-b border-neutral-200 bg-white flex justify-between items-center">
+      <header className="w-full py-8 px-10 border-b border-neutral-200 flex justify-between items-center">
         <h2
           className="text-2xl font-extrabold uppercase tracking-widest"
           style={{ color: primaryColor }}
         >
-          PORTFOLIO
+          Mi CV
         </h2>
         <nav className="hidden md:flex gap-8 font-medium text-neutral-600">
           <a href="#about" className="hover:text-neutral-900">
-            About
+            Visitame
           </a>
-          <a href="#services" className="hover:text-neutral-900">
-            Services
-          </a>
-          <a href="#contact" className="hover:text-neutral-900">
-            Contact
-          </a>
+
         </nav>
       </header>
       <main className="w-full max-w-5xl px-10 py-24 flex flex-col md:flex-row gap-16 items-center justify-center">
@@ -131,11 +139,11 @@ export default function TemplateCorporate({
             )}
           </div>
           {/* Courses */}
-          {portfolio.courses?.length > 0 && (
+          {courses.length > 0 && (
             <div className="mb-8">
               <h3 className="text-xl font-bold mb-2">Cursos</h3>
               <ul className="list-disc pl-6">
-                {portfolio.courses.map((c: any, idx: number) => (
+                {courses.map((c: PortfolioCourse, idx: number) => (
                   <li key={idx} className="mb-1">
                     <span className="font-semibold">{c.name}</span> -{" "}
                     {c.institution} ({c.year})
@@ -150,12 +158,12 @@ export default function TemplateCorporate({
             </div>
           )}
           {/* Projects */}
-          {portfolio.projects?.length > 0 && (
+          {projects.length > 0 && (
             <div className="mb-8">
               <h3 className="text-xl font-bold mb-2">Proyectos</h3>
               <ul className="list-disc pl-6">
-                {portfolio.projects.map((p: any, idx: number) => (
-                  <li key={idx} className="mb-1">
+                {projects.map((p: PortfolioProject, idx: number) => (
+                  <li key={idx} className="mb-6">
                     <span className="font-semibold">{p.name}</span>:{" "}
                     {p.description}
                     {p.link && (
@@ -168,17 +176,22 @@ export default function TemplateCorporate({
                         Ver
                       </a>
                     )}
+                    {p.imageUrl && (
+                      <div className="mt-3">
+                        <img src={p.imageUrl} alt={p.name} className="w-full max-w-sm h-48 object-cover rounded-lg shadow-sm border border-neutral-200" />
+                      </div>
+                    )}
                   </li>
                 ))}
               </ul>
             </div>
           )}
           {/* Experience */}
-          {portfolio.experience?.length > 0 && (
+          {experience.length > 0 && (
             <div className="mb-8">
               <h3 className="text-xl font-bold mb-2">Experiencia</h3>
               <ul className="list-disc pl-6">
-                {portfolio.experience.map((e: any, idx: number) => (
+                {experience.map((e: PortfolioExperience, idx: number) => (
                   <li key={idx} className="mb-1">
                     <span className="font-semibold">{e.company}</span> -{" "}
                     {e.role} ({e.period})
@@ -193,11 +206,11 @@ export default function TemplateCorporate({
             </div>
           )}
           {/* Skills */}
-          {portfolio.skills?.length > 0 && (
+          {skills.length > 0 && (
             <div className="mb-8">
-              <h3 className="text-xl font-bold mb-2">Skills</h3>
+              <h3 className="text-xl font-bold mb-2">Habilidades</h3>
               <div className="flex flex-wrap gap-2">
-                {portfolio.skills.map((s: any, idx: number) => (
+                {skills.map((s: PortfolioSkillEntry, idx: number) => (
                   <span
                     key={idx}
                     className="px-3 py-1 bg-gray-200 rounded-full text-xs font-semibold"
@@ -220,6 +233,15 @@ export default function TemplateCorporate({
               </a>
             </div>
           )}
+
+          <PortfolioInquiryForm
+            portfolioSlug={portfolio.slug}
+            primaryColor={primaryColor}
+            secondaryColor={secondaryColor}
+            textColor={portfolio.secondaryTextColor || "#555"}
+            variant="corporate"
+            className="mt-10"
+          />
         </motion.div>
         <motion.div
           initial={{ opacity: 0, x: 40 }}
