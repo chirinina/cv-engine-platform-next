@@ -92,6 +92,23 @@ const overlayIndicators = [
 
 const primarySeries = [24, 38, 34, 56, 48, 72, 64];
 const overlaySeries = [18, 30, 42, 36, 58, 74, 68, 82];
+const textRevealViewport = { once: true, amount: 0.4 };
+const textRevealTransition = {
+  duration: 0.9,
+  ease: [0.22, 1, 0.36, 1] as const,
+};
+const revealFromLeft = {
+  initial: { opacity: 0, x: -72 },
+  whileInView: { opacity: 1, x: 0 },
+  viewport: textRevealViewport,
+  transition: textRevealTransition,
+};
+const revealFromRight = {
+  initial: { opacity: 0, x: 72 },
+  whileInView: { opacity: 1, x: 0 },
+  viewport: textRevealViewport,
+  transition: textRevealTransition,
+};
 
 const KineticLines = () => {
   return (
@@ -450,23 +467,24 @@ export default function Home() {
 
       <section className="relative z-10 mx-auto flex min-h-[100svh] max-w-7xl items-center px-4 pb-16 pt-28 sm:px-6 sm:pb-20 sm:pt-36 lg:px-8 lg:pt-44">
         <div className="grid w-full items-center gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(340px,0.95fr)] lg:gap-20">
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            style={{ y: heroTextY, opacity: heroOpacity }}
-            className="max-w-xl"
-          >
-            <h1 className="mb-8 text-[2.75rem] font-light leading-[0.95] tracking-[-0.04em] text-white sm:text-6xl lg:text-7xl xl:text-[5.25rem]">
+          <motion.div style={{ y: heroTextY, opacity: heroOpacity }} className="max-w-xl">
+            <motion.h1
+              {...revealFromLeft}
+              className="mb-8 text-[2.75rem] font-light leading-[0.95] tracking-[-0.04em] text-white sm:text-6xl lg:text-7xl xl:text-[5.25rem]"
+            >
               Gestion de activos <br />
               <span className="text-zinc-600">con precision </span>
               <span className="font-serif italic text-white underline decoration-blue-500/30">atomica.</span>
-            </h1>
+            </motion.h1>
 
-            <p className="mb-10 max-w-md text-sm font-light leading-relaxed tracking-wide text-zinc-500 sm:text-base">
+            <motion.p
+              {...revealFromRight}
+              transition={{ ...textRevealTransition, delay: 0.12 }}
+              className="mb-10 max-w-md text-sm font-light leading-relaxed tracking-wide text-zinc-500 sm:text-base"
+            >
               Arquitectura modular para la visualizacion de portafolios de alto impacto. Rendimiento optimizado mediante renderizado
               perimetral y entrega de baja latencia.
-            </p>
+            </motion.p>
 
             <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-8">
               <button
@@ -523,16 +541,20 @@ export default function Home() {
       <section id="infraestructura" className="relative z-10 border-t border-white/5 py-24 sm:py-32 lg:py-40">
         <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8">
           <div className="mb-16 flex flex-col gap-8 md:mb-24 md:flex-row md:items-end md:justify-between md:gap-10">
-            <div className="max-w-2xl">
+            <motion.div {...revealFromLeft} className="max-w-2xl">
               <span className="mb-4 block font-mono text-[10px] uppercase tracking-widest text-blue-500">01 // Otras Cosas</span>
               <h2 className="text-3xl font-light tracking-tighter text-white sm:text-4xl md:text-5xl">
                 Disenado para la <span className="text-zinc-600">velocidad</span>. <br />
                 Construido para la <span className="text-zinc-600">escala</span>.
               </h2>
-            </div>
-            <p className="max-w-xs text-[11px] uppercase tracking-wider leading-loose text-zinc-500">
+            </motion.div>
+            <motion.p
+              {...revealFromRight}
+              transition={{ ...textRevealTransition, delay: 0.12 }}
+              className="max-w-xs text-[11px] uppercase tracking-wider leading-loose text-zinc-500"
+            >
               Nuestro motor de renderizado procesa mas de 14M de activos visuales diariamente con redundancia global.
-            </p>
+            </motion.p>
           </div>
 
           <div className="grid grid-cols-1 gap-px border border-white/5 bg-white/5 md:grid-cols-2 xl:grid-cols-4">
@@ -563,16 +585,20 @@ export default function Home() {
       <section ref={dashboardRef} id="demo" className="relative z-10 px-4 pb-28 pt-16 sm:px-6 sm:pb-36 sm:pt-20 lg:px-8 lg:pb-48 lg:pt-24">
         <div className="mx-auto max-w-6xl">
           <div className="mb-10 flex flex-col gap-5 lg:mb-12 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-2xl">
+            <motion.div {...revealFromLeft} className="max-w-2xl">
               <span className="mb-4 block font-mono text-[10px] uppercase tracking-widest text-blue-500">02 // Control Surface</span>
               <h2 className="text-3xl font-light tracking-tight text-white sm:text-4xl lg:text-5xl">
                 Demo operativa mas real. <br />
                 Mucho mas fina en <span className="text-zinc-600">scroll y responsive</span>.
               </h2>
-            </div>
-            <p className="max-w-sm text-[11px] uppercase tracking-[0.24em] leading-loose text-zinc-500">
+            </motion.div>
+            <motion.p
+              {...revealFromRight}
+              transition={{ ...textRevealTransition, delay: 0.12 }}
+              className="max-w-sm text-[11px] uppercase tracking-[0.24em] leading-loose text-zinc-500"
+            >
               Vista compartida entre administracion y cliente con trazas, actividad viva y una capa de insight que entra al hacer scroll.
-            </p>
+            </motion.p>
           </div>
 
           <div className="relative">
