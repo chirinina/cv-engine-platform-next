@@ -29,7 +29,8 @@ const buildLinePath = (values: number[]) =>
     })
     .join(" ");
 
-const buildAreaPath = (values: number[]) => `${buildLinePath(values)} L 100 100 L 0 100 Z`;
+const buildAreaPath = (values: number[]) =>
+  `${buildLinePath(values)} L 100 100 L 0 100 Z`;
 
 const dashboardStats = [
   {
@@ -128,7 +129,9 @@ const timezoneCountryFallbacks: Record<string, string> = {
 };
 
 const formatLocalClock = (date: Date) =>
-  [date.getHours(), date.getMinutes(), date.getSeconds()].map((value) => String(value).padStart(2, "0")).join(".");
+  [date.getHours(), date.getMinutes(), date.getSeconds()]
+    .map((value) => String(value).padStart(2, "0"))
+    .join(".");
 
 const getRegionFromLocale = (locale: string) => {
   try {
@@ -141,7 +144,10 @@ const getRegionFromLocale = (locale: string) => {
 
 const getCountryLabel = (regionCode: string) => {
   if (typeof Intl.DisplayNames !== "undefined") {
-    return new Intl.DisplayNames(["es"], { type: "region" }).of(regionCode) ?? regionCode;
+    return (
+      new Intl.DisplayNames(["es"], { type: "region" }).of(regionCode) ??
+      regionCode
+    );
   }
 
   return regionCode;
@@ -188,7 +194,11 @@ function AutoLocaleClock() {
     };
   }, []);
 
-  return <span className="hidden font-mono text-[9px] text-zinc-600 xl:block">{clockLabel}</span>;
+  return (
+    <span className="hidden font-mono text-[9px] text-zinc-600 xl:block">
+      {clockLabel}
+    </span>
+  );
 }
 
 function TypingAccentText({
@@ -236,11 +246,18 @@ function TypingAccentText({
   }, [delay, shouldStart, text]);
 
   return (
-    <span ref={containerRef} aria-label={text} className={`${className ?? ""} relative inline-block whitespace-pre`}>
+    <span
+      ref={containerRef}
+      aria-label={text}
+      className={`${className ?? ""} relative inline-block whitespace-pre`}
+    >
       <span aria-hidden="true" className="invisible">
         {text}
       </span>
-      <span aria-hidden="true" className="absolute left-0 top-0 inline-flex items-baseline whitespace-pre">
+      <span
+        aria-hidden="true"
+        className="absolute left-0 top-0 inline-flex items-baseline whitespace-pre"
+      >
         {shouldStart ? text.slice(0, visibleCount) : null}
         {shouldStart && visibleCount < text.length ? (
           <motion.span
@@ -258,7 +275,12 @@ function TypingAccentText({
 const KineticLines = () => {
   return (
     <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden opacity-40 md:opacity-60">
-      <svg className="h-full w-full" viewBox="0 0 1440 900" fill="none" preserveAspectRatio="xMidYMid slice">
+      <svg
+        className="h-full w-full"
+        viewBox="0 0 1440 900"
+        fill="none"
+        preserveAspectRatio="xMidYMid slice"
+      >
         {Array.from({ length: 6 }).map((_, i) => (
           <motion.path
             key={i}
@@ -281,9 +303,19 @@ const KineticLines = () => {
         ))}
         <defs>
           {Array.from({ length: 6 }).map((_, i) => (
-            <linearGradient key={i} id={`grad${i}`} x1="0%" y1="0%" x2="100%" y2="0%">
+            <linearGradient
+              key={i}
+              id={`grad${i}`}
+              x1="0%"
+              y1="0%"
+              x2="100%"
+              y2="0%"
+            >
               <stop offset="0%" stopColor="transparent" />
-              <stop offset="50%" stopColor={i % 2 === 0 ? "#3b82f6" : "#6366f1"} />
+              <stop
+                offset="50%"
+                stopColor={i % 2 === 0 ? "#3b82f6" : "#6366f1"}
+              />
               <stop offset="100%" stopColor="transparent" />
             </linearGradient>
           ))}
@@ -322,8 +354,21 @@ const FloatingBrand = () => {
             }}
             style={{ left: `${i * 25}%`, top: `${20 + i * 15}%` }}
           >
-            <svg width="180" height="180" viewBox="0 0 180 180" fill="none" className="xl:h-[200px] xl:w-[200px]">
-              <mask id={maskId} maskUnits="userSpaceOnUse" x="0" y="0" width="180" height="180">
+            <svg
+              width="180"
+              height="180"
+              viewBox="0 0 180 180"
+              fill="none"
+              className="xl:h-[200px] xl:w-[200px]"
+            >
+              <mask
+                id={maskId}
+                maskUnits="userSpaceOnUse"
+                x="0"
+                y="0"
+                width="180"
+                height="180"
+              >
                 <circle cx="90" cy="90" r="90" fill="white" />
               </mask>
               <g mask={`url(#${maskId})`}>
@@ -336,7 +381,13 @@ const FloatingBrand = () => {
               </g>
             </svg>
 
-            <svg width="108" height="108" viewBox="0 0 24 24" fill="white" className="opacity-80 xl:h-[120px] xl:w-[120px]">
+            <svg
+              width="108"
+              height="108"
+              viewBox="0 0 24 24"
+              fill="white"
+              className="opacity-80 xl:h-[120px] xl:w-[120px]"
+            >
               <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.333-1.754-1.333-1.754-1.089-.745.082-.729.082-.729 1.205.084 1.84 1.236 1.84 1.236 1.07 1.835 2.807 1.305 3.492.998.108-.776.418-1.305.76-1.605-2.665-.3-5.466-1.335-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23a11.49 11.49 0 0 1 3-.405c1.02.005 2.045.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.435.375.81 1.102.81 2.222 0 1.606-.015 2.896-.015 3.286 0 .315.21.694.825.576C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z" />
             </svg>
           </motion.div>
@@ -359,9 +410,12 @@ const CodePreview = () => (
     <div className="overflow-x-auto">
       <div className="min-w-[20rem] space-y-1">
         <p className="text-blue-400">
-          export const <span className="text-white">PortfolioEngine</span> = () =&gt; &#123;
+          export const <span className="text-white">PortfolioEngine</span> = ()
+          =&gt; &#123;
         </p>
-        <p className="pl-4 text-zinc-500">const [assets, setAssets] = useStorage("v3");</p>
+        <p className="pl-4 text-zinc-500">
+          const [assets, setAssets] = useStorage("v3");
+        </p>
         <p className="pl-4 italic text-zinc-500">// Optimize visual pipeline</p>
         <p className="pl-4 text-zinc-500">return assets.map(asset =&gt; (</p>
         <p className="pl-8 text-indigo-400">&lt;NeuralRenderer</p>
@@ -391,13 +445,19 @@ function DashboardMetricCard({
   return (
     <div className="rounded-2xl border border-white/5 bg-zinc-950/80 p-4 sm:p-5">
       <div className="mb-6 flex items-center justify-between gap-4">
-        <span className="text-[10px] uppercase tracking-[0.26em] text-zinc-600">{label}</span>
+        <span className="text-[10px] uppercase tracking-[0.26em] text-zinc-600">
+          {label}
+        </span>
         <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-blue-400">
           <Icon size={16} />
         </div>
       </div>
-      <div className="font-mono text-2xl text-white sm:text-[1.75rem]">{value}</div>
-      <p className="mt-2 text-[10px] uppercase tracking-[0.2em] text-zinc-500">{detail}</p>
+      <div className="font-mono text-2xl text-white sm:text-[1.75rem]">
+        {value}
+      </div>
+      <p className="mt-2 text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+        {detail}
+      </p>
     </div>
   );
 }
@@ -417,7 +477,9 @@ function SurfaceTile({
         <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-black/40 text-zinc-500 transition-colors duration-300 group-hover/item:text-blue-400">
           <Icon size={16} />
         </div>
-        <span className="text-[10px] uppercase tracking-[0.22em] text-zinc-600">{stat}</span>
+        <span className="text-[10px] uppercase tracking-[0.22em] text-zinc-600">
+          {stat}
+        </span>
       </div>
       <p className="mb-4 text-sm font-medium text-white">{title}</p>
       <div className="space-y-2">
@@ -425,7 +487,10 @@ function SurfaceTile({
         <div className="h-1.5 w-4/5 rounded-full bg-zinc-800/90" />
         <div className="grid grid-cols-3 gap-2 pt-2">
           {Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="h-6 rounded-md border border-white/5 bg-black/40" />
+            <div
+              key={index}
+              className="h-6 rounded-md border border-white/5 bg-black/40"
+            />
           ))}
         </div>
       </div>
@@ -450,18 +515,44 @@ function ChartCanvas({
   const areaPath = buildAreaPath(series);
 
   return (
-    <div className={`relative overflow-hidden rounded-2xl border border-white/5 bg-[#070707] ${className}`}>
+    <div
+      className={`relative overflow-hidden rounded-2xl border border-white/5 bg-[#070707] ${className}`}
+    >
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(59,130,246,0.12)_0%,rgba(59,130,246,0)_70%)]" />
-      <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+      <svg
+        className="absolute inset-0 h-full w-full"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+      >
         {Array.from({ length: 5 }).map((_, index) => {
           const offset = index * 25;
 
-          return <line key={`h-${offset}`} x1="0" y1={offset} x2="100" y2={offset} stroke="rgba(255,255,255,0.06)" strokeWidth="0.6" />;
+          return (
+            <line
+              key={`h-${offset}`}
+              x1="0"
+              y1={offset}
+              x2="100"
+              y2={offset}
+              stroke="rgba(255,255,255,0.06)"
+              strokeWidth="0.6"
+            />
+          );
         })}
         {Array.from({ length: 6 }).map((_, index) => {
           const offset = index * 20;
 
-          return <line key={`v-${offset}`} x1={offset} y1="0" x2={offset} y2="100" stroke="rgba(255,255,255,0.04)" strokeWidth="0.6" />;
+          return (
+            <line
+              key={`v-${offset}`}
+              x1={offset}
+              y1="0"
+              x2={offset}
+              y2="100"
+              stroke="rgba(255,255,255,0.04)"
+              strokeWidth="0.6"
+            />
+          );
         })}
 
         <defs>
@@ -533,7 +624,10 @@ export default function Home() {
   const infraIntroRef = useRef<HTMLDivElement | null>(null);
   const demoIntroRef = useRef<HTMLDivElement | null>(null);
   const heroIntroInView = useInView(heroIntroRef, { once: true, amount: 0.45 });
-  const infraIntroInView = useInView(infraIntroRef, { once: true, amount: 0.45 });
+  const infraIntroInView = useInView(infraIntroRef, {
+    once: true,
+    amount: 0.45,
+  });
   const demoIntroInView = useInView(demoIntroRef, { once: true, amount: 0.45 });
 
   const { scrollYProgress } = useScroll({
@@ -551,13 +645,19 @@ export default function Home() {
   const heroOpacity = useTransform(scrollYProgress, [0, 0.22], [1, 0.62]);
 
   const dashboardShellY = useTransform(dashboardProgress, [0, 1], [96, 0]);
-  const dashboardShellOpacity = useTransform(dashboardProgress, [0, 0.28], [0.2, 1]);
+  const dashboardShellOpacity = useTransform(
+    dashboardProgress,
+    [0, 0.28],
+    [0.2, 1],
+  );
   const insightY = useTransform(dashboardProgress, [0, 1], [140, -28]);
   const insightOpacity = useTransform(dashboardProgress, [0, 0.38], [0, 1]);
   const insightScale = useTransform(dashboardProgress, [0, 0.45], [0.92, 1]);
 
   const scrollToDemo = () => {
-    document.getElementById("demo")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document
+      .getElementById("demo")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   return (
@@ -618,26 +718,41 @@ export default function Home() {
 
       <section className="relative z-10 mx-auto flex min-h-[100svh] max-w-7xl items-center px-4 pb-16 pt-28 sm:px-6 sm:pb-20 sm:pt-36 lg:px-8 lg:pt-44">
         <div className="grid w-full items-center gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(340px,0.95fr)] lg:gap-20">
-          <motion.div ref={heroIntroRef} style={{ y: heroTextY, opacity: heroOpacity }} className="max-w-xl">
+          <motion.div
+            ref={heroIntroRef}
+            style={{ y: heroTextY, opacity: heroOpacity }}
+            className="max-w-xl"
+          >
             <motion.h1
               initial={{ opacity: 0, x: -72 }}
-              animate={heroIntroInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -72 }}
+              animate={
+                heroIntroInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -72 }
+              }
               transition={textRevealTransition}
               className="mb-8 text-[2.75rem] font-light leading-[0.95] tracking-[-0.04em] text-white sm:text-6xl lg:text-7xl xl:text-[5.25rem]"
             >
               Gestion de activos <br />
-              <TypingAccentText text="con precision " className="text-zinc-600" active={heroIntroInView} />
-              <span className="font-serif italic text-white underline decoration-blue-500/30">atomica.</span>
+              <TypingAccentText
+                text="con precision "
+                className="text-zinc-600"
+                active={heroIntroInView}
+              />
+              <span className="font-serif italic text-white underline decoration-blue-500/30">
+                atomica.
+              </span>
             </motion.h1>
 
             <motion.p
               initial={{ opacity: 0, x: 72 }}
-              animate={heroIntroInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 72 }}
+              animate={
+                heroIntroInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 72 }
+              }
               transition={textRevealTransition}
               className="mb-10 max-w-md text-sm font-light leading-relaxed tracking-wide text-zinc-500 sm:text-base"
             >
-              Arquitectura modular para la visualizacion de portafolios de alto impacto. Rendimiento optimizado mediante renderizado
-              perimetral y entrega de baja latencia.
+              Arquitectura modular para la visualizacion de portafolios de alto
+              impacto. Rendimiento optimizado mediante renderizado perimetral y
+              entrega de baja latencia.
             </motion.p>
 
             <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-8">
@@ -662,7 +777,9 @@ export default function Home() {
                     </div>
                   ))}
                 </div>
-                <div className="flex items-center text-[9px] text-zinc-600 sm:pl-1">+2.4k Agencias activas</div>
+                <div className="flex items-center text-[9px] text-zinc-600 sm:pl-1">
+                  +2.4k Agencias activas
+                </div>
               </div>
             </div>
           </motion.div>
@@ -684,7 +801,9 @@ export default function Home() {
             >
               <Activity className="mt-1 text-green-500" size={12} />
               <div>
-                <span className="text-[9px] uppercase tracking-[0.18em] text-zinc-400">Global Throughput</span>
+                <span className="text-[9px] uppercase tracking-[0.18em] text-zinc-400">
+                  Global Throughput
+                </span>
                 <div className="mt-1 font-mono text-xl text-white">99.99%</div>
               </div>
             </motion.div>
@@ -692,28 +811,52 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="infraestructura" className="relative z-10 border-t border-white/5 py-24 sm:py-32 lg:py-40">
+      <section
+        id="infraestructura"
+        className="relative z-10 border-t border-white/5 py-24 sm:py-32 lg:py-40"
+      >
         <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8">
-          <div ref={infraIntroRef} className="mb-16 flex flex-col gap-8 md:mb-24 md:flex-row md:items-end md:justify-between md:gap-10">
+          <div
+            ref={infraIntroRef}
+            className="mb-16 flex flex-col gap-8 md:mb-24 md:flex-row md:items-end md:justify-between md:gap-10"
+          >
             <motion.div
               initial={{ opacity: 0, x: -72 }}
-              animate={infraIntroInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -72 }}
+              animate={
+                infraIntroInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -72 }
+              }
               transition={textRevealTransition}
               className="max-w-2xl"
             >
-              <span className="mb-4 block font-mono text-[10px] uppercase tracking-widest text-blue-500">01 // Otras Cosas</span>
+              <span className="mb-4 block font-mono text-[10px] uppercase tracking-widest text-blue-500">
+                01 // Otras Cosas
+              </span>
               <h2 className="text-3xl font-light tracking-tighter text-white sm:text-4xl md:text-5xl">
-                Disenado para la <TypingAccentText text="velocidad." className="text-zinc-600" active={infraIntroInView} /> <br />
-                Construido para la <TypingAccentText text="escala." className="text-zinc-600" active={infraIntroInView} />
+                Disenado para la{" "}
+                <TypingAccentText
+                  text="velocidad."
+                  className="text-zinc-600"
+                  active={infraIntroInView}
+                />{" "}
+                <br />
+                Construido para la{" "}
+                <TypingAccentText
+                  text="escala."
+                  className="text-zinc-600"
+                  active={infraIntroInView}
+                />
               </h2>
             </motion.div>
             <motion.p
               initial={{ opacity: 0, x: 72 }}
-              animate={infraIntroInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 72 }}
+              animate={
+                infraIntroInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 72 }
+              }
               transition={textRevealTransition}
               className="max-w-xs text-[11px] uppercase tracking-wider leading-loose text-zinc-500"
             >
-              Nuestro motor de renderizado procesa mas de 14M de activos visuales diariamente con redundancia global.
+              Nuestro motor de renderizado procesa mas de 14M de activos
+              visuales diariamente con redundancia global.
             </motion.p>
           </div>
 
@@ -750,28 +893,47 @@ export default function Home() {
         </div>
       </section>
 
-      <section ref={dashboardRef} id="demo" className="relative z-10 px-4 pb-28 pt-16 sm:px-6 sm:pb-36 sm:pt-20 lg:px-8 lg:pb-48 lg:pt-24">
+      <section
+        ref={dashboardRef}
+        id="demo"
+        className="relative z-10 px-4 pb-28 pt-16 sm:px-6 sm:pb-36 sm:pt-20 lg:px-8 lg:pb-48 lg:pt-24"
+      >
         <div className="mx-auto max-w-6xl">
-          <div ref={demoIntroRef} className="mb-10 flex flex-col gap-5 lg:mb-12 lg:flex-row lg:items-end lg:justify-between">
+          <div
+            ref={demoIntroRef}
+            className="mb-10 flex flex-col gap-5 lg:mb-12 lg:flex-row lg:items-end lg:justify-between"
+          >
             <motion.div
               initial={{ opacity: 0, x: -72 }}
-              animate={demoIntroInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -72 }}
+              animate={
+                demoIntroInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -72 }
+              }
               transition={textRevealTransition}
               className="max-w-2xl"
             >
-              <span className="mb-4 block font-mono text-[10px] uppercase tracking-widest text-blue-500">02 // Control Surface</span>
+              <span className="mb-4 block font-mono text-[10px] uppercase tracking-widest text-blue-500">
+                02 // Control Surface
+              </span>
               <h2 className="text-3xl font-light tracking-tight text-white sm:text-4xl lg:text-5xl">
                 Demo operativa mas real. <br />
-                Mucho mas fina en <TypingAccentText text="scroll y responsive." className="text-zinc-600" active={demoIntroInView} />
+                Mucho mas fina en{" "}
+                <TypingAccentText
+                  text="scroll y responsive."
+                  className="text-zinc-600"
+                  active={demoIntroInView}
+                />
               </h2>
             </motion.div>
             <motion.p
               initial={{ opacity: 0, x: 72 }}
-              animate={demoIntroInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 72 }}
+              animate={
+                demoIntroInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 72 }
+              }
               transition={textRevealTransition}
               className="max-w-sm text-[11px] uppercase tracking-[0.24em] leading-loose text-zinc-500"
             >
-              Vista compartida entre administracion y cliente con trazas, actividad viva y una capa de insight que entra al hacer scroll.
+              Vista compartida entre administracion y cliente con trazas,
+              actividad viva y una capa de insight que entra al hacer scroll.
             </motion.p>
           </div>
 
@@ -785,7 +947,9 @@ export default function Home() {
                   <div className="h-2.5 w-2.5 rounded-full bg-zinc-800" />
                   <div className="h-2.5 w-2.5 rounded-full bg-zinc-800" />
                 </div>
-                <div className="text-[9px] uppercase tracking-[0.4em] text-zinc-500">Admin / Cliente</div>
+                <div className="text-[9px] uppercase tracking-[0.4em] text-zinc-500">
+                  Admin / Cliente
+                </div>
                 <div className="flex items-center gap-3">
                   <span className="hidden rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[9px] uppercase tracking-[0.22em] text-emerald-400 sm:inline-flex">
                     Sync 99.99%
@@ -798,31 +962,46 @@ export default function Home() {
                 <div className="space-y-5">
                   <div className="rounded-[1.25rem] border border-white/5 bg-zinc-950/70 p-5">
                     <div className="mb-6 flex items-center justify-between">
-                      <span className="text-[10px] uppercase tracking-[0.24em] text-zinc-600">Pipeline operativo</span>
+                      <span className="text-[10px] uppercase tracking-[0.24em] text-zinc-600">
+                        Pipeline operativo
+                      </span>
                       <Layers size={15} className="text-zinc-500" />
                     </div>
 
                     <div className="mb-5">
                       <div className="flex items-end justify-between gap-4">
-                        <span className="font-mono text-3xl text-white">248</span>
-                        <span className="text-[10px] uppercase tracking-[0.2em] text-emerald-400">+18 activas</span>
+                        <span className="font-mono text-3xl text-white">
+                          248
+                        </span>
+                        <span className="text-[10px] uppercase tracking-[0.2em] text-emerald-400">
+                          +18 activas
+                        </span>
                       </div>
-                      <p className="mt-2 text-[10px] uppercase tracking-[0.22em] text-zinc-500">Portafolios listos para cliente</p>
+                      <p className="mt-2 text-[10px] uppercase tracking-[0.22em] text-zinc-500">
+                        Portafolios listos para cliente
+                      </p>
                     </div>
 
                     <div className="space-y-4">
                       {workflowSteps.map((item, index) => (
                         <div key={item.label} className="space-y-2">
                           <div className="flex items-center justify-between gap-3">
-                            <span className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">{item.label}</span>
-                            <span className="font-mono text-xs text-white">{item.value}</span>
+                            <span className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                              {item.label}
+                            </span>
+                            <span className="font-mono text-xs text-white">
+                              {item.value}
+                            </span>
                           </div>
                           <div className="h-1.5 overflow-hidden rounded-full bg-white/5">
                             <motion.div
                               initial={{ width: 0 }}
                               whileInView={{ width: item.value }}
                               viewport={{ once: true, amount: 0.5 }}
-                              transition={{ duration: 0.8, delay: 0.15 * index }}
+                              transition={{
+                                duration: 0.8,
+                                delay: 0.15 * index,
+                              }}
                               className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-500"
                             />
                           </div>
@@ -833,28 +1012,35 @@ export default function Home() {
 
                   <div className="rounded-[1.25rem] border border-white/5 bg-zinc-950/70 p-5">
                     <div className="mb-4 flex items-center justify-between">
-                      <span className="text-[10px] uppercase tracking-[0.24em] text-zinc-600">Regiones y blindaje</span>
+                      <span className="text-[10px] uppercase tracking-[0.24em] text-zinc-600">
+                        Regiones y blindaje
+                      </span>
                       <Shield size={15} className="text-zinc-500" />
                     </div>
                     <div className="mb-5 flex flex-wrap gap-2">
-                      {["La Paz", "Santiago", "Miami", "Madrid"].map((region) => (
-                        <span
-                          key={region}
-                          className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-zinc-400"
-                        >
-                          {region}
-                        </span>
-                      ))}
+                      {["La Paz", "Santiago", "Miami", "Madrid"].map(
+                        (region) => (
+                          <span
+                            key={region}
+                            className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-zinc-400"
+                          >
+                            {region}
+                          </span>
+                        ),
+                      )}
                     </div>
                     <div className="rounded-xl border border-white/5 bg-black/40 p-4">
                       <div className="mb-3 flex items-center justify-between">
-                        <span className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">Proteccion activa</span>
+                        <span className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                          Proteccion activa
+                        </span>
                         <span className="rounded-full border border-blue-500/20 bg-blue-500/10 px-2 py-1 text-[9px] uppercase tracking-[0.18em] text-blue-400">
                           JWT + RBAC
                         </span>
                       </div>
                       <p className="text-sm leading-relaxed text-zinc-400">
-                        Flujos segmentados para admin, cliente y reviewers sin romper continuidad del despliegue.
+                        Flujos segmentados para admin, cliente y reviewers sin
+                        romper continuidad del despliegue.
                       </p>
                     </div>
                   </div>
@@ -868,17 +1054,33 @@ export default function Home() {
                   </div>
 
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                    <SurfaceTile icon={LayoutTemplate} title="Libreria de assets" stat="142 templates" />
-                    <SurfaceTile icon={Terminal} title="Control de deploy" stat="4 colas vivas" />
-                    <SurfaceTile icon={Shield} title="Revision cliente" stat="18 aprobaciones" />
+                    <SurfaceTile
+                      icon={LayoutTemplate}
+                      title="Libreria de assets"
+                      stat="142 templates"
+                    />
+                    <SurfaceTile
+                      icon={Terminal}
+                      title="Control de deploy"
+                      stat="4 colas vivas"
+                    />
+                    <SurfaceTile
+                      icon={Shield}
+                      title="Revision cliente"
+                      stat="18 aprobaciones"
+                    />
                   </div>
 
                   <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)]">
                     <div className="rounded-[1.25rem] border border-white/5 bg-zinc-950/70 p-5">
                       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div>
-                          <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-600">Rendimiento semanal</p>
-                          <h3 className="mt-3 text-xl text-white sm:text-2xl">Carga sincronizada por entorno</h3>
+                          <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-600">
+                            Rendimiento semanal
+                          </p>
+                          <h3 className="mt-3 text-xl text-white sm:text-2xl">
+                            Carga sincronizada por entorno
+                          </h3>
                         </div>
                         <div className="inline-flex rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-emerald-400">
                           +12.8%
@@ -887,7 +1089,15 @@ export default function Home() {
 
                       <ChartCanvas
                         series={primarySeries}
-                        labels={["lun", "mar", "mie", "jue", "vie", "sab", "dom"]}
+                        labels={[
+                          "lun",
+                          "mar",
+                          "mie",
+                          "jue",
+                          "vie",
+                          "sab",
+                          "dom",
+                        ]}
                         accent="#3b82f6"
                         className="h-56"
                       />
@@ -896,19 +1106,30 @@ export default function Home() {
                     <div className="rounded-[1.25rem] border border-white/5 bg-zinc-950/70 p-5">
                       <div className="mb-5 flex items-center justify-between gap-3">
                         <div>
-                          <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-600">Actividad reciente</p>
-                          <h3 className="mt-2 text-lg text-white">Flujos en vivo</h3>
+                          <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-600">
+                            Actividad reciente
+                          </p>
+                          <h3 className="mt-2 text-lg text-white">
+                            Flujos en vivo
+                          </h3>
                         </div>
                         <BarChart3 size={16} className="text-zinc-500" />
                       </div>
 
                       <div className="space-y-3">
                         {liveProjects.map((project) => (
-                          <div key={project.name} className="rounded-xl border border-white/5 bg-black/40 p-4">
+                          <div
+                            key={project.name}
+                            className="rounded-xl border border-white/5 bg-black/40 p-4"
+                          >
                             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                               <div className="min-w-0">
-                                <p className="truncate text-sm text-white">{project.name}</p>
-                                <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-zinc-500">{project.scope}</p>
+                                <p className="truncate text-sm text-white">
+                                  {project.name}
+                                </p>
+                                <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                                  {project.scope}
+                                </p>
                               </div>
                               <div className="flex flex-wrap items-center gap-2">
                                 <span className="rounded-full border border-white/10 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-zinc-400">
@@ -929,14 +1150,22 @@ export default function Home() {
             </motion.div>
 
             <motion.div
-              style={{ y: insightY, opacity: insightOpacity, scale: insightScale }}
+              style={{
+                y: insightY,
+                opacity: insightOpacity,
+                scale: insightScale,
+              }}
               className="relative z-20 mx-3 -mt-8 sm:mx-6 sm:-mt-12 lg:absolute lg:bottom-0 lg:right-8 lg:mx-0 lg:mt-0 lg:w-[min(32rem,44%)] lg:translate-y-1/2"
             >
               <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-black/85 shadow-[0_40px_120px_rgba(0,0,0,0.6)] backdrop-blur-xl">
                 <div className="flex items-center justify-between gap-4 border-b border-white/5 px-5 py-4">
                   <div>
-                    <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-600">Insight Layer</p>
-                    <h3 className="mt-2 text-lg text-white sm:text-xl">Demanda predictiva</h3>
+                    <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-600">
+                      Insight Layer
+                    </p>
+                    <h3 className="mt-2 text-lg text-white sm:text-xl">
+                      Demanda predictiva
+                    </h3>
                   </div>
                   <span className="rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-blue-400">
                     Live
@@ -946,8 +1175,12 @@ export default function Home() {
                 <div className="grid gap-5 p-5 sm:grid-cols-[1.05fr_0.95fr]">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between gap-4">
-                      <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">Curva de demanda</span>
-                      <span className="font-mono text-sm text-emerald-400">+18.2%</span>
+                      <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+                        Curva de demanda
+                      </span>
+                      <span className="font-mono text-sm text-emerald-400">
+                        +18.2%
+                      </span>
                     </div>
 
                     <ChartCanvas
@@ -959,16 +1192,26 @@ export default function Home() {
 
                     <div className="grid grid-cols-3 gap-3">
                       <div className="rounded-xl border border-white/5 bg-white/[0.03] p-3">
-                        <p className="text-[9px] uppercase tracking-[0.18em] text-zinc-500">Carga</p>
+                        <p className="text-[9px] uppercase tracking-[0.18em] text-zinc-500">
+                          Carga
+                        </p>
                         <p className="mt-2 font-mono text-lg text-white">84%</p>
                       </div>
                       <div className="rounded-xl border border-white/5 bg-white/[0.03] p-3">
-                        <p className="text-[9px] uppercase tracking-[0.18em] text-zinc-500">SLA</p>
-                        <p className="mt-2 font-mono text-lg text-white">99.7</p>
+                        <p className="text-[9px] uppercase tracking-[0.18em] text-zinc-500">
+                          SLA
+                        </p>
+                        <p className="mt-2 font-mono text-lg text-white">
+                          99.7
+                        </p>
                       </div>
                       <div className="rounded-xl border border-white/5 bg-white/[0.03] p-3">
-                        <p className="text-[9px] uppercase tracking-[0.18em] text-zinc-500">Drift</p>
-                        <p className="mt-2 font-mono text-lg text-white">0.3%</p>
+                        <p className="text-[9px] uppercase tracking-[0.18em] text-zinc-500">
+                          Drift
+                        </p>
+                        <p className="mt-2 font-mono text-lg text-white">
+                          0.3%
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -976,19 +1219,30 @@ export default function Home() {
                   <div className="space-y-4">
                     <div className="rounded-2xl border border-white/5 bg-white/[0.03] p-4">
                       <div className="mb-3 flex items-center justify-between">
-                        <span className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">Escucha operacional</span>
+                        <span className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                          Escucha operacional
+                        </span>
                         <Activity size={14} className="text-zinc-500" />
                       </div>
                       <p className="text-sm leading-relaxed text-zinc-400">
-                        El panel inferior se activa al entrar al viewport y se monta medio superpuesto para darle mas profundidad al demo.
+                        El panel inferior se activa al entrar al viewport y se
+                        monta medio superpuesto para darle mas profundidad al
+                        demo.
                       </p>
                     </div>
 
                     {overlayIndicators.map((indicator, index) => (
-                      <div key={indicator.label} className="space-y-2 rounded-2xl border border-white/5 bg-white/[0.03] p-4">
+                      <div
+                        key={indicator.label}
+                        className="space-y-2 rounded-2xl border border-white/5 bg-white/[0.03] p-4"
+                      >
                         <div className="flex items-center justify-between gap-3">
-                          <span className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">{indicator.label}</span>
-                          <span className="font-mono text-sm text-white">{indicator.value}</span>
+                          <span className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                            {indicator.label}
+                          </span>
+                          <span className="font-mono text-sm text-white">
+                            {indicator.value}
+                          </span>
                         </div>
                         <div className="h-1.5 overflow-hidden rounded-full bg-white/5">
                           <motion.div
@@ -1022,23 +1276,40 @@ export default function Home() {
               </span>
             </div>
             <p className="max-w-sm text-[11px] leading-relaxed tracking-widest text-zinc-600">
-              Sistemas de visualizacion de proxima generacion para entidades creativas y estudios de diseno global.
+              Sistemas de visualizacion de proxima generacion para entidades
+              creativas y estudios de diseno global.
             </p>
           </div>
           <div>
-            <h4 className="mb-6 text-[10px] font-bold uppercase tracking-widest text-white">Demo</h4>
+            <h4 className="mb-6 text-[10px] font-bold uppercase tracking-widest text-white">
+              Demo
+            </h4>
             <ul className="space-y-4 text-[10px] uppercase tracking-widest text-zinc-500">
-              <li className="cursor-pointer transition-colors hover:text-blue-500">Seguridad L3</li>
-              <li className="cursor-pointer transition-colors hover:text-blue-500">Nodos Edge</li>
-              <li className="cursor-pointer transition-colors hover:text-blue-500">Gobernanza</li>
+              <li className="cursor-pointer transition-colors hover:text-blue-500">
+                Seguridad L3
+              </li>
+              <li className="cursor-pointer transition-colors hover:text-blue-500">
+                Nodos Edge
+              </li>
+              <li className="cursor-pointer transition-colors hover:text-blue-500">
+                Gobernanza
+              </li>
             </ul>
           </div>
           <div>
-            <h4 className="mb-6 text-[10px] font-bold uppercase tracking-widest text-white">Soporte</h4>
+            <h4 className="mb-6 text-[10px] font-bold uppercase tracking-widest text-white">
+              Soporte
+            </h4>
             <ul className="space-y-4 text-[10px] uppercase tracking-widest text-zinc-500">
-              <li className="cursor-pointer transition-colors hover:text-blue-500">Documentacion</li>
-              <li className="cursor-pointer transition-colors hover:text-blue-500">Terminal SSH</li>
-              <li className="cursor-pointer transition-colors hover:text-blue-500">Status</li>
+              <li className="cursor-pointer transition-colors hover:text-blue-500">
+                Documentacion
+              </li>
+              <li className="cursor-pointer transition-colors hover:text-blue-500">
+                Terminal SSH
+              </li>
+              <li className="cursor-pointer transition-colors hover:text-blue-500">
+                Status
+              </li>
             </ul>
           </div>
         </div>
@@ -1095,17 +1366,34 @@ function FeatureCard({
             fill="none"
             initial={{ pathLength: 0, opacity: 0 }}
             animate={{ pathLength: [0, 1], opacity: [0, 0.4, 0] }}
-            transition={{ duration: 1.6, repeat: Infinity, ease: "linear", delay: 0.3 }}
+            transition={{
+              duration: 1.6,
+              repeat: Infinity,
+              ease: "linear",
+              delay: 0.3,
+            }}
           />
 
           <defs>
-            <linearGradient id={gradientOneId} x1="0%" y1="0%" x2="100%" y2="0%">
+            <linearGradient
+              id={gradientOneId}
+              x1="0%"
+              y1="0%"
+              x2="100%"
+              y2="0%"
+            >
               <stop offset="0%" stopColor="transparent" />
               <stop offset="50%" stopColor="#3b82f6" />
               <stop offset="100%" stopColor="transparent" />
             </linearGradient>
 
-            <linearGradient id={gradientTwoId} x1="0%" y1="0%" x2="100%" y2="0%">
+            <linearGradient
+              id={gradientTwoId}
+              x1="0%"
+              y1="0%"
+              x2="100%"
+              y2="0%"
+            >
               <stop offset="0%" stopColor="transparent" />
               <stop offset="50%" stopColor="#6366f1" />
               <stop offset="100%" stopColor="transparent" />
@@ -1118,8 +1406,12 @@ function FeatureCard({
         <div className="mb-6 flex h-12 w-12 items-center justify-center rounded border border-white/10 transition-all duration-500 group-hover:border-blue-500/50 group-hover:text-blue-500 sm:mb-8">
           {icon}
         </div>
-        <h3 className="mb-4 text-[11px] font-bold uppercase tracking-[0.2em] text-white">{title}</h3>
-        <p className="text-[11px] font-light uppercase tracking-wider leading-relaxed text-zinc-500">{desc}</p>
+        <h3 className="mb-4 text-[11px] font-bold uppercase tracking-[0.2em] text-white">
+          {title}
+        </h3>
+        <p className="text-[11px] font-light uppercase tracking-wider leading-relaxed text-zinc-500">
+          {desc}
+        </p>
       </div>
     </motion.div>
   );
