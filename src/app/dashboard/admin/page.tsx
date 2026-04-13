@@ -578,19 +578,7 @@ export default function AdminDashboard() {
             )}
           </div>
 
-          {/* Acciones rápidas móvil */}
-          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-            <button
-              onClick={toggleTheme}
-              className="p-1.5 sm:p-2 text-gray-400 hover:text-white transition-colors rounded-md"
-            >
-              {isDarkMode ? (
-                <Sun className="w-4 h-4 sm:w-5 sm:h-5" />
-              ) : (
-                <Moon className="w-4 h-4 sm:w-5 sm:h-5" />
-              )}
-            </button>
-          </div>
+
         </header>
 
         {/* PAGE CONTENT */}
@@ -599,13 +587,13 @@ export default function AdminDashboard() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
             <div className="min-w-0">
               <h1 className="text-lg sm:text-xl md:text-2xl font-black text-white truncate">
-                {activeMainTab === "Dashboard" && "Dashboard de Análisis"}
+                {activeMainTab === "Dashboard" && "Escritorio"}
                 {activeMainTab === "Clientes" && "Gestión de Clientes"}
                 {activeMainTab === "Plantillas" && "Distribución de Plantillas"}
               </h1>
               <p className="text-gray-500 text-xs sm:text-sm font-medium mt-0.5 sm:mt-1">
                 {activeMainTab === "Dashboard" &&
-                  "Métricas generales del sistema"}
+                  "Analisis General"}
                 {activeMainTab === "Clientes" &&
                   "Registro y directorio de clientes"}
                 {activeMainTab === "Plantillas" &&
@@ -691,7 +679,7 @@ export default function AdminDashboard() {
                   <Users className="w-4 h-4 sm:w-5 sm:h-5 text-violet-500" />
                   Directorio de Clientes
                 </h2>
-                <span className="text-[10px] sm:text-xs font-bold bg-gray-800 text-gray-400 px-2 sm:px-3 py-1 rounded-lg w-fit">
+                <span className="text-[10px] sm:text-xs font-bold text-gray-400 px-2 sm:px-3 py-1 rounded-lg w-fit">
                   {filteredClients.length} registros
                 </span>
               </div>
@@ -701,8 +689,8 @@ export default function AdminDashboard() {
                 {/* Table Header */}
                 <div className="grid grid-cols-12 px-6 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest text-gray-400 border-b border-gray-800">
                   <div className="col-span-4">Cliente</div>
-                  <div className="col-span-3">Estado Portfolio</div>
-                  <div className="col-span-2">Plantilla</div>
+                  <div className="col-span-3">Estado</div>
+                  <div className="col-span-2">Diseño</div>
                   <div className="col-span-3 text-right">Acciones</div>
                 </div>
 
@@ -742,11 +730,7 @@ export default function AdminDashboard() {
                               <div className="min-w-0">
                                 <p className="font-bold text-white text-xs sm:text-sm truncate flex items-center gap-1.5 sm:gap-2">
                                   {client.name}
-                                  {client.isActive === false && (
-                                    <span className="bg-red-500/20 text-red-400 text-[8px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-full tracking-wider font-black">
-                                      Inactivo
-                                    </span>
-                                  )}
+
                                 </p>
                                 <p className="text-[10px] sm:text-xs text-gray-400 flex items-center gap-1 truncate">
                                   <Mail className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
@@ -758,22 +742,39 @@ export default function AdminDashboard() {
                             </div>
 
                             {/* Portfolio status */}
+                            {/* Portfolio status + Estado del cliente UNIFICADO */}
                             <div className="col-span-3">
                               {hasPortfolio && pf ? (
-                                <div className="flex flex-col gap-0.5 sm:gap-1">
-                                  <span className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs font-bold text-emerald-400">
-                                    <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                    Activo
-                                  </span>
-                                  <span className="text-[9px] sm:text-xs text-gray-500 font-mono truncate">
-                                    /p/{pf.slug}
-                                  </span>
+                                <div className="flex items-center gap-2">
+                                  {/* Badge de Estado del Cliente - SOLO AQUÍ */}
+                                  {client.isActive === false ? (
+                                    <span className="flex items-center gap-1 text-[10px] sm:text-xs font-bold text-red-400 bg-red-500/10 px-2 sm:px-3 py-1 rounded-lg border border-red-500/20">
+                                      <Shield className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                                      Inactivo
+                                    </span>
+                                  ) : (
+                                    <span className="flex items-center gap-1 text-[10px] sm:text-xs font-bold text-blue-400 bg-blue-500/10 px-2 sm:px-3 py-1 rounded-lg border border-blue-500/20">
+                                      <UserCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                                      Activo
+                                    </span>
+                                  )}
                                 </div>
                               ) : (
-                                <span className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs font-bold text-amber-400">
-                                  <AlertCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                                  Sin asignar
-                                </span>
+                                <div className="flex items-center gap-2">
+                                  {/* Sin portfolio */}
+                                  <span className="flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-amber-400 bg-amber-500/10 px-2 sm:px-3 py-1 rounded-lg">
+                                    <AlertCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                                    Sin Portfolio
+                                  </span>
+
+                                  {/* Estado del cliente cuando no tiene portfolio */}
+                                  {client.isActive === false ? (
+                                    <span className="flex items-center gap-1 text-[10px] sm:text-xs font-bold text-red-400 bg-red-500/10 px-2 sm:px-3 py-1 rounded-lg border border-red-500/20">
+                                      <Shield className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                                      Inactivo
+                                    </span>
+                                  ) : null}
+                                </div>
                               )}
                             </div>
 
@@ -979,23 +980,46 @@ export default function AdminDashboard() {
                             </div>
 
                             {/* Estado y Template */}
+                            {/* Estado y Template - UNIFICADO */}
                             <div className="flex items-center gap-2 mt-2 flex-wrap">
                               {hasPortfolio && pf ? (
                                 <>
                                   <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                    Activo
+                                    Portfolio
                                   </span>
+
+                                  {/* Estado del cliente - SOLO AQUÍ */}
+                                  {client.isActive === false ? (
+                                    <span className="flex items-center gap-1 text-[10px] font-bold text-red-400 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20">
+                                      <Shield className="w-3 h-3" />
+                                      Inactivo
+                                    </span>
+                                  ) : (
+                                    <span className="flex items-center gap-1 text-[10px] font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
+                                      <UserCheck className="w-3 h-3" />
+                                      Activo
+                                    </span>
+                                  )}
+
                                   <span className="text-[10px] font-black px-2 py-0.5 rounded bg-gradient-to-r from-violet-600 to-purple-600 text-white">
-                                    {TEMPLATE_NAMES[pf.templateId] ||
-                                      `T${pf.templateId}`}
+                                    {TEMPLATE_NAMES[pf.templateId] || `T${pf.templateId}`}
                                   </span>
                                 </>
                               ) : (
-                                <span className="flex items-center gap-1 text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">
-                                  <AlertCircle className="w-3 h-3" />
-                                  Sin asignar
-                                </span>
+                                <>
+                                  <span className="flex items-center gap-1 text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">
+                                    <AlertCircle className="w-3 h-3" />
+                                    Sin asignar
+                                  </span>
+
+                                  {client.isActive === false && (
+                                    <span className="flex items-center gap-1 text-[10px] font-bold text-red-400 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20">
+                                      <Shield className="w-3 h-3" />
+                                      Inactivo
+                                    </span>
+                                  )}
+                                </>
                               )}
                             </div>
 

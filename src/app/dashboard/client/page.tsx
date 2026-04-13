@@ -92,7 +92,7 @@ const TABS = [
   { id: "proyectos", label: "Proyectos", icon: FolderKanban },
   { id: "cursos", label: "Educación", icon: GraduationCap },
   { id: "skills", label: "Habilidades", icon: Wrench },
-  { id: "redes", label: "Redes", icon: Globe },
+  { id: "redes", label: "Redes Sociales", icon: Globe },
   { id: "consultas", label: "Mensajes", icon: MessageSquareMore },
 ];
 
@@ -436,7 +436,7 @@ export default function ClientDashboard() {
         <div className="w-full max-w-[98%] mx-auto flex items-center justify-between">
           <button
             onClick={() => setViewMode(viewMode === "dashboard" ? "profile" : "dashboard")}
-            className="flex items-center gap-4 text-left hover:bg-white/5 p-2 -ml-2 rounded-xl transition-all group"
+            className="flex items-center gap-4 text-left p-2 -ml-2 rounded-xl transition-all group"
             title="Ver Perfil y Resumen de Datos"
           >
             <div className="w-10 h-10 flex bg-white/10 rounded-2xl items-center justify-center overflow-hidden border border-transparent group-hover:border-white/30 transition-all">
@@ -451,10 +451,10 @@ export default function ClientDashboard() {
               )}
             </div>
             <div>
-              <p className="font-black text-gray-900 dark:text-white leading-tight group-hover:text-blue-400 transition-colors">
+              <p className="font-black text-white transition-colors">
                 {user.name}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 font-medium group-hover:text-gray-300 transition-colors">
+              <p className="text-xs text-gray-500 dark:text-gray-400 font-medium transition-colors">
                 Ver mi perfil
               </p>
             </div>
@@ -462,11 +462,9 @@ export default function ClientDashboard() {
 
           <div className="flex items-center gap-2 md:gap-3">
             {currentTime && (
-              <div className="hidden md:flex items-center gap-2 text-white px-3 py-2" style={{ borderRadius: isRounded ? "0.5rem" : "0px" }}>
-                <Clock className="w-4 h-4 text-blue-400" />
+              <div className="hidden md:flex items-center gap-2 px-3 py-2" style={{ borderRadius: isRounded ? "0.5rem" : "0px" }}>
                 <span className="text-xs font-bold tracking-wider">{currentTime}</span>
-                <span className="w-1 h-1 bg-gray-500 rounded-full mx-1"></span>
-                <span className="text-xs font-medium text-gray-400 tracking-widest">{country}</span>
+                <span className="text-xs text-gray-400 tracking-widest">{country}</span>
               </div>
             )}
 
@@ -588,14 +586,13 @@ export default function ClientDashboard() {
                     : " text-gray-400 hover:bg-white hover:text-black hover:border-white"
                     }`}
                 >
-                  <Icon className="w-4 h-4" /> 
+                  <Icon className="w-4 h-4" />
                   <span>{label}</span>
                   {id === "consultas" && inquiries.length > 0 && (
-                    <span className={`flex items-center justify-center min-w-[22px] h-[22px] px-1.5 ml-1 text-[11px] font-black rounded-full transition-all ${
-                      activeTab === id 
-                        ? "bg-black text-white" 
-                        : "bg-red-500 text-white border border-red-400 shadow-[0_0_10px_rgba(239,68,68,0.5)] animate-pulse"
-                    }`}>
+                    <span className={`flex items-center justify-center min-w-[22px] h-[22px] px-1.5 ml-1 text-[11px] font-black rounded-full transition-all ${activeTab === id
+                      ? "bg-black text-white"
+                      : "bg-red-500 text-white border border-red-400 shadow-[0_0_10px_rgba(239,68,68,0.5)] animate-pulse"
+                      }`}>
                       {inquiries.length}
                     </span>
                   )}
@@ -710,7 +707,7 @@ export default function ClientDashboard() {
                             href={`/p/${portfolio.slug}`}
                             target="_blank"
                             rel="noreferrer"
-                            className="px-4 py-3 text-blue-500 hover:text-blue-700 transition-colors"
+                            className="px-4 py-3 text-blue-500 transition-colors"
                           >
                             <ExternalLink className="w-4 h-4" />
                           </a>
