@@ -8,6 +8,9 @@ import api from "@/lib/api";
 import { toast } from "react-hot-toast";
 import WhatsAppInquiryInbox from "@/components/dashboard/WhatsAppInquiryInbox";
 import {
+  VisualForm, PerfilForm, ExperienciaForm, ProyectosForm, CursosForm, SkillsForm, RedesForm
+} from "@/components/dashboard/ClientForms";
+import {
   LogOut,
   Laptop,
   UserCircle,
@@ -73,18 +76,6 @@ interface Inquiry {
   portfolio?: { id: number; slug: string; userId: number };
 }
 
-const FONTS = [
-  "Inter",
-  "Roboto",
-  "Montserrat",
-  "Lato",
-  "Poppins",
-  "Merriweather",
-  "Oswald",
-  "Playfair Display",
-];
-const LOGO_POSITIONS = ["left", "center", "right", "top"];
-
 const TABS = [
   { id: "visual", label: "Visual", icon: Palette },
   { id: "perfil", label: "Perfil", icon: UserCircle },
@@ -113,7 +104,7 @@ export default function ClientDashboard() {
   const [slug, setSlug] = useState("");
 
   // === Perfil ===
-  const [heroTitle, setHeroTitle] = useState("Hola Bienvenido Soy ");
+  const [heroTitle, setHeroTitle] = useState("");
   const [heroSubtitle, setHeroSubtitle] = useState(
     "Este espacio está diseñado para presentar de manera clara y profesional mi trabajo y logros en cualquier área. Aquí encontrarás proyectos destacados, colaboraciones y experiencias que reflejan mi enfoque, creatividad y compromiso con la excelencia. Cada sección puede ser personalizada para mostrar la información más relevante de manera concisa y atractiva, permitiendo que visitantes y potenciales clientes conozcan de forma directa mi perfil profesional.",
   );
@@ -246,9 +237,15 @@ export default function ClientDashboard() {
       );
       if (sec) {
         setHeroSectionId(sec.id ?? null);
-        setHeroTitle(sec.content?.title || user?.name || "");
+        let finalTitle = sec.content?.title || "";
+        if (!finalTitle || finalTitle.trim() === "Hola Bienvenido Soy") {
+          finalTitle = `Hola Bienvenido Soy ${user?.name || ""}`;
+        }
+        setHeroTitle(finalTitle);
         setHeroSubtitle(sec.content?.subtitle || "");
         setHeroAvatarUrl(sec.content?.avatarUrl || "");
+      } else {
+        setHeroTitle(`Hola Bienvenido Soy ${user?.name || ""}`);
       }
     } catch {
       toast.error("Error al cargar secciones");
@@ -493,81 +490,114 @@ export default function ClientDashboard() {
 
       {portfolio ? (
         viewMode === "profile" ? (
-          <div className="w-full max-w-[98%] mx-auto px-2 md:px-4 py-4 animate-in fade-in zoom-in-95 duration-300">
+          <div className="w-full max-w-5xl mx-auto px-4 py-8 animate-in slide-in-from-bottom-8 fade-in duration-500">
             <button
               onClick={() => setViewMode("dashboard")}
-              className="mb-8 font-bold flex items-center gap-2 text-white border border-white px-4 py-2 hover:bg-white hover:text-black transition-all w-fit text-sm uppercase tracking-widest"
+              className="mb-8 font-bold flex items-center gap-3 text-gray-400 hover:text-white transition-all w-fit text-sm uppercase tracking-widest group"
             >
-              ← Volver al Menú
+              <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white group-hover:text-black transition-all">
+                ←
+              </div>
+              Menu Principal
             </button>
-            <div className="bg-black/90 p-6 md:p-10 border border-white/10 shadow-2xl">
-              <div className="flex flex-col md:flex-row gap-8 items-center md:items-start text-center md:text-left">
-                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-white/20 shrink-0">
-                  {heroAvatarUrl ? (
-                    <img src={heroAvatarUrl} className="w-full h-full object-cover" alt="Perfil" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-white/5">
-                      <UserCircle className="w-20 h-20 text-white/50" />
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1">
-                  <h2 className="text-3xl md:text-5xl font-black text-white">{user.name}</h2>
-                  <p className="text-gray-400 font-bold uppercase tracking-widest text-sm md:text-base mt-2">
-                    {user.role} {profession ? `— ${profession}` : ""}
-                  </p>
-                  <div className="mt-5 flex flex-wrap gap-4 items-center justify-center md:justify-start text-sm md:text-base font-medium text-gray-300">
-                    <span className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-full border border-white/10 shrink-0"><Mail className="w-4 h-4" /> {user.email || email}</span>
-                    {location && <span className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-full border border-white/10 shrink-0"><MapPin className="w-4 h-4" /> {location}</span>}
-                  </div>
-                </div>
+            <div className={`relative overflow-hidden bg-[#0A0A0A] border border-white/10 shadow-2xl ${isRounded ? "rounded-[2rem]" : "rounded-none"}`}>
+              {/* Banner Background */}
+              <div className="absolute top-0 left-0 w-full h-48 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 opacity-80">
+                <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px]"></div>
+                <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+                <div className="absolute -top-12 -left-12 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
               </div>
 
-              <div className="mt-16">
-                <div className="flex flex-col xl:flex-row gap-8">
-                  <div className="flex-1">
-                    <h3 className="text-2xl font-black text-white mb-8 border-b border-white/10 pb-4 flex items-center gap-3">
-                      <FolderKanban className="w-6 h-6 text-blue-500" /> Resumen de Actividad
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
+              <div className="relative px-8 sm:px-12 pb-12 pt-32">
+                <div className="flex flex-col md:flex-row gap-8 items-center md:items-end text-center md:text-left">
+                  {/* Avatar */}
+                  <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-full overflow-hidden border-8 border-[#0A0A0A] bg-black shrink-0 relative z-10 shadow-xl">
+                    {heroAvatarUrl ? (
+                      <img src={heroAvatarUrl} className="w-full h-full object-cover" alt="Perfil" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900 border border-white/10">
+                        <UserCircle className="w-20 h-20 text-white/30" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Info */}
+                  <div className="flex-1 pb-2">
+                    <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">{user.name}</h2>
+                    <p className="text-blue-400 font-bold uppercase tracking-widest text-sm sm:text-base mt-2">
+                      {user.role} {profession ? `• ${profession}` : ""}
+                    </p>
+                    <div className="mt-4 flex flex-wrap gap-3 items-center justify-center md:justify-start text-sm font-medium text-gray-300">
+                      <span className="flex items-center gap-2 bg-white/5 hover:bg-white/10 transition-colors px-4 py-2 rounded-full border border-white/5 shrink-0"><Mail className="w-4 h-4 text-emerald-400" /> {user.email || email}</span>
+                      {location && <span className="flex items-center gap-2 bg-white/5 hover:bg-white/10 transition-colors px-4 py-2 rounded-full border border-white/5 shrink-0"><MapPin className="w-4 h-4 text-rose-400" /> {location}</span>}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dashboard Stats */}
+                <div className="mt-16 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Left Column: Progress Stats */}
+                  <div className="lg:col-span-2 space-y-6">
+                    <div className="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
+                      <div className="p-2 bg-blue-500/20 rounded-lg">
+                        <FolderKanban className="w-6 h-6 text-blue-400" />
+                      </div>
+                      <h3 className="text-xl font-bold text-white">Resumen de Actividad</h3>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {[
-                        { label: "Experiencias Registradas", count: experience.length, color: "from-blue-600 to-blue-400", max: 5 },
-                        { label: "Proyectos en Portafolio", count: projects.length, color: "from-purple-600 to-purple-400", max: 8 },
-                        { label: "Cursos Completados", count: courses.length, color: "from-emerald-600 to-emerald-400", max: 5 },
-                        { label: "Habilidades Técnicas", count: skills.length, color: "from-amber-600 to-amber-400", max: 15 },
-                        { label: "Consultas Recibidas", count: inquiries.length, color: "from-cyan-600 to-cyan-400", max: 20 },
-                      ].map((stat, i) => {
-                        const percentage = Math.min((stat.count / stat.max) * 100, 100) || 1;
-                        return (
-                          <div key={i} className="group">
-                            <div className="flex justify-between text-base font-bold text-gray-200 mb-2">
-                              <span className="flex items-center gap-2">{stat.label}</span>
-                              <span className="text-white text-lg">{stat.count}</span>
+                        { label: "Experiencias", count: experience.length, icon: Briefcase, color: "text-blue-400", bg: "bg-blue-400", border: "border-blue-500/20" },
+                        { label: "Proyectos", count: projects.length, icon: FolderKanban, color: "text-purple-400", bg: "bg-purple-400", border: "border-purple-500/20" },
+                        { label: "Cursos", count: courses.length, icon: GraduationCap, color: "text-emerald-400", bg: "bg-emerald-400", border: "border-emerald-500/20" },
+                        { label: "Habilidades", count: skills.length, icon: Wrench, color: "text-amber-400", bg: "bg-amber-400", border: "border-amber-500/20" },
+                      ].map((stat, i) => (
+                        <div key={i} className={`p-5 rounded-2xl bg-white/[0.02] border ${stat.border} hover:bg-white/[0.05] transition-all group relative overflow-hidden`}>
+                          <div className={`absolute -right-6 -bottom-6 w-24 h-24 ${stat.bg} opacity-[0.03] rounded-full blur-xl group-hover:opacity-10 transition-all`}></div>
+                          <div className="flex justify-between items-center mb-4 relative z-10">
+                            <div className={`p-2.5 rounded-xl bg-white/5 ${stat.color}`}>
+                              <stat.icon className="w-5 h-5" />
                             </div>
-                            <div className={`h-5 w-full bg-white/5 overflow-hidden ${isRounded ? "rounded-full" : "rounded-none"}`}>
-                              <div
-                                className={`h-full bg-gradient-to-r ${stat.color} transition-all duration-1000 ease-out group-hover:brightness-125`}
-                                style={{ width: `${percentage}%` }}
-                              ></div>
-                            </div>
+                            <span className="text-3xl font-black text-white">{stat.count}</span>
                           </div>
-                        );
-                      })}
+                          <p className="text-sm font-bold text-gray-400 uppercase tracking-wider relative z-10">{stat.label}</p>
+                        </div>
+                      ))}
+                      
+                      {/* Consultas */}
+                      <div className="sm:col-span-2 p-6 rounded-2xl bg-gradient-to-r from-cyan-950/40 to-blue-900/20 border border-cyan-500/20 flex items-center justify-between group relative overflow-hidden">
+                        <div className="absolute inset-0 bg-cyan-500/5 group-hover:bg-cyan-500/10 transition-colors"></div>
+                        <div className="flex items-center gap-5 relative z-10">
+                          <div className="p-3.5 rounded-xl bg-cyan-500/20 text-cyan-400">
+                            <MessageSquareMore className="w-7 h-7" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-cyan-500 uppercase tracking-wider">Consultas Recibidas</p>
+                            <p className="text-xs text-gray-400 mt-1 font-medium">Bandeja de mensajes de clientes potenciales</p>
+                          </div>
+                        </div>
+                        <span className="text-4xl font-black text-white relative z-10">{inquiries.length}</span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* CALENDAR WIDGET */}
-                  <div className={`w-full xl:w-72 bg-gradient-to-b from-white/5 to-transparent border border-white/10 p-8 flex flex-col items-center justify-center shrink-0 ${isRounded ? 'rounded-[2rem]' : 'rounded-none'}`}>
-                    <CalendarDays className="w-10 h-10 text-white/50 mb-6" />
-                    <span className="text-red-500 font-black uppercase tracking-[0.2em] text-xs mb-2">
-                      {new Date().toLocaleDateString('es-ES', { month: 'long' })}
-                    </span>
-                    <span className="text-[6rem] font-black text-white leading-none my-2 drop-shadow-2xl">
-                      {new Date().getDate()}
-                    </span>
-                    <span className="text-gray-400 font-bold capitalize mt-4 tracking-wider">
-                      {new Date().toLocaleDateString('es-ES', { weekday: 'long' })}, {new Date().getFullYear()}
-                    </span>
+                  {/* Right Column: Date Info */}
+                  <div className="flex flex-col gap-6">
+                    <div className={`flex-1 bg-gradient-to-br from-[#111] to-[#050505] border border-white/5 p-8 flex flex-col items-center justify-center relative overflow-hidden shadow-inner ${isRounded ? 'rounded-[2rem]' : 'rounded-none'}`}>
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/10 blur-3xl rounded-full"></div>
+                      <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/10 blur-3xl rounded-full"></div>
+                      
+                      <CalendarDays className="w-10 h-10 text-white/20 mb-6 relative z-10" />
+                      <span className="text-red-500 font-black uppercase tracking-[0.2em] text-sm mb-2 relative z-10">
+                        {new Date().toLocaleDateString('es-ES', { month: 'long' })}
+                      </span>
+                      <span className="text-[7rem] font-black text-white leading-none my-2 drop-shadow-2xl relative z-10">
+                        {new Date().getDate()}
+                      </span>
+                      <span className="text-gray-400 font-bold capitalize mt-4 tracking-wider relative z-10">
+                        {new Date().toLocaleDateString('es-ES', { weekday: 'long' })}, {new Date().getFullYear()}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -604,693 +634,72 @@ export default function ClientDashboard() {
               <div className="lg:col-span-2 space-y-0">
                 {/* ========== TAB: VISUAL ========== */}
                 {activeTab === "visual" && (
-                  <div className="bg-black space-y-4">
-                    <div className={card}>
-                      <h3 className="font-black text-white mb-5 flex items-center gap-2">
-                        <Palette className="w-5 h-5 text-blue-500" /> Colores del
-                        Tema
-                      </h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                        {[
-                          {
-                            label: "Color Primario",
-                            value: primaryColor,
-                            set: setPrimaryColor,
-                          },
-                          {
-                            label: "Color de Fondo",
-                            value: secondaryColor,
-                            set: setSecondaryColor,
-                          },
-                          {
-                            label: "Texto Secundario",
-                            value: secondaryTextColor,
-                            set: setSecondaryTextColor,
-                          },
-                        ].map(({ label: l, value, set }) => (
-                          <div key={l}>
-                            <p className={label}>{l}</p>
-                            <div className="flex items-center gap-3  p-2 overflow-hidden">
-                              <input
-                                type="color"
-                                value={value}
-                                onChange={(e) => set(e.target.value)}
-                                className="w-12 h-12 rounded-lg border-0 cursor-pointer bg-transparent p-0.5 shrink-0"
-                              />
-                              <span className="font-mono text-sm font-bold text-gray-800 dark:text-gray-100">
-                                {value.toUpperCase()}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className={card}>
-                      <h3 className="font-black text-gray-900 dark:text-white mb-5 flex items-center gap-2">
-                        <AlignLeft className="w-5 h-5 text-purple-500" />{" "}
-                        Tipografía y Logo
-                      </h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                        <div>
-                          <p className={label}>Tipografía</p>
-                          <select
-                            value={fontFamily}
-                            onChange={(e) => setFontFamily(e.target.value)}
-                            className={inp + " cursor-pointer"}
-                          >
-                            {FONTS.map((f) => (
-                              <option key={f} value={f}>
-                                {f}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <p className={label}>Posición del Logo</p>
-                          <select
-                            value={logoPosition}
-                            onChange={(e) => setLogoPosition(e.target.value)}
-                            className={inp + " cursor-pointer capitalize"}
-                          >
-                            {LOGO_POSITIONS.map((pos) => (
-                              <option
-                                key={pos}
-                                value={pos}
-                                className="capitalize"
-                              >
-                                {pos}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className={card}>
-                      <h3 className="font-black text-gray-900 dark:text-white mb-5 flex items-center gap-2">
-                        <LinkIcon className="w-5 h-5 text-emerald-500" /> Enlace
-                        Público
-                      </h3>
-                      <div className="flex items-center overflow-hidden">
-                        <span className="px-4 py-3 text-gray-500 dark:text-gray-400 text-sm font-mono border-r border-gray-200 dark:border-gray-700">
-                          /p/
-                        </span>
-                        <input
-                          type="text"
-                          value={slug}
-                          readOnly
-                          className="flex-1 bg-transparent px-4 py-3 text-sm font-bold text-gray-700 dark:text-gray-200 outline-none cursor-not-allowed"
-                        />
-                        {portfolio && (
-                          <a
-                            href={`/p/${portfolio.slug}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="px-4 py-3 text-blue-500 transition-colors"
-                          >
-                            <ExternalLink className="w-4 h-4" />
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+                  <VisualForm
+                    primaryColor={primaryColor} setPrimaryColor={setPrimaryColor}
+                    secondaryColor={secondaryColor} setSecondaryColor={setSecondaryColor}
+                    secondaryTextColor={secondaryTextColor} setSecondaryTextColor={setSecondaryTextColor}
+                    fontFamily={fontFamily} setFontFamily={setFontFamily}
+                    logoPosition={logoPosition} setLogoPosition={setLogoPosition}
+                    slug={slug} portfolio={portfolio}
+                    inp={inp} label={label} card={card}
+                  />
                 )}
 
                 {/* ========== TAB: PERFIL ========== */}
                 {activeTab === "perfil" && (
-                  <div className="bg-black space-y-4">
-                    <div className={card}>
-                      <h3 className="font-black text-gray-900 dark:text-white mb-5 flex items-center gap-2">
-                        <ImageIcon className="w-5 h-5 text-pink-500" />
-                        Foto de Perfil
-                      </h3>
-                      <div
-                        onClick={() => fileInputRef.current?.click()}
-                        className="relative min-h-[180px] flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 transition-all group overflow-hidden bg-black"
-                      >
-                        {heroAvatarUrl && !uploadingImage && (
-                          <img
-                            src={heroAvatarUrl}
-                            alt="Avatar"
-                            className="absolute inset-0 w-full h-full object-contain p-3 opacity-40 group-hover:opacity-30 transition-all"
-                          />
-                        )}
-                        {uploadingImage ? (
-                          <div className="z-10 flex flex-col items-center gap-2">
-                            <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
-                            <span className="text-sm font-bold text-gray-600 dark:text-gray-300">
-                              Cargando...
-                            </span>
-                          </div>
-                        ) : (
-                          <div className="z-10 flex flex-col items-center gap-2 bg-white/10 px-6 py-3 shadow-sm border border-gray-100 dark:border-gray-700">
-                            <ImageIcon className="w-7 h-7 text-white" />
-                            <p className="text-sm font-bold text-gray-700 dark:text-gray-200">
-                              {heroAvatarUrl
-                                ? "Cambiar Imagen"
-                                : "Subir Foto / Logo"}
-                            </p>
-                          </div>
-                        )}
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageUpload}
-                          className="hidden"
-                        />
-                      </div>
-                    </div>
-
-                    <div className={card}>
-                      <h3 className="font-black text-gray-900 dark:text-white mb-5 flex items-center gap-2">
-                        <Edit3 className="w-5 h-5 text-blue-500" /> Información
-                        Personal
-                      </h3>
-                      <div className="space-y-4">
-                        <div>
-                          <p className={label}>Título Principal / Nombre</p>
-                          <input
-                            type="text"
-                            value={`${heroTitle} ${user?.name || ""}`}
-                            onChange={(e) => setHeroTitle(e.target.value)}
-                            placeholder="Ej: Juan Pérez — Diseñador UX"
-                            className={inp}
-                          />
-                        </div>
-                        <div>
-                          <p className={label}>Biografía / Descripción</p>
-                          <textarea
-                            value={heroSubtitle}
-                            onChange={(e) => setHeroSubtitle(e.target.value)}
-                            placeholder="Escribe tu presentación personal..."
-                            rows={4}
-                            className={inp + " resize-none h-32"}
-                          />
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                          <div>
-                            <p className={label}>
-                              <Briefcase className="inline w-3 h-3 mr-1" />
-                              Profesión
-                            </p>
-                            <input
-                              type="text"
-                              value={profession}
-                              onChange={(e) => setProfession(e.target.value)}
-                              placeholder="Diseñador UI/UX"
-                              className={inp}
-                            />
-                          </div>
-                          <div>
-                            <p className={label}>
-                              <MapPin className="inline w-3 h-3 mr-1" />
-                              Ubicación
-                            </p>
-                            <input
-                              type="text"
-                              value={location}
-                              onChange={(e) => setLocation(e.target.value)}
-                              placeholder="Ciudad, País"
-                              className={inp}
-                            />
-                          </div>
-                          <div>
-                            <p className={label}>
-                              <Mail className="inline w-3 h-3 mr-1" />
-                              Email de Contacto
-                            </p>
-                            <input
-                              type="email"
-                              value={email}
-                              onChange={(e) => setEmail(e.target.value)}
-                              placeholder="tu@email.com"
-                              className={inp}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <PerfilForm
+                    heroAvatarUrl={heroAvatarUrl}
+                    fileInputRef={fileInputRef}
+                    uploadingImage={uploadingImage}
+                    handleImageUpload={handleImageUpload}
+                    heroTitle={heroTitle} setHeroTitle={setHeroTitle}
+                    heroSubtitle={heroSubtitle} setHeroSubtitle={setHeroSubtitle}
+                    profession={profession} setProfession={setProfession}
+                    location={location} setLocation={setLocation}
+                    email={email} setEmail={setEmail}
+                    inp={inp} label={label} card={card}
+                  />
                 )}
 
                 {/* ========== TAB: EXPERIENCIA ========== */}
                 {activeTab === "experiencia" && (
-                  <div>
-                    <div className={card}>
-                      <div className="flex items-center justify-between mb-5">
-                        <h3 className="font-black text-gray-900 dark:text-white flex items-center gap-2">
-                          <Briefcase className="w-5 h-5 text-blue-500" />{" "}
-                          Experiencia Laboral
-                        </h3>
-                        <button
-                          onClick={addExp}
-                          className="flex items-center gap-1.5 text-sm font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-3 py-2 hover:bg-blue-100 dark:hover:bg-blue-800/30 transition-all border border-blue-200 dark:border-blue-800"
-                        >
-                          <Plus className="w-4 h-4" /> Añadir
-                        </button>
-                      </div>
-                      {experience.length === 0 && (
-                        <div className="text-center py-10 text-gray-400 dark:text-gray-600">
-                          <Briefcase className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                          <p className="text-sm font-medium">
-                            Sin experiencia registrada. Añade la primera.
-                          </p>
-                        </div>
-                      )}
-                      {experience.map((exp, i) => (
-                        <div
-                          key={i}
-                          className="bg-black p-5 mb-4 relative group"
-                        >
-                          <button
-                            onClick={() => removeExp(i)}
-                            className="absolute top-3 right-3 p-1.5 text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                          <p className="text-xs font-black uppercase text-white/80 mb-4">
-                            Experiencia #{i + 1}
-                          </p>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                            <div>
-                              <p className={label}>Empresa</p>
-                              <input
-                                type="text"
-                                value={exp.company}
-                                onChange={(e) =>
-                                  updateExp(i, "company", e.target.value)
-                                }
-                                placeholder="Nombre de la empresa"
-                                className={inp}
-                              />
-                            </div>
-                            <div>
-                              <p className={label}>Cargo / Rol</p>
-                              <input
-                                type="text"
-                                value={exp.role}
-                                onChange={(e) =>
-                                  updateExp(i, "role", e.target.value)
-                                }
-                                placeholder="Diseñador Senior"
-                                className={inp}
-                              />
-                            </div>
-                          </div>
-                          <div className="mb-3">
-                            <p className={label}>Período</p>
-                            <input
-                              type="text"
-                              value={exp.period}
-                              onChange={(e) =>
-                                updateExp(i, "period", e.target.value)
-                              }
-                              placeholder="Ene 2022 – Dic 2023"
-                              className={inp}
-                            />
-                          </div>
-                          <div>
-                            <p className={label}>Descripción</p>
-                            <textarea
-                              value={exp.description}
-                              onChange={(e) =>
-                                updateExp(i, "description", e.target.value)
-                              }
-                              placeholder="Describe tus responsabilidades y logros..."
-                              rows={3}
-                              className={inp + " resize-none"}
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <ExperienciaForm
+                    experience={experience} addExp={addExp} removeExp={removeExp} updateExp={updateExp}
+                    inp={inp} label={label} card={card}
+                  />
                 )}
 
                 {/* ========== TAB: PROYECTOS ========== */}
                 {activeTab === "proyectos" && (
-                  <div>
-                    <div className={card}>
-                      <div className="flex items-center justify-between mb-5">
-                        <h3 className="font-black text-gray-900 dark:text-white flex items-center gap-2">
-                          <FolderKanban className="w-5 h-5 text-purple-500" />{" "}
-                          Proyectos
-                        </h3>
-                        <button
-                          onClick={addProject}
-                          className="flex items-center gap-1.5 text-sm font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20 px-3 py-2 hover:bg-purple-100 dark:hover:bg-purple-800/30 transition-all border border-purple-200 dark:border-purple-800"
-                        >
-                          <Plus className="w-4 h-4" /> Añadir
-                        </button>
-                      </div>
-                      {projects.length === 0 && (
-                        <div className="text-center py-10 text-gray-400 dark:text-gray-600">
-                          <FolderKanban className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                          <p className="text-sm font-medium">
-                            Sin proyectos. Añade el primero.
-                          </p>
-                        </div>
-                      )}
-                      {projects.map((proj, i) => (
-                        <div
-                          key={i}
-                          className="bg-black p-5 mb-4 relative group"
-                        >
-                          <button
-                            onClick={() => removeProject(i)}
-                            className="absolute top-3 right-3 p-1.5 text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                          <p className="text-xs font-black uppercase text-white/80 mb-4">
-                            Proyecto #{i + 1}
-                          </p>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                            <div>
-                              <p className={label}>Nombre</p>
-                              <input
-                                type="text"
-                                value={proj.name}
-                                onChange={(e) =>
-                                  updateProject(i, "name", e.target.value)
-                                }
-                                placeholder="Mi Ultimo Pro"
-                                className={inp}
-                              />
-                            </div>
-                            <div>
-                              <p className={label}>Enlace (URL)</p>
-                              <input
-                                type="text"
-                                value={proj.link}
-                                onChange={(e) =>
-                                  updateProject(i, "link", e.target.value)
-                                }
-                                placeholder="https://miproyecto.com"
-                                className={inp}
-                              />
-                            </div>
-                          </div>
-                          <div className="mb-3">
-                            <p className={label}>Herramientas</p>
-                            <input
-                              type="text"
-                              value={proj.tools}
-                              onChange={(e) =>
-                                updateProject(i, "tools", e.target.value)
-                              }
-                              placeholder="React, Node.js, Figma..."
-                              className={inp}
-                            />
-                          </div>
-                          <div>
-                            <p className={label}>Descripción</p>
-                            <textarea
-                              value={proj.description}
-                              onChange={(e) =>
-                                updateProject(i, "description", e.target.value)
-                              }
-                              placeholder="Describe el proyecto..."
-                              rows={3}
-                              className={inp + " resize-none mb-4"}
-                            />
-                          </div>
-                          <div>
-                            <p className={label}>Imagen (Opcional)</p>
-                            <div className="flex items-center gap-4 mt-2 p-3">
-                              {proj.imageUrl ? (
-                                <img src={proj.imageUrl} alt="preview" className="w-16 h-16 object-cover shadow-sm bg-white" />
-                              ) : (
-                                <div className="w-16 h-16 bg-gray-100 dark:bg-black flex items-center justify-center shadow-sm shrink-0">
-                                  <ImageIcon className="w-6 h-6 text-gray-400 dark:text-gray-600" />
-                                </div>
-                              )}
-                              <div className="flex-1 overflow-hidden">
-                                <input type="file" accept="image/*" onChange={(e) => {
-                                  if (e.target.files?.[0]) handleProjectImageUpload(i, e.target.files[0]);
-                                }} className="w-full text-xs text-gray-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-black file:uppercase cursor-pointer" />
-                                {proj.imageUrl && (
-                                  <button onClick={() => updateProject(i, "imageUrl", "")} className="text-xs font-bold text-red-500 mt-2 hover:text-red-400 transition-colors flex items-center gap-1">
-                                    <Trash2 className="w-3 h-3" /> Quitar imagen
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <ProyectosForm
+                    projects={projects} addProject={addProject} removeProject={removeProject}
+                    updateProject={updateProject} handleProjectImageUpload={handleProjectImageUpload}
+                    inp={inp} label={label} card={card}
+                  />
                 )}
 
                 {/* ========== TAB: CURSOS / EDUCACIÓN ========== */}
                 {activeTab === "cursos" && (
-                  <div>
-                    <div className={card}>
-                      <div className="flex items-center justify-between mb-5">
-                        <h3 className="font-black text-gray-900 dark:text-white flex items-center gap-2">
-                          <GraduationCap className="w-5 h-5 text-emerald-500" />{" "}
-                          Cursos y Educación
-                        </h3>
-                        <button
-                          onClick={addCourse}
-                          className="flex items-center gap-1.5 text-sm font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-2 hover:bg-emerald-100 dark:hover:bg-emerald-800/30 transition-all border border-emerald-200 dark:border-emerald-800"
-                        >
-                          <Plus className="w-4 h-4" /> Añadir
-                        </button>
-                      </div>
-                      {courses.length === 0 && (
-                        <div className="text-center py-10 text-gray-400 dark:text-gray-600">
-                          <GraduationCap className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                          <p className="text-sm font-medium">
-                            Sin cursos o estudios. Añade el primero.
-                          </p>
-                        </div>
-                      )}
-                      {courses.map((course, i) => (
-                        <div
-                          key={i}
-                          className="bg-black p-5 mb-4 relative group"
-                        >
-                          <button
-                            onClick={() => removeCourse(i)}
-                            className="absolute top-3 right-3 p-1.5 text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                          <p className="text-xs font-black uppercase text-white/80 mb-4">
-                            Formación #{i + 1}
-                          </p>
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
-                            <div>
-                              <p className={label}>Nombre del Curso</p>
-                              <input
-                                type="text"
-                                value={course.name}
-                                onChange={(e) =>
-                                  updateCourse(i, "name", e.target.value)
-                                }
-                                placeholder="Diseño UX"
-                                className={inp}
-                              />
-                            </div>
-                            <div>
-                              <p className={label}>Institución</p>
-                              <input
-                                type="text"
-                                value={course.institution}
-                                onChange={(e) =>
-                                  updateCourse(i, "institution", e.target.value)
-                                }
-                                placeholder="Coursera / UTEC"
-                                className={inp}
-                              />
-                            </div>
-                            <div>
-                              <p className={label}>Año</p>
-                              <input
-                                type="text"
-                                value={course.year}
-                                onChange={(e) =>
-                                  updateCourse(i, "year", e.target.value)
-                                }
-                                placeholder="2023"
-                                className={inp}
-                              />
-                            </div>
-                          </div>
-                          <div>
-                            <p className={label}>Descripción Breve</p>
-                            <input
-                              type="text"
-                              value={course.description}
-                              onChange={(e) =>
-                                updateCourse(i, "description", e.target.value)
-                              }
-                              placeholder="Temas vistos, logros..."
-                              className={inp}
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <CursosForm
+                    courses={courses} addCourse={addCourse} removeCourse={removeCourse} updateCourse={updateCourse}
+                    inp={inp} label={label} card={card}
+                  />
                 )}
 
                 {/* ========== TAB: SKILLS ========== */}
                 {activeTab === "skills" && (
-                  <div>
-                    <div className={card}>
-                      <div className="flex items-center justify-between mb-5">
-                        <h3 className="font-black text-gray-900 dark:text-white flex items-center gap-2">
-                          <Wrench className="w-5 h-5 text-amber-500" />{" "}
-                          Habilidades Técnicas
-                        </h3>
-                        <button
-                          onClick={addSkill}
-                          className="flex items-center gap-1.5 text-sm font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 hover:bg-amber-100 dark:hover:bg-amber-800/30 transition-all border border-amber-200 dark:border-amber-800"
-                        >
-                          <Plus className="w-4 h-4" /> Añadir
-                        </button>
-                      </div>
-                      {skills.length === 0 && (
-                        <div className="text-center py-10 text-gray-400 dark:text-gray-600">
-                          <Wrench className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                          <p className="text-sm font-medium">
-                            Sin habilidades. Añade la primera.
-                          </p>
-                        </div>
-                      )}
-                      <div className="space-y-3">
-                        {skills.map((skill, i) => (
-                          <div
-                            key={i}
-                            className="bg-black p-4 relative group"
-                          >
-                            <button
-                              onClick={() => removeSkill(i)}
-                              className="absolute top-3 right-3 p-1.5 text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end pr-8">
-                              <div className="sm:col-span-2">
-                                <p className={label}>Habilidad</p>
-                                <input
-                                  type="text"
-                                  value={skill.name}
-                                  onChange={(e) =>
-                                    updateSkill(i, "name", e.target.value)
-                                  }
-                                  placeholder="React, Figma, Python..."
-                                  className={inp}
-                                />
-                              </div>
-                              <div>
-                                <p className={label}>Nivel ({skill.level}%)</p>
-                                <input
-                                  type="range"
-                                  min={0}
-                                  max={100}
-                                  value={skill.level}
-                                  onChange={(e) =>
-                                    updateSkill(
-                                      i,
-                                      "level",
-                                      Number(e.target.value),
-                                    )
-                                  }
-                                  className="w-full mt-1 accent-amber-500"
-                                />
-                              </div>
-                            </div>
-                            <div className="mt-3 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-                              <div
-                                className="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full transition-all duration-300"
-                                style={{ width: `${skill.level}%` }}
-                              />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+                  <SkillsForm
+                    skills={skills} addSkill={addSkill} removeSkill={removeSkill} updateSkill={updateSkill}
+                    inp={inp} label={label} card={card}
+                  />
                 )}
 
                 {/* ========== TAB: REDES SOCIALES ========== */}
                 {activeTab === "redes" && (
-                  <div>
-                    <div className={card}>
-                      <h3 className="font-black text-white mb-5 flex items-center gap-2">
-                        <Globe className="w-5 h-5" /> Redes Sociales
-                        y Contacto
-                      </h3>
-                      <div className="bg-black p-4 space-y-4">
-                        {[
-                          {
-                            key: "linkedin",
-                            label: "LinkedIn",
-                            placeholder: "https://linkedin.com/in/tu-perfil",
-                          },
-                          {
-                            key: "github",
-                            label: "GitHub",
-                            placeholder: "https://github.com/tu-usuario",
-                          },
-                          {
-                            key: "twitter",
-                            label: "Twitter / X",
-                            placeholder: "https://twitter.com/tu-usuario",
-                          },
-                          {
-                            key: "website",
-                            label: "Sitio Web Personal",
-                            placeholder: "https://tu-web.com",
-                          },
-                        ].map(
-                          ({
-                            key,
-                            label: l,
-                            placeholder,
-                          }: {
-                            key: keyof SocialLinks;
-                            label: string;
-                            placeholder: string;
-                          }) => (
-                            <div key={key}>
-                              <p className={label}>{l}</p>
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="url"
-                                  value={socialLinks[key] || ""}
-                                  onChange={(e) =>
-                                    setSocialLinks({
-                                      ...socialLinks,
-                                      [key]: e.target.value,
-                                    })
-                                  }
-                                  placeholder={placeholder}
-                                  className={inp}
-                                />
-                                {socialLinks[key] && (
-                                  <a
-                                    href={socialLinks[key]}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="bg-white/10 p-3 text-black hover:bg-white transition-all shrink-0"
-                                  >
-                                    <ExternalLink className="w-4 h-4" />
-                                  </a>
-                                )}
-                              </div>
-                            </div>
-                          ),
-                        )}
-                      </div>
-                    </div>
-                  </div>
+                  <RedesForm
+                    socialLinks={socialLinks} setSocialLinks={setSocialLinks}
+                    inp={inp} label={label} card={card}
+                  />
                 )}
 
                 {/* ========== TAB: CONSULTAS ========== */}

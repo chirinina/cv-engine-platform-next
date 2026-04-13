@@ -136,7 +136,7 @@ export default function LoginPage() {
     try {
       const res = await api.post("/auth/login", { email, password });
       login(res.data.token, res.data.user);
-      toast.success("Login Exitoso");
+      toast.success(`Bienvenido ${res.data.user.name}`);
 
       if (res.data.user.role === "ADMIN") {
         router.push("/dashboard/admin");

@@ -163,6 +163,9 @@ export default function AdminDashboard() {
   const router = useRouter();
   const { user, logout, checkAuth, isLoading } = useAuthStore();
   const [clients, setClients] = useState<Client[]>([]);
+  const [totalClients, setTotalClients] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -234,7 +237,6 @@ export default function AdminDashboard() {
     if (!isLoading) {
       if (!user || user.role !== "ADMIN") router.push("/login");
       else {
-        fetchClients();
         fetchPortfolios();
         fetchInquiries();
       }
@@ -243,12 +245,29 @@ export default function AdminDashboard() {
 
   const fetchClients = async () => {
     try {
-      const res = await api.get("/users");
-      setClients(res.data);
+      const res = await api.get(`/users?page=${currentPage}&limit=6&search=${searchQuery}`);
+      if (res.data.data !== undefined) {
+        setClients(res.data.data);
+        setTotalPages(res.data.totalPages);
+        setTotalClients(res.data.totalItems);
+      } else {
+        setClients(res.data);
+        setTotalPages(1);
+        setTotalClients(res.data.length);
+      }
     } catch {
       toast.error("Error cargando clientes");
     }
   };
+
+  useEffect(() => {
+    if (user && user.role === "ADMIN") {
+      const delay = setTimeout(() => {
+        fetchClients();
+      }, 300);
+      return () => clearTimeout(delay);
+    }
+  }, [searchQuery, currentPage, user]);
 
   const fetchPortfolios = async () => {
     try {
@@ -368,17 +387,11 @@ export default function AdminDashboard() {
     }
   };
 
-  const filteredClients = clients.filter(
-    (c) =>
-      c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.email.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  const filteredClients = clients;
 
   const activePortfolios = portfolios.length;
-  const clientsWithPortfolio = clients.filter((c) =>
-    portfolios.some((p) => p.userId === c.id),
-  ).length;
-  const clientsWithoutPortfolio = clients.length - clientsWithPortfolio;
+  const clientsWithPortfolio = new Set(portfolios.map(p => p.userId)).size;
+  const clientsWithoutPortfolio = totalClients - clientsWithPortfolio;
   const selectedClientInquiries = selectedPortfolio
     ? inquiries.filter(
       (inquiry) =>
@@ -424,6 +437,13 @@ export default function AdminDashboard() {
               <span className="text-blue-500">play</span>
             </span>
           </div>
+          {/* Botón de cierre visible sólo en móvil, integrado elegamentemente */}
+          <button
+            onClick={() => setIsSidebarOpen(false)}
+            className={`md:hidden p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-md transition-all shrink-0 ${isSidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+          >
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
+          </button>
         </div>
 
         {/* Nav */}
@@ -542,27 +562,23 @@ export default function AdminDashboard() {
         <header className="sticky top-0 z-30 bg-black/95 backdrop-blur-xl border-b border-gray-200/60 dark:border-gray-800 px-3 sm:px-4 md:px-6 py-3 sm:py-4 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
             {/* Botón para abrir sidebar en móvil */}
-            {!isSidebarOpen && (
-              <button
-                onClick={() => setIsSidebarOpen(true)}
-                className="p-1.5 sm:p-2 text-white bg-white/10 rounded-md md:hidden shrink-0"
-              >
-                <Menu className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
-            )}
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className="p-1.5 sm:p-2 text-white bg-white/10 rounded-md md:hidden shrink-0 active:scale-95 transition-all"
+            >
+              <Menu className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
 
-            {/* Logo móvil cuando sidebar cerrado */}
-            {!isSidebarOpen && (
-              <div className="md:hidden flex items-center gap-2 shrink-0">
-                <div className="w-6 h-6 bg-white/15 rounded flex items-center justify-center">
-                  <Terminal className="w-3 h-3 text-white" />
-                </div>
-                <span className="text-[10px] font-black tracking-wider uppercase">
-                  <span className="text-white">Dio</span>
-                  <span className="text-blue-500">play</span>
-                </span>
+            {/* Logo móvil en top bar */}
+            <div className="md:hidden flex items-center gap-2 shrink-0">
+              <div className="w-6 h-6 bg-white/15 rounded flex items-center justify-center">
+                <Terminal className="w-3 h-3 text-white" />
               </div>
-            )}
+              <span className="text-[10px] font-black tracking-wider uppercase">
+                <span className="text-white">Dio</span>
+                <span className="text-blue-500">play</span>
+              </span>
+            </div>
 
             {activeMainTab === "Clientes" && (
               <div className="relative flex-1 max-w-xs sm:max-w-sm">
@@ -571,7 +587,10 @@ export default function AdminDashboard() {
                   type="text"
                   placeholder="Buscar cliente..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1);
+                  }}
                   className="w-full pl-8 sm:pl-9 pr-3 sm:pr-4 py-2 sm:py-2.5 bg-black border border-transparent focus:border-violet-500 text-xs sm:text-sm text-white outline-none transition-all placeholder-gray-400 font-medium rounded-md"
                 />
               </div>
@@ -603,7 +622,7 @@ export default function AdminDashboard() {
             {activeMainTab === "Clientes" && (
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="flex items-center justify-center gap-1.5 sm:gap-2 border border-white text-white font-bold px-3 sm:px-5 py-2 sm:py-3 transition-all text-xs sm:text-sm hover:bg-white hover:text-black rounded-md shrink-0"
+                className="w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 border border-white text-white font-bold px-3 sm:px-5 py-2.5 sm:py-3 transition-all text-sm hover:bg-white hover:text-black rounded-md shrink-0"
               >
                 <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span className="hidden sm:inline">Nuevo Cliente</span>
@@ -614,11 +633,11 @@ export default function AdminDashboard() {
 
           {/* KPI STATS */}
           {activeMainTab === "Dashboard" && (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               {[
                 {
                   label: "Total Clientes",
-                  value: clients.length,
+                  value: totalClients,
                   icon: Users,
                   color: "text-violet-400",
                   bg: "bg-violet-500/10",
@@ -679,9 +698,7 @@ export default function AdminDashboard() {
                   <Users className="w-4 h-4 sm:w-5 sm:h-5 text-violet-500" />
                   Directorio de Clientes
                 </h2>
-                <span className="text-[10px] sm:text-xs font-bold text-gray-400 px-2 sm:px-3 py-1 rounded-lg w-fit">
-                  {filteredClients.length} registros
-                </span>
+
               </div>
 
               {/* Vista Desktop - Table */}
@@ -1032,18 +1049,18 @@ export default function AdminDashboard() {
                                   exit={{ height: 0, opacity: 0 }}
                                   className="overflow-hidden"
                                 >
-                                  <div className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-gray-800">
+                                  <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-gray-800">
                                     <button
                                       onClick={() => {
                                         handleToggleClientStatus(client);
                                         setShowMobileActions(null);
                                       }}
-                                      className={`flex items-center gap-1 text-[10px] font-bold px-2 py-1.5 border rounded-md ${client.isActive === false
-                                        ? "border-emerald-500 text-emerald-400"
-                                        : "border-red-500 text-red-400"
+                                      className={`flex items-center justify-center gap-2 text-xs font-bold w-full py-2.5 border rounded-lg active:scale-95 transition-transform ${client.isActive === false
+                                        ? "border-emerald-500 text-emerald-400 bg-emerald-500/10"
+                                        : "border-red-500 text-red-400 bg-red-500/10"
                                         }`}
                                     >
-                                      <Shield className="w-3 h-3" />
+                                      <Shield className="w-4 h-4" />
                                       {client.isActive === false
                                         ? "Activar"
                                         : "Inactivar"}
@@ -1054,9 +1071,9 @@ export default function AdminDashboard() {
                                         openEditModal(client);
                                         setShowMobileActions(null);
                                       }}
-                                      className="flex items-center gap-1 text-[10px] font-bold px-2 py-1.5 border border-white text-white rounded-md"
+                                      className="flex items-center justify-center gap-2 text-xs font-bold w-full py-2.5 border border-gray-600 text-white rounded-lg hover:border-white active:scale-95 transition-all"
                                     >
-                                      <Pencil className="w-3 h-3" /> Editar
+                                      <Pencil className="w-4 h-4" /> Editar
                                     </button>
 
                                     {hasPortfolio && pf && (
@@ -1066,18 +1083,18 @@ export default function AdminDashboard() {
                                             openDetails(client, pf);
                                             setShowMobileActions(null);
                                           }}
-                                          className="flex items-center gap-1 text-[10px] font-bold px-2 py-1.5 border border-white text-white rounded-md"
+                                          className="flex items-center justify-center gap-2 text-xs font-bold w-full py-2.5 border border-blue-500/50 text-blue-400 bg-blue-500/10 rounded-lg hover:border-blue-500 active:scale-95 transition-all"
                                         >
-                                          <Eye className="w-3 h-3" /> Ver
+                                          <Eye className="w-4 h-4" /> Ver
                                         </button>
 
                                         <a
                                           href={`/p/${pf.slug}`}
                                           target="_blank"
                                           rel="noreferrer"
-                                          className="flex items-center gap-1 text-[10px] font-bold px-2 py-1.5 border border-white text-white rounded-md"
+                                          className="flex items-center justify-center gap-2 text-xs font-bold w-full py-2.5 border border-emerald-500/50 text-emerald-400 bg-emerald-500/10 rounded-lg hover:border-emerald-500 active:scale-95 transition-all"
                                         >
-                                          <ExternalLink className="w-3 h-3" />{" "}
+                                          <ExternalLink className="w-4 h-4" />{" "}
                                           Link
                                         </a>
                                       </>
@@ -1090,7 +1107,7 @@ export default function AdminDashboard() {
                                       <p className="text-[10px] text-gray-500 mb-1.5">
                                         Asignar template:
                                       </p>
-                                      <div className="flex gap-1.5 flex-wrap">
+                                      <div className="grid grid-cols-2 gap-2">
                                         {[1, 2, 3, 4].map((num) => (
                                           <button
                                             key={num}
@@ -1101,9 +1118,9 @@ export default function AdminDashboard() {
                                               );
                                               setShowMobileActions(null);
                                             }}
-                                            className="text-[10px] font-black px-2 py-1 rounded border border-white/50 text-white hover:bg-white hover:text-black transition-colors"
+                                            className="text-xs font-black w-full py-2.5 rounded-lg border border-gray-600 text-white hover:border-white hover:bg-white hover:text-black active:scale-95 transition-all flex items-center justify-center"
                                           >
-                                            {TEMPLATE_NAMES[num]}
+                                            T{num} - {TEMPLATE_NAMES[num]}
                                           </button>
                                         ))}
                                       </div>
@@ -1130,6 +1147,65 @@ export default function AdminDashboard() {
                   </div>
                 )}
               </div>
+
+              {/* PAGINATION CONTROLS */}
+              {totalPages > 1 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 sm:px-6 border-t border-gray-800 bg-black gap-4">
+                  <div className="flex w-full sm:w-auto justify-between sm:hidden">
+                    <button
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className="relative inline-flex items-center rounded-md border border-gray-700 bg-black px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 disabled:opacity-50"
+                    >
+                      Anterior
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                      className="relative ml-3 inline-flex items-center rounded-md border border-gray-700 bg-black px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 disabled:opacity-50"
+                    >
+                      Siguiente
+                    </button>
+                  </div>
+                  <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-sm text-gray-400">
+                        Mostrando <span className="font-medium text-white">{((currentPage - 1) * 6) + 1}</span> a <span className="font-medium text-white">{Math.min(currentPage * 6, totalClients)}</span> de{' '}
+                        <span className="font-medium text-white">{totalClients}</span> resultados
+                      </p>
+                    </div>
+                    <div>
+                      <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                        <button
+                          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                          disabled={currentPage === 1}
+                          className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-700 hover:bg-gray-800 disabled:opacity-50 focus:z-20 focus:outline-offset-0"
+                        >
+                          <span className="sr-only">Anterior</span>
+                          <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+                        </button>
+                        {[...Array(totalPages)].map((_, i) => (
+                          <button
+                            key={i}
+                            onClick={() => setCurrentPage(i + 1)}
+                            className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold focus:z-20 focus:outline-offset-0 ring-1 ring-inset ring-gray-700 ${currentPage === i + 1 ? 'z-10 bg-violet-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600' : 'text-gray-300 hover:bg-gray-800'}`}
+                          >
+                            {i + 1}
+                          </button>
+                        ))}
+                        <button
+                          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                          disabled={currentPage === totalPages}
+                          className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-700 hover:bg-gray-800 disabled:opacity-50 focus:z-20 focus:outline-offset-0"
+                        >
+                          <span className="sr-only">Siguiente</span>
+                          <ChevronRightIcon className="h-4 w-4" aria-hidden="true" />
+                        </button>
+                      </nav>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
