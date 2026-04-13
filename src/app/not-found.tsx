@@ -19,21 +19,31 @@ const KineticLines = () => {
             animate={{
               pathLength: [0, 1],
               opacity: [0, 0.5, 0],
-              pathOffset: [0, 1]
+              pathOffset: [0, 1],
             }}
             transition={{
               duration: 4 + i,
               repeat: Infinity,
               ease: "linear",
-              delay: i * 0.5
+              delay: i * 0.5,
             }}
           />
         ))}
         <defs>
           {[...Array(6)].map((_, i) => (
-            <linearGradient key={i} id={`gradNotFound${i}`} x1="0%" y1="0%" x2="100%" y2="0%">
+            <linearGradient
+              key={i}
+              id={`gradNotFound${i}`}
+              x1="0%"
+              y1="0%"
+              x2="100%"
+              y2="0%"
+            >
               <stop offset="0%" stopColor="transparent" />
-              <stop offset="50%" stopColor={i % 2 === 0 ? "#3b82f6" : "#8b5cf6"} />
+              <stop
+                offset="50%"
+                stopColor={i % 2 === 0 ? "#3b82f6" : "#8b5cf6"}
+              />
               <stop offset="100%" stopColor="transparent" />
             </linearGradient>
           ))}
@@ -67,7 +77,7 @@ export default function NotFound() {
             </div>
             <div className="h-4 w-[1px] bg-white/10 mx-2" />
             <div className="flex gap-6 text-[9px] uppercase tracking-[0.2em] font-medium text-zinc-500">
-              <span className="text-blue-500 font-mono">Error 404</span>
+              <span className="font-mono">Error 404</span>
             </div>
           </div>
         </div>
@@ -82,12 +92,20 @@ export default function NotFound() {
           className="max-w-2xl text-center flex flex-col items-center"
         >
           <h1 className="text-5xl md:text-7xl font-light text-white tracking-tighter mb-6 relative mt-12">
-            <span className="absolute -left-8 -top-8 text-[120px] font-bold text-white/5 pointer-events-none select-none blur-sm">404</span>
-            Página no <span className="text-blue-500 font-serif italic underline decoration-violet-500/30">encontrada</span>
+            <span className="absolute -left-8 -top-8 text-[120px] font-bold text-white/5 pointer-events-none select-none blur-sm">
+              404
+            </span>
+            Página no{" "}
+            <span className="text-blue-500 font-serif italic underline decoration-violet-500/30">
+              existente
+            </span>
           </h1>
 
           <p className="text-sm text-zinc-500 max-w-lg leading-relaxed font-light tracking-wide mb-10">
-            La dirección a la que intentas acceder <strong className="text-zinc-300 font-normal">no existe</strong> en nuestra infraestructura.
+            La dirección a la que intentas acceder{" "}
+            <strong className="text-zinc-300 font-normal">no existe</strong> en
+            nuestra infraestructura puede ser que haya sido eliminada, movida o
+            nunca haya existido.
           </p>
         </motion.div>
       </main>
@@ -97,7 +115,7 @@ export default function NotFound() {
         <div className="flex justify-center items-center text-[9px] text-zinc-700 uppercase tracking-[0.5em]">
           <span>© 2026 Dioplay todo los Derechos Reservados</span>
           <span className="mx-4">|</span>
-          <span>Encrypted Form</span>
+          <span>Chiri</span>
         </div>
       </footer>
     </div>

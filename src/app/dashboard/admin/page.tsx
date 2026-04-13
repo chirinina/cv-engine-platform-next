@@ -286,7 +286,15 @@ export default function AdminDashboard() {
 
   const handleAssignTemplate = async (clientId: number, templateId: number) => {
     try {
-      const slug = `portfolio-${clientId}-${Date.now().toString().slice(-4)}`;
+      // Find the client's name to embed in the token (makes it partially human-readable like "diolay==...")
+      const clientObj = clients.find((c) => c.id === clientId);
+      const namePart = (clientObj?.name || "user")
+        .toLowerCase()
+        .replace(/\s+/g, "")
+        .slice(0, 6);
+      const payload = `${clientId}:${Date.now()}:${Math.random().toString(36).slice(2)}`;
+      const encoded = btoa(payload).replace(/=/g, "").replace(/\+/g, "x").replace(/\//g, "z");
+      const slug = `${namePart}==${encoded}`;
       await api.post("/portfolios", { userId: clientId, templateId, slug });
       toast.success(`Template "${TEMPLATE_NAMES[templateId]}" asignado`);
       fetchPortfolios();
@@ -373,10 +381,10 @@ export default function AdminDashboard() {
   const clientsWithoutPortfolio = clients.length - clientsWithPortfolio;
   const selectedClientInquiries = selectedPortfolio
     ? inquiries.filter(
-        (inquiry) =>
-          inquiry.portfolioId === selectedPortfolio.id ||
-          inquiry.portfolio?.id === selectedPortfolio.id,
-      )
+      (inquiry) =>
+        inquiry.portfolioId === selectedPortfolio.id ||
+        inquiry.portfolio?.id === selectedPortfolio.id,
+    )
     : [];
 
   if (isLoading || !user)
@@ -735,7 +743,7 @@ export default function AdminDashboard() {
                                 <p className="font-bold text-white text-xs sm:text-sm truncate flex items-center gap-1.5 sm:gap-2">
                                   {client.name}
                                   {client.isActive === false && (
-                                    <span className="bg-red-500/20 text-red-400 text-[8px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-full uppercase tracking-wider font-black">
+                                    <span className="bg-red-500/20 text-red-400 text-[8px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-full tracking-wider font-black">
                                       Inactivo
                                     </span>
                                   )}
@@ -804,11 +812,10 @@ export default function AdminDashboard() {
                                     ? "Activar"
                                     : "Inactivar"
                                 }
-                                className={`flex items-center gap-1 text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1.5 sm:py-2 border rounded-md transition-all ${
-                                  client.isActive === false
-                                    ? "border-emerald-500 text-emerald-400 hover:bg-emerald-500 hover:text-white"
-                                    : "border-red-500 text-red-400 hover:bg-red-500 hover:text-white"
-                                }`}
+                                className={`flex items-center gap-1 text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1.5 sm:py-2 border rounded-md transition-all ${client.isActive === false
+                                  ? "border-emerald-500 text-emerald-400 hover:bg-emerald-500 hover:text-white"
+                                  : "border-red-500 text-red-400 hover:bg-red-500 hover:text-white"
+                                  }`}
                               >
                                 <Shield className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                               </button>
@@ -858,11 +865,10 @@ export default function AdminDashboard() {
                                               onClick={() =>
                                                 handleChangeTemplate(pf.id, num)
                                               }
-                                              className={`w-full text-left px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold transition-all flex items-center justify-between rounded-md ${
-                                                pf.templateId === num
-                                                  ? "bg-white text-black"
-                                                  : "text-white hover:bg-white/10"
-                                              }`}
+                                              className={`w-full text-left px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold transition-all flex items-center justify-between rounded-md ${pf.templateId === num
+                                                ? "bg-white text-black"
+                                                : "text-white hover:bg-white/10"
+                                                }`}
                                             >
                                               <span>{TEMPLATE_NAMES[num]}</span>
                                               {pf.templateId === num && (
@@ -1008,11 +1014,10 @@ export default function AdminDashboard() {
                                         handleToggleClientStatus(client);
                                         setShowMobileActions(null);
                                       }}
-                                      className={`flex items-center gap-1 text-[10px] font-bold px-2 py-1.5 border rounded-md ${
-                                        client.isActive === false
-                                          ? "border-emerald-500 text-emerald-400"
-                                          : "border-red-500 text-red-400"
-                                      }`}
+                                      className={`flex items-center gap-1 text-[10px] font-bold px-2 py-1.5 border rounded-md ${client.isActive === false
+                                        ? "border-emerald-500 text-emerald-400"
+                                        : "border-red-500 text-red-400"
+                                        }`}
                                     >
                                       <Shield className="w-3 h-3" />
                                       {client.isActive === false
@@ -1289,25 +1294,34 @@ export default function AdminDashboard() {
                   { id: "experience", label: "Experiencia", icon: Briefcase },
                   { id: "projects", label: "Proyectos", icon: Layers },
                   { id: "courses", label: "Educación", icon: GraduationCap },
-                  { id: "skills", label: "Skills", icon: Wrench },
+                  { id: "skills", label: "Habilidades", icon: Wrench },
                   {
                     id: "inquiries",
                     label: "Consultas",
                     icon: MessageSquareMore,
                   },
-                  { id: "social", label: "Redes", icon: Globe },
+                  { id: "social", label: "Redes Sociales", icon: Globe },
                 ].map(({ id, label, icon: Icon }) => (
                   <button
                     key={id}
                     onClick={() => setDetailsTab(id)}
-                    className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 text-[10px] sm:text-xs font-black whitespace-nowrap transition-all border rounded-md ${
-                      detailsTab === id
-                        ? "border-white bg-white text-black"
-                        : "border-gray-700 text-gray-400 hover:border-gray-500 hover:text-white"
-                    }`}
+                    className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 text-[10px] sm:text-xs font-black whitespace-nowrap transition-all border rounded-md ${detailsTab === id
+                      ? "border-white bg-white text-black"
+                      : "border-gray-700 text-gray-400 hover:border-gray-500 hover:text-white"
+                      }`}
                   >
-                    <Icon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                    <span className="hidden sm:inline">{label}</span>
+                    <div className="flex items-center gap-1 sm:gap-1.5">
+                      <Icon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                      <span className="hidden sm:inline">{label}</span>
+                    </div>
+                    {id === "inquiries" && selectedClientInquiries.length > 0 && (
+                      <span className={`flex items-center justify-center min-w-[20px] h-[20px] px-1 text-[10px] font-black rounded-full transition-all ${detailsTab === id
+                        ? "bg-black text-white"
+                        : "bg-red-500 text-white border border-red-400 shadow-[0_0_8px_rgba(239,68,68,0.6)] animate-pulse"
+                        }`}>
+                        {selectedClientInquiries.length}
+                      </span>
+                    )}
                   </button>
                 ))}
               </div>
@@ -1618,7 +1632,7 @@ export default function AdminDashboard() {
                 {detailsTab === "social" && (
                   <div className="p-2 sm:p-6">
                     {selectedPortfolio.socialLinks &&
-                    Object.keys(selectedPortfolio.socialLinks).length > 0 ? (
+                      Object.keys(selectedPortfolio.socialLinks).length > 0 ? (
                       <div className="space-y-2 sm:space-y-3">
                         {Object.entries(selectedPortfolio.socialLinks)
                           .filter(([, v]) => v)

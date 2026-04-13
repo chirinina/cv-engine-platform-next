@@ -584,11 +584,21 @@ export default function ClientDashboard() {
                   key={id}
                   onClick={() => setActiveTab(id)}
                   className={`flex items-center gap-2 px-4 py-2.5 font-bold text-sm whitespace-nowrap transition-all border ${activeTab === id
-                    ? "bg-white text-black "
+                    ? "bg-white text-black label-active"
                     : " text-gray-400 hover:bg-white hover:text-black hover:border-white"
                     }`}
                 >
-                  <Icon className="w-4 h-4" /> {label}
+                  <Icon className="w-4 h-4" /> 
+                  <span>{label}</span>
+                  {id === "consultas" && inquiries.length > 0 && (
+                    <span className={`flex items-center justify-center min-w-[22px] h-[22px] px-1.5 ml-1 text-[11px] font-black rounded-full transition-all ${
+                      activeTab === id 
+                        ? "bg-black text-white" 
+                        : "bg-red-500 text-white border border-red-400 shadow-[0_0_10px_rgba(239,68,68,0.5)] animate-pulse"
+                    }`}>
+                      {inquiries.length}
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
