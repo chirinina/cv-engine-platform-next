@@ -87,15 +87,15 @@ const TABS = [
   { id: "consultas", label: "Mensajes", icon: MessageSquareMore },
 ];
 
-const YearCalendar = ({ isRounded }: { isRounded: boolean }) => {
+const YearCalendar = ({ isRounded, primaryColor }: { isRounded: boolean; primaryColor: string }) => {
   const now = new Date();
   const currentMonth = now.getMonth();
   const currentDay = now.getDate();
   const year = now.getFullYear();
 
   const months = [
-    "Ene", "Feb", "Mar", "Abr", "May", "Jun",
-    "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"
+    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
   ];
 
   const getDaysInMonth = (month: number, year: number) => {
@@ -107,39 +107,52 @@ const YearCalendar = ({ isRounded }: { isRounded: boolean }) => {
   };
 
   return (
-    <div className={`p-4 md:p-6 bg-black/40 border border-white/5 backdrop-blur-md shadow-2xl ${isRounded ? 'rounded-[2rem]' : 'rounded-none'} overflow-hidden`}>
-      <div className="flex items-center justify-between mb-4">
+    <div className={`p-4 md:p-6 bg-zinc-900/40 border border-white/5 backdrop-blur-md shadow-2xl ${isRounded ? 'rounded-[2rem]' : 'rounded-none'} overflow-hidden`}>
+      <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-bold text-white flex items-center gap-2">
-          <CalendarDays className="w-4 h-4 text-red-500" />
+          <CalendarDays className="w-4 h-4" style={{ color: primaryColor || '#ef4444' }} />
           Calendario {year}
         </h3>
+
       </div>
 
-      <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4">
         {months.map((monthName, mIdx) => {
           const days = getDaysInMonth(mIdx, year);
           const firstDay = getFirstDayOfMonth(mIdx, year);
           const isCurrentMonth = mIdx === currentMonth;
 
           return (
-            <div key={mIdx} className={`p-2 rounded-xl transition-all duration-300 ${isCurrentMonth ? 'bg-white/5 border border-white/10 shadow-[0_0_20px_rgba(255,255,255,0.05)] scale-105 z-10' : 'opacity-30 hover:opacity-100 group'}`}>
-              <p className={`text-[9px] font-black uppercase tracking-wider mb-1.5 ${isCurrentMonth ? 'text-red-500' : 'text-gray-400 group-hover:text-white'}`}>
-                {monthName}
+            <div key={mIdx} className={`p-3 rounded-2xl transition-all duration-500 ${isCurrentMonth
+              ? 'bg-white/5 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.3)] scale-[1.02] z-10'
+              : 'opacity-40 hover:opacity-100 hover:bg-white/5 group border border-transparent hover:border-white/5'}`}>
+              <p className={`text-[10px] font-black uppercase tracking-widest mb-3 ${isCurrentMonth ? '' : 'text-zinc-500 group-hover:text-white'}`} style={{ color: isCurrentMonth ? (primaryColor || '#ef4444') : undefined }}>
+                {monthName.substring(0, 3)}
               </p>
-              <div className="grid grid-cols-7 gap-0.5">
+              <div className="grid grid-cols-7 gap-1">
                 {Array.from({ length: firstDay }).map((_, i) => (
-                  <div key={`empty-${i}`} className="w-1 h-1" />
+                  <div key={`empty-${i}`} className="w-1.5 h-1.5" />
                 ))}
                 {Array.from({ length: days }).map((_, dIdx) => {
                   const day = dIdx + 1;
                   const isToday = isCurrentMonth && day === currentDay;
+                  const date = new Date(year, mIdx, day);
+                  const weekday = date.toLocaleDateString("es-ES", { weekday: "long" });
+                  const month = date.toLocaleDateString("es-ES", { month: "long" });
+                  const formattedDate = `${weekday.charAt(0).toUpperCase() + weekday.slice(1)} ${day} de ${month.charAt(0).toUpperCase() + month.slice(1)} de ${year}`;
+
                   return (
                     <div
                       key={day}
-                      className={`w-1 h-1 rounded-full transition-all duration-500 ${isToday
-                        ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,1)] scale-150 z-20'
-                        : 'bg-white/10 group-hover:bg-white/30'
+                      title={formattedDate}
+                      className={`w-1.5 h-1.5 rounded-full transition-all duration-300 cursor-help ${isToday
+                        ? 'shadow-[0_0_12px_rgba(255,255,255,0.3)] scale-150 z-20'
+                        : 'bg-white/10 group-hover:bg-white/20 hover:scale-150 hover:bg-white/50'
                         }`}
+                      style={{
+                        backgroundColor: isToday ? (primaryColor || '#ef4444') : undefined,
+                        boxShadow: isToday ? `0 0 10px ${primaryColor || '#ef4444'}` : undefined
+                      }}
                     />
                   );
                 })}
@@ -690,7 +703,7 @@ export default function ClientDashboard() {
 
                   {/* Right: Year Calendar (4 cols) */}
                   <div className="lg:col-span-4 space-y-8">
-                    <YearCalendar isRounded={isRounded} />
+                    <YearCalendar isRounded={isRounded} primaryColor={primaryColor} />
 
                     {/* Secondary Info Card */}
                     <div className={`p-8 ${isRounded ? 'rounded-[2.5rem]' : 'rounded-none'} space-y-6`}>
