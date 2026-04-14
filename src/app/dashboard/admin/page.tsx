@@ -186,6 +186,8 @@ export default function AdminDashboard() {
   const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [portfolioFilter, setPortfolioFilter] = useState("all");
   const [detailsTab, setDetailsTab] = useState("overview");
   const [showEditModal, setShowEditModal] = useState(false);
   const [editClient, setEditClient] = useState({
@@ -261,7 +263,7 @@ export default function AdminDashboard() {
 
   const fetchClients = async () => {
     try {
-      const res = await api.get(`/users?page=${currentPage}&limit=6&search=${searchQuery}`);
+      const res = await api.get(`/users?page=${currentPage}&limit=6&search=${searchQuery}&isActive=${statusFilter}&hasPortfolio=${portfolioFilter}`);
       if (res.data.data !== undefined) {
         setClients(res.data.data);
         setTotalPages(res.data.totalPages);
@@ -283,7 +285,7 @@ export default function AdminDashboard() {
       }, 300);
       return () => clearTimeout(delay);
     }
-  }, [searchQuery, currentPage, user]);
+  }, [searchQuery, currentPage, user, statusFilter, portfolioFilter]);
 
   const fetchPortfolios = async () => {
     try {
@@ -677,6 +679,74 @@ export default function AdminDashboard() {
             )}
           </div>
 
+          {/* FILTERS */}
+          {activeMainTab === "Clientes" && clientView === "list" && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex flex-wrap items-center gap-3 sm:gap-4 bg-white/5 p-3 sm:p-4 border border-white/10 rounded-lg"
+            >
+              <div className="flex items-center gap-2 shrink-0">
+                <Filter className="w-4 h-4 text-violet-500" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Filtrar:</span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 flex-1">
+                <div className="relative">
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => {
+                      setStatusFilter(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="appearance-none bg-black border border-gray-800 hover:border-violet-500 transition-colors text-white text-[11px] font-bold pl-3 pr-8 py-2 rounded-md outline-none cursor-pointer"
+                  >
+                    <option value="all">Cualquier Estado</option>
+                    <option value="active">Activos</option>
+                    <option value="inactive">Inactivos</option>
+                  </select>
+                  <ChevronRight className="w-3 h-3 text-gray-500 absolute right-2 top-1/2 -translate-y-1/2 rotate-90 pointer-events-none" />
+                </div>
+
+                <div className="relative">
+                  <select
+                    value={portfolioFilter}
+                    onChange={(e) => {
+                      setPortfolioFilter(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="appearance-none bg-black border border-gray-800 hover:border-violet-500 transition-colors text-white text-[11px] font-bold pl-3 pr-8 py-2 rounded-md outline-none cursor-pointer"
+                  >
+                    <option value="all">Todos los Portfolios</option>
+                    <option value="with">Con Portfolio</option>
+                    <option value="without">Sin Portfolio</option>
+                  </select>
+                  <ChevronRight className="w-3 h-3 text-gray-500 absolute right-2 top-1/2 -translate-y-1/2 rotate-90 pointer-events-none" />
+                </div>
+
+                {(statusFilter !== "all" || portfolioFilter !== "all" || searchQuery !== "") && (
+                  <button
+                    onClick={() => {
+                      setStatusFilter("all");
+                      setPortfolioFilter("all");
+                      setSearchQuery("");
+                      setCurrentPage(1);
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-2 text-[10px] font-black text-red-500 hover:bg-red-500/10 transition-all rounded-md"
+                    title="Limpiar todos los filtros"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                    <span>LIMPIAR</span>
+                  </button>
+                )}
+              </div>
+              
+              <div className="text-[10px] font-bold text-gray-500 bg-white/5 px-2.5 py-1.5 rounded-md border border-white/5">
+                <span className="text-white">{totalClients}</span> Clientes Encontrados
+              </div>
+            </motion.div>
+          )}
+
           {/* KPI STATS */}
           {activeMainTab === "Dashboard" && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -751,7 +821,8 @@ export default function AdminDashboard() {
               <div className="hidden md:block">
                 {/* Table Header */}
                 <div className="grid grid-cols-12 px-6 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest text-gray-400 border-b border-gray-800">
-                  <div className="col-span-4">Cliente</div>
+                  <div className="col-span-1">#</div>
+                  <div className="col-span-3">Cliente</div>
                   <div className="col-span-3">Estado</div>
                   <div className="col-span-2">Diseño</div>
                   <div className="col-span-3 text-right">Acciones</div>
@@ -759,7 +830,7 @@ export default function AdminDashboard() {
 
                 <div className="divide-y divide-gray-800">
                   <AnimatePresence>
-                    {filteredClients.map((client) => {
+                    {filteredClients.map((client, index) => {
                       const clientPortfolios = portfolios.filter(
                         (p) => p.userId === client.id,
                       );
@@ -775,8 +846,12 @@ export default function AdminDashboard() {
                           className="px-4 sm:px-6 py-3 sm:py-4 hover:bg-white/5 transition-colors"
                         >
                           <div className="grid grid-cols-12 gap-2 sm:gap-3 items-center">
+                            {/* Number */}
+                            <div className="col-span-1 text-gray-500 font-mono text-xs">
+                              {(currentPage - 1) * 6 + index + 1}
+                            </div>
                             {/* Client Info */}
-                            <div className="col-span-4 flex items-center gap-2 sm:gap-3 min-w-0">
+                            <div className="col-span-3 flex items-center gap-2 sm:gap-3 min-w-0">
                               <div className="w-8 h-8 sm:w-10 sm:h-10 overflow-hidden bg-white/10 flex items-center justify-center shrink-0">
                                 {pf?.logoUrl ? (
                                   <img
@@ -988,7 +1063,7 @@ export default function AdminDashboard() {
               {/* Vista Móvil - Cards */}
               <div className="md:hidden divide-y divide-gray-800">
                 <AnimatePresence>
-                  {filteredClients.map((client) => {
+                  {filteredClients.map((client, index) => {
                     const clientPortfolios = portfolios.filter(
                       (p) => p.userId === client.id,
                     );
@@ -1025,6 +1100,7 @@ export default function AdminDashboard() {
                             <div className="flex items-start justify-between gap-2">
                               <div className="min-w-0">
                                 <p className="font-bold text-white text-sm truncate flex items-center gap-1.5">
+                                  <span className="text-gray-500 font-mono text-[10px]">{((currentPage - 1) * 6) + index + 1}.</span>
                                   {client.name}
                                   {client.isActive === false && (
                                     <span className="bg-red-500/20 text-red-400 text-[9px] px-1.5 py-0.5 rounded-full uppercase font-black">
