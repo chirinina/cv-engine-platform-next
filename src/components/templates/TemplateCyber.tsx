@@ -190,7 +190,7 @@ export default function TemplateCyber({
 
   return (
     <div
-      className="min-h-screen text-gray-100 font-sans tracking-tight"
+      className="min-h-screen text-gray-100 font-sans tracking-tight overflow-x-hidden w-full relative"
       style={{
         backgroundColor: secondaryColor,
         fontFamily: portfolio.fontFamily,
@@ -223,7 +223,7 @@ export default function TemplateCyber({
       </header>
 
       <div className="fixed top-8 left-8 text-sm font-mono hidden xl:block" style={{ color: secondaryTextColor }}>
-        SYS_USR / {String(title).split(" ")[0] || "Client"}
+        SYS_USR / {String(title).split(" ")[0] || "Usuario"}
       </div>
       <div className="fixed top-8 right-8 text-sm font-mono hidden xl:block" style={{ color: primaryColor }}>
         [ {currentTime || "00:00:00"} ]
@@ -259,7 +259,7 @@ export default function TemplateCyber({
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 lg:ml-72 flex py-10 lg:py-40 px-6 lg:px-16 min-h-screen">
+        <main className="flex-1 lg:ml-72 flex py-10 lg:py-40 px-4 sm:px-6 md:px-10 lg:px-16 min-h-screen">
           <div className="flex flex-col gap-24 lg:gap-32 w-full">
             
             {/* HEROS SECTION */}
@@ -308,7 +308,7 @@ export default function TemplateCyber({
               >
                 {/* Hero heading */}
                 <div className="space-y-4 mb-10">
-                  <h1 className="text-5xl md:text-7xl lg:text-[5.5rem] font-black tracking-tighter leading-none" style={{ color: primaryColor }}>
+                  <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-[5.5rem] font-black tracking-tighter leading-none break-words" style={{ color: primaryColor }}>
                     {String(title)}
                   </h1>
                   <h2 className="text-2xl md:text-3xl font-medium tracking-wide" style={{ color: secondaryTextColor }}>
@@ -358,7 +358,7 @@ export default function TemplateCyber({
             {projects.length > 0 && (
               <section id="projects" className="w-full">
                 <div className="flex items-center gap-5 mb-14">
-                  <h3 className="text-4xl md:text-5xl font-black tracking-tighter" style={{ color: primaryColor }}>
+                  <h3 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter" style={{ color: primaryColor }}>
                     Proyectos
                   </h3>
                   <div className="h-px flex-1 mt-2" style={{ background: `linear-gradient(to right, ${primaryColor}, transparent)` }} />
@@ -382,7 +382,7 @@ export default function TemplateCyber({
                             <Code2 className="w-6 h-6" style={{ color: primaryColor }} />
                           </div>
                           <span className="font-mono text-xs font-bold uppercase tracking-widest" style={{ color: primaryColor }}>
-                            0{idx + 1} / BLOCK
+                            0{idx + 1} / BLOQUE
                           </span>
                         </div>
 
@@ -394,7 +394,7 @@ export default function TemplateCyber({
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
                           <div className="space-y-4">
-                            <h4 className="text-3xl md:text-4xl font-bold group-hover:translate-x-2 transition-transform duration-500" style={{ color: primaryColor }}>
+                            <h4 className="text-2xl sm:text-3xl md:text-4xl font-bold group-hover:translate-x-2 transition-transform duration-500 break-words" style={{ color: primaryColor }}>
                               {String(project.name || project.title || "")}
                             </h4>
                             <p className="text-lg leading-relaxed max-w-xl" style={{ color: secondaryTextColor }}>
@@ -554,11 +554,11 @@ export default function TemplateCyber({
             {/* CONTACT FOOTER */}
             <section className="mb-32">
               <div 
-                className="p-10 md:p-16 rounded-[3rem] border relative overflow-hidden text-center"
+                className="p-6 sm:p-10 md:p-16 rounded-[2rem] sm:rounded-[3rem] border relative overflow-hidden text-center"
                 style={{ backgroundColor: `color-mix(in srgb, ${secondaryColor} 90%, ${primaryColor} 10%)`, borderColor: `color-mix(in srgb, ${primaryColor} 20%, transparent)` }}
               >
                 <div className="relative z-10">
-                  <h3 className="text-4xl md:text-6xl font-black mb-6 tracking-tighter" style={{ color: primaryColor }}>
+                  <h3 className="text-3xl sm:text-4xl md:text-6xl font-black mb-6 tracking-tighter break-words" style={{ color: primaryColor }}>
                     Creemos algo genial
                   </h3>
                   <p className="mb-8 max-w-2xl mx-auto text-lg leading-relaxed font-medium" style={{ color: secondaryTextColor }}>
