@@ -1364,52 +1364,52 @@ export default function AdminDashboard() {
       >
         {selectedPortfolio && selectedClient && (
           <div className="flex flex-col h-[80vh]">
-          {/* Info Header inside modal */}
-          <div className="p-6 border-b border-white/5 flex items-start justify-between bg-white/[0.02]">
-            <div className="flex items-center gap-5">
-              <div className="w-16 h-16 overflow-hidden bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center rounded-2xl shadow-lg shrink-0">
-                {selectedPortfolio?.logoUrl ? (
-                  <img
-                    src={selectedPortfolio.logoUrl}
-                    alt=""
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="text-white font-black text-2xl">
-                    {selectedClient?.name.charAt(0)}
-                  </span>
-                )}
-              </div>
-              <div>
-                <h3 className="text-2xl font-black text-white leading-tight">
-                  {selectedClient?.name}
-                </h3>
-                <div className="flex items-center gap-4 mt-1.5">
-                  {selectedPortfolio?.profession && (
-                    <span className="text-sm text-gray-400 flex items-center gap-1.5">
-                      <Briefcase className="w-4 h-4 text-violet-400" />
-                      {selectedPortfolio.profession}
-                    </span>
-                  )}
-                  {selectedPortfolio?.location && (
-                    <span className="text-sm text-gray-400 flex items-center gap-1.5">
-                      <MapPin className="w-4 h-4 text-emerald-400" />
-                      {selectedPortfolio.location}
+            {/* Info Header inside modal */}
+            <div className="p-6 border-b border-white/5 flex items-start justify-between bg-white/[0.02]">
+              <div className="flex items-center gap-5">
+                <div className="w-16 h-16 overflow-hidden bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center rounded-2xl shadow-lg shrink-0">
+                  {selectedPortfolio?.logoUrl ? (
+                    <img
+                      src={selectedPortfolio.logoUrl}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-white font-black text-2xl">
+                      {selectedClient?.name.charAt(0)}
                     </span>
                   )}
                 </div>
+                <div>
+                  <h3 className="text-2xl font-black text-white leading-tight">
+                    {selectedClient?.name}
+                  </h3>
+                  <div className="flex items-center gap-4 mt-1.5">
+                    {selectedPortfolio?.profession && (
+                      <span className="text-sm text-gray-400 flex items-center gap-1.5">
+                        <Briefcase className="w-4 h-4 text-violet-400" />
+                        {selectedPortfolio.profession}
+                      </span>
+                    )}
+                    {selectedPortfolio?.location && (
+                      <span className="text-sm text-gray-400 flex items-center gap-1.5">
+                        <MapPin className="w-4 h-4 text-emerald-400" />
+                        {selectedPortfolio.location}
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
+              <a
+                href={`/p/${selectedPortfolio?.slug}`}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-2 text-sm font-bold px-4 py-2.5 bg-white/5 border border-white/10 text-white hover:bg-white hover:text-black transition-all rounded-xl shadow-sm"
+              >
+                <ExternalLink className="w-4 h-4" />
+                Ver Online
+              </a>
             </div>
-            <a
-              href={`/p/${selectedPortfolio?.slug}`}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-2 text-sm font-bold px-4 py-2.5 bg-white/5 border border-white/10 text-white hover:bg-white hover:text-black transition-all rounded-xl shadow-sm"
-            >
-              <ExternalLink className="w-4 h-4" />
-              Ver Online
-            </a>
-          </div>
 
             {/* Tabs - Scrollable horizontal en móvil */}
             <div className="flex gap-1 px-2 sm:px-6 py-2 sm:py-3 border-b border-gray-800 bg-black overflow-x-auto scrollbar-hide shrink-0">
@@ -1791,9 +1791,9 @@ export default function AdminDashboard() {
                 </div>
               )}
             </div>
-            </div>
-          )}
-        </Modal>
+          </div>
+        )}
+      </Modal>
 
       {/* Close dropdown on outside click */}
       {activeDropdown !== null && (

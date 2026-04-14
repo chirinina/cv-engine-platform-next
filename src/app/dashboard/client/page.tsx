@@ -87,6 +87,72 @@ const TABS = [
   { id: "consultas", label: "Mensajes", icon: MessageSquareMore },
 ];
 
+const YearCalendar = ({ isRounded }: { isRounded: boolean }) => {
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentDay = now.getDate();
+  const year = now.getFullYear();
+
+  const months = [
+    "Ene", "Feb", "Mar", "Abr", "May", "Jun",
+    "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"
+  ];
+
+  const getDaysInMonth = (month: number, year: number) => {
+    return new Date(year, month + 1, 0).getDate();
+  };
+
+  const getFirstDayOfMonth = (month: number, year: number) => {
+    return new Date(year, month, 1).getDay();
+  };
+
+  return (
+    <div className={`p-4 md:p-6 bg-black/40 border border-white/5 backdrop-blur-md shadow-2xl ${isRounded ? 'rounded-[2rem]' : 'rounded-none'} overflow-hidden`}>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-bold text-white flex items-center gap-2">
+          <CalendarDays className="w-4 h-4 text-red-500" />
+          Calendario {year}
+        </h3>
+      </div>
+
+      <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+        {months.map((monthName, mIdx) => {
+          const days = getDaysInMonth(mIdx, year);
+          const firstDay = getFirstDayOfMonth(mIdx, year);
+          const isCurrentMonth = mIdx === currentMonth;
+
+          return (
+            <div key={mIdx} className={`p-2 rounded-xl transition-all duration-300 ${isCurrentMonth ? 'bg-white/5 border border-white/10 shadow-[0_0_20px_rgba(255,255,255,0.05)] scale-105 z-10' : 'opacity-30 hover:opacity-100 group'}`}>
+              <p className={`text-[9px] font-black uppercase tracking-wider mb-1.5 ${isCurrentMonth ? 'text-red-500' : 'text-gray-400 group-hover:text-white'}`}>
+                {monthName}
+              </p>
+              <div className="grid grid-cols-7 gap-0.5">
+                {Array.from({ length: firstDay }).map((_, i) => (
+                  <div key={`empty-${i}`} className="w-1 h-1" />
+                ))}
+                {Array.from({ length: days }).map((_, dIdx) => {
+                  const day = dIdx + 1;
+                  const isToday = isCurrentMonth && day === currentDay;
+                  return (
+                    <div
+                      key={day}
+                      className={`w-1 h-1 rounded-full transition-all duration-500 ${isToday
+                        ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,1)] scale-150 z-20'
+                        : 'bg-white/10 group-hover:bg-white/30'
+                        }`}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+
 export default function ClientDashboard() {
   const router = useRouter();
   const { user, logout, checkAuth, isLoading } = useAuthStore();
@@ -490,113 +556,155 @@ export default function ClientDashboard() {
 
       {portfolio ? (
         viewMode === "profile" ? (
-          <div className="w-full max-w-5xl mx-auto px-4 py-8 animate-in slide-in-from-bottom-8 fade-in duration-500">
+          <div className="w-full max-w-[1400px] mx-auto px-2 sm:px-4 py-4 md:py-8 animate-in slide-in-from-bottom-8 fade-in duration-700">
             <button
               onClick={() => setViewMode("dashboard")}
-              className="mb-8 font-bold flex items-center gap-3 text-gray-400 hover:text-white transition-all w-fit text-sm uppercase tracking-widest group"
+              className="mb-6 font-bold flex items-center gap-3 text-gray-400 hover:text-white transition-all w-fit text-[10px] uppercase tracking-[0.2em] group"
             >
-              <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white group-hover:text-black transition-all">
+              <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white group-hover:text-black transition-all">
                 ←
               </div>
-              Menu Principal
+              Volver al Panel
             </button>
-            <div className={`relative overflow-hidden bg-[#0A0A0A] border border-white/10 shadow-2xl ${isRounded ? "rounded-[2rem]" : "rounded-none"}`}>
-              {/* Banner Background */}
-              <div className="absolute top-0 left-0 w-full h-48 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 opacity-80">
-                <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px]"></div>
-                <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-                <div className="absolute -top-12 -left-12 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
+
+            <div className={`relative overflow-hidden bg-[#050505] border border-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] ${isRounded ? "rounded-[2.5rem]" : "rounded-none"}`}>
+              {/* Premium Background Elements */}
+              <div className="absolute top-0 left-0 w-full h-[300px] overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-b from-blue-600/20 via-purple-600/10 to-transparent"></div>
+                <div className="absolute -top-24 -left-24 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px] animate-pulse"></div>
+                <div className="absolute top-20 -right-24 w-80 h-80 bg-purple-500/10 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1s' }}></div>
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03]"></div>
               </div>
 
-              <div className="relative px-8 sm:px-12 pb-12 pt-32">
-                <div className="flex flex-col md:flex-row gap-8 items-center md:items-end text-center md:text-left">
-                  {/* Avatar */}
-                  <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-full overflow-hidden border-8 border-[#0A0A0A] bg-black shrink-0 relative z-10 shadow-xl">
-                    {heroAvatarUrl ? (
-                      <img src={heroAvatarUrl} className="w-full h-full object-cover" alt="Perfil" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900 border border-white/10">
-                        <UserCircle className="w-20 h-20 text-white/30" />
-                      </div>
-                    )}
+              <div className="relative p-6 sm:p-10 md:p-14 lg:p-16">
+                {/* Header Section */}
+                <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-center lg:items-end">
+                  {/* Photo Profile */}
+                  <div className="relative group shrink-0">
+                    <div className="absolute inset-0 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full blur-2xl opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
+                    <div className="w-40 h-40 md:w-52 md:h-52 rounded-full overflow-hidden border-[6px] border-[#050505] bg-black relative z-10 shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]">
+                      {heroAvatarUrl ? (
+                        <img src={heroAvatarUrl} className="w-full h-full object-cover" alt="Perfil" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-zinc-900">
+                          <UserCircle className="w-24 h-24 text-zinc-700" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="absolute -bottom-2 -right-2 bg-emerald-500 w-6 h-6 rounded-full border-4 border-[#050505] z-20 shadow-lg"></div>
                   </div>
 
-                  {/* Info */}
-                  <div className="flex-1 pb-2">
-                    <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">{user.name}</h2>
-                    <p className="text-blue-400 font-bold uppercase tracking-widest text-sm sm:text-base mt-2">
-                      {user.role} {profession ? `• ${profession}` : ""}
-                    </p>
-                    <div className="mt-4 flex flex-wrap gap-3 items-center justify-center md:justify-start text-sm font-medium text-gray-300">
-                      <span className="flex items-center gap-2 bg-white/5 hover:bg-white/10 transition-colors px-4 py-2 rounded-full border border-white/5 shrink-0"><Mail className="w-4 h-4 text-emerald-400" /> {user.email || email}</span>
-                      {location && <span className="flex items-center gap-2 bg-white/5 hover:bg-white/10 transition-colors px-4 py-2 rounded-full border border-white/5 shrink-0"><MapPin className="w-4 h-4 text-rose-400" /> {location}</span>}
+                  {/* Profile Info */}
+                  <div className="flex-1 text-center lg:text-left space-y-4">
+                    <div className="space-y-1">
+
+                      <h2 className="text-4xl md:text-6xl font-black text-white tracking-tight leading-none drop-shadow-sm">
+                        {user.name}
+                      </h2>
+                      <p className="text-lg md:text-xl text-zinc-400 font-medium">
+                        {profession || "Especialista en Portafolios"}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 text-sm">
+                      <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5 hover:border-white/20 transition-all">
+                        <Mail className="w-4 h-4 text-blue-400" />
+                        <span className="text-zinc-200 font-semibold">{user.email || email}</span>
+                      </div>
+                      {location && (
+                        <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5 hover:border-white/20 transition-all">
+                          <MapPin className="w-4 h-4 text-purple-400" />
+                          <span className="text-zinc-200 font-semibold">{location}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5 hover:border-white/20 transition-all">
+                        <Clock className="w-4 h-4 text-emerald-400" />
+                        <span className="text-zinc-200 font-semibold">{currentTime} Local</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="hidden xl:flex flex-col gap-2 shrink-0">
+                    <div className="p-4 text-center">
+                      <p className="text-2xl font-black text-white">{inquiries.length}</p>
+                    </div>
+                    <div className="p-4 text-center transition-all hover:bg-white/10 cursor-pointer">
+                      <Settings className="w-5 h-5 text-zinc-400 mx-auto" />
                     </div>
                   </div>
                 </div>
 
-                {/* Dashboard Stats */}
-                <div className="mt-16 grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* Left Column: Progress Stats */}
-                  <div className="lg:col-span-2 space-y-6">
-                    <div className="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
-                      <div className="p-2 bg-blue-500/20 rounded-lg">
-                        <FolderKanban className="w-6 h-6 text-blue-400" />
-                      </div>
-                      <h3 className="text-xl font-bold text-white">Resumen de Actividad</h3>
-                    </div>
+                {/* Main Content Grid */}
+                <div className="mt-12 md:mt-20 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {[
-                        { label: "Experiencias", count: experience.length, icon: Briefcase, color: "text-blue-400", bg: "bg-blue-400", border: "border-blue-500/20" },
-                        { label: "Proyectos", count: projects.length, icon: FolderKanban, color: "text-purple-400", bg: "bg-purple-400", border: "border-purple-500/20" },
-                        { label: "Cursos", count: courses.length, icon: GraduationCap, color: "text-emerald-400", bg: "bg-emerald-400", border: "border-emerald-500/20" },
-                        { label: "Habilidades", count: skills.length, icon: Wrench, color: "text-amber-400", bg: "bg-amber-400", border: "border-amber-500/20" },
-                      ].map((stat, i) => (
-                        <div key={i} className={`p-5 rounded-2xl bg-white/[0.02] border ${stat.border} hover:bg-white/[0.05] transition-all group relative overflow-hidden`}>
-                          <div className={`absolute -right-6 -bottom-6 w-24 h-24 ${stat.bg} opacity-[0.03] rounded-full blur-xl group-hover:opacity-10 transition-all`}></div>
-                          <div className="flex justify-between items-center mb-4 relative z-10">
-                            <div className={`p-2.5 rounded-xl bg-white/5 ${stat.color}`}>
+                  {/* Left: Summary Cards (8 cols) */}
+                  <div className="lg:col-span-8 space-y-12">
+                    <section>
+                      <div className="flex items-center justify-between mb-8">
+                        <h3 className="text-2xl font-black text-white flex items-center gap-3">
+                          <FolderKanban className="w-6 h-6 text-blue-500" />
+                          Resumen General
+                        </h3>
+                        <div className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent ml-6"></div>
+                      </div>
+
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                        {[
+                          { label: "Experiencias", count: experience.length, icon: Briefcase, color: "text-blue-400", bg: "from-blue-500/20 to-transparent", border: "border-blue-500/20" },
+                          { label: "Proyectos", count: projects.length, icon: FolderKanban, color: "text-purple-400", bg: "from-purple-500/20 to-transparent", border: "border-purple-500/20" },
+                          { label: "Educación", count: courses.length, icon: GraduationCap, color: "text-emerald-400", bg: "from-emerald-500/20 to-transparent", border: "border-emerald-500/20" },
+                          { label: "Habilidades", count: skills.length, icon: Wrench, color: "text-amber-400", bg: "from-amber-500/20 to-transparent", border: "border-amber-500/20" },
+                        ].map((stat, i) => (
+                          <div key={i} className={`p-6 rounded-[2rem] bg-zinc-900/40 border ${stat.border} hover:bg-zinc-800/60 transition-all duration-500 group relative overflow-hidden`}>
+                            <div className={`absolute -right-4 -bottom-4 w-20 h-20 bg-gradient-to-br ${stat.bg} opacity-20 blur-2xl group-hover:scale-150 transition-transform duration-700`}></div>
+                            <div className={`p-3 rounded-2xl bg-white/5 w-fit ${stat.color} mb-4 relative z-10`}>
                               <stat.icon className="w-5 h-5" />
                             </div>
-                            <span className="text-3xl font-black text-white">{stat.count}</span>
+                            <p className="text-4xl font-black text-white mb-1 relative z-10">{stat.count}</p>
+                            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] relative z-10">{stat.label}</p>
                           </div>
-                          <p className="text-sm font-bold text-gray-400 uppercase tracking-wider relative z-10">{stat.label}</p>
-                        </div>
-                      ))}
-                      
-                      {/* Consultas */}
-                      <div className="sm:col-span-2 p-6 rounded-2xl bg-gradient-to-r from-cyan-950/40 to-blue-900/20 border border-cyan-500/20 flex items-center justify-between group relative overflow-hidden">
-                        <div className="absolute inset-0 bg-cyan-500/5 group-hover:bg-cyan-500/10 transition-colors"></div>
-                        <div className="flex items-center gap-5 relative z-10">
-                          <div className="p-3.5 rounded-xl bg-cyan-500/20 text-cyan-400">
-                            <MessageSquareMore className="w-7 h-7" />
+                        ))}
+                      </div>
+                    </section>
+
+                    <section className="from-blue-900/10 p-6 md:p-10 relative overflow-hidden group hover:border-blue-500/30 transition-all duration-500">
+                      <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
+                        <div className="space-y-3 text-center md:text-left">
+                          <div className="p-4 w-fit mx-auto md:mx-0 text-white">
+                            <MessageSquareMore className="w-8 h-8" />
                           </div>
                           <div>
-                            <p className="text-sm font-bold text-cyan-500 uppercase tracking-wider">Consultas Recibidas</p>
-                            <p className="text-xs text-gray-400 mt-1 font-medium">Bandeja de mensajes de clientes potenciales</p>
+                            <h4 className="text-2xl font-black text-white">Mensajería Directa</h4>
+                            <p className="text-zinc-400 text-sm max-w-md mt-2">Tienes una bandeja de entrada interactiva para gestionar todas las consultas de tus clientes potenciales.</p>
                           </div>
                         </div>
-                        <span className="text-4xl font-black text-white relative z-10">{inquiries.length}</span>
+                        <div className="flex flex-col items-center">
+                          <span className="text-7xl font-black text-white drop-shadow-2xl">{inquiries.length}</span>
+                          <span className="text-xs font-bold text-white tracking-[0.3em] mt-2">Consultas Totales</span>
+                        </div>
                       </div>
-                    </div>
+                      {/* Decorative pattern */}
+                      <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-[80px] -mr-32 -mt-32"></div>
+                    </section>
                   </div>
 
-                  {/* Right Column: Date Info */}
-                  <div className="flex flex-col gap-6">
-                    <div className={`flex-1 bg-gradient-to-br from-[#111] to-[#050505] border border-white/5 p-8 flex flex-col items-center justify-center relative overflow-hidden shadow-inner ${isRounded ? 'rounded-[2rem]' : 'rounded-none'}`}>
-                      <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/10 blur-3xl rounded-full"></div>
-                      <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/10 blur-3xl rounded-full"></div>
-                      
-                      <CalendarDays className="w-10 h-10 text-white/20 mb-6 relative z-10" />
-                      <span className="text-red-500 font-black uppercase tracking-[0.2em] text-sm mb-2 relative z-10">
-                        {new Date().toLocaleDateString('es-ES', { month: 'long' })}
-                      </span>
-                      <span className="text-[7rem] font-black text-white leading-none my-2 drop-shadow-2xl relative z-10">
-                        {new Date().getDate()}
-                      </span>
-                      <span className="text-gray-400 font-bold capitalize mt-4 tracking-wider relative z-10">
-                        {new Date().toLocaleDateString('es-ES', { weekday: 'long' })}, {new Date().getFullYear()}
-                      </span>
+                  {/* Right: Year Calendar (4 cols) */}
+                  <div className="lg:col-span-4 space-y-8">
+                    <YearCalendar isRounded={isRounded} />
+
+                    {/* Secondary Info Card */}
+                    <div className={`p-8 ${isRounded ? 'rounded-[2.5rem]' : 'rounded-none'} space-y-6`}>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-zinc-500 font-bold">Fecha actual</span>
+                          <span className="text-zinc-200 font-bold">{new Date().toLocaleDateString('es-ES')}</span>
+                        </div>
+                        <div className="pt-4 border-t border-white/5">
+                          <p className="text-[10px] text-zinc-500 leading-relaxed font-medium italic text-center">
+                            "Tu portafolio es tu carta de presentación digital. Mantén tus datos actualizados para mejores resultados."
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
