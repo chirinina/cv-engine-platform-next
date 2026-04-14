@@ -44,7 +44,7 @@ const variantMap: Record<Variant, Record<string, string>> = {
   },
   cyber: {
     wrapper:
-      " border border-cyan-500/20",
+      "",
     title: "text-white",
     description: "text-gray-400",
     label: "text-cyan-300/80",

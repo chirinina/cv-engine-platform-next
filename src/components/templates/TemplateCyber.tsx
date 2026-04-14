@@ -48,15 +48,15 @@ const CyberBackground = ({ primaryColor, secondaryColor }: { primaryColor: strin
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none" style={{ backgroundColor: secondaryColor }}>
       {/* Mallas de luz fluida ambientales en esquinas */}
-      <div 
+      <div
         className="absolute top-[-30%] left-[-20%] w-[70%] h-[70%] rounded-full blur-[160px] opacity-30 mix-blend-screen"
         style={{ backgroundColor: primaryColor }}
       />
-      <div 
+      <div
         className="absolute bottom-[-30%] right-[-20%] w-[70%] h-[70%] rounded-full blur-[160px] opacity-20 mix-blend-screen"
         style={{ backgroundColor: primaryColor }}
       />
-      
+
       {/* Vías Curvas Hipnóticas */}
       <svg
         className="absolute w-full h-full opacity-40 mix-blend-plus-lighter"
@@ -200,7 +200,7 @@ export default function TemplateCyber({
 
       {/* Top Navbar */}
       <header className="fixed top-6 left-0 right-0 z-50 flex justify-center pointer-events-none px-4">
-        <div 
+        <div
           className="flex items-center gap-1 md:gap-2 backdrop-blur-xl border p-2 rounded-full pointer-events-auto shadow-2xl overflow-x-auto max-w-[95%] md:max-w-none"
           style={topNavStyle}
         >
@@ -218,6 +218,22 @@ export default function TemplateCyber({
           <a href="#projects" className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold transition-colors shrink-0 hover:bg-white/10" style={{ color: secondaryTextColor }}>
             <FileText className="w-4 h-4" />{" "}
             <span className="hidden sm:inline">Proyectos</span>
+          </a>
+          <a href="#experience" className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold transition-colors shrink-0 hover:bg-white/10" style={{ color: secondaryTextColor }}>
+            <FileText className="w-4 h-4" />{" "}
+            <span className="hidden sm:inline">Experiencia</span>
+          </a>
+          <a href="#education" className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold transition-colors shrink-0 hover:bg-white/10" style={{ color: secondaryTextColor }}>
+            <FileText className="w-4 h-4" />{" "}
+            <span className="hidden sm:inline">Educación</span>
+          </a>
+          <a href="#skills" className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold transition-colors shrink-0 hover:bg-white/10" style={{ color: secondaryTextColor }}>
+            <FileText className="w-4 h-4" />{" "}
+            <span className="hidden sm:inline">Habilidades</span>
+          </a>
+          <a href="#contact" className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold transition-colors shrink-0 hover:bg-white/10" style={{ color: secondaryTextColor }}>
+            <FileText className="w-4 h-4" />{" "}
+            <span className="hidden sm:inline">Contacto</span>
           </a>
         </div>
       </header>
@@ -261,7 +277,7 @@ export default function TemplateCyber({
         {/* Main Content */}
         <main className="flex-1 lg:ml-72 flex py-10 lg:py-40 px-4 sm:px-6 md:px-10 lg:px-16 min-h-screen">
           <div className="flex flex-col gap-24 lg:gap-32 w-full">
-            
+
             {/* HEROS SECTION */}
             <div className="flex flex-col xl:flex-row gap-12 lg:gap-20 w-full items-center xl:items-start" id="intro">
               <motion.div
@@ -282,7 +298,7 @@ export default function TemplateCyber({
                     />
                   </div>
                 </div>
-                
+
                 <div className="flex flex-col items-center space-y-3 font-mono">
                   {portfolio.location && (
                     <div className="flex items-center gap-2 text-xs uppercase tracking-widest px-4 py-1.5 rounded-full border shadow-sm" style={{ backgroundColor: secondaryColor, borderColor: `color-mix(in srgb, ${primaryColor} 30%, transparent)`, color: primaryColor }}>
@@ -410,10 +426,10 @@ export default function TemplateCyber({
                                 <span
                                   key={j}
                                   className="text-xs px-4 py-1.5 rounded-full border font-mono font-bold"
-                                  style={{ 
+                                  style={{
                                     backgroundColor: secondaryColor,
                                     borderColor: `color-mix(in srgb, ${primaryColor} 30%, transparent)`,
-                                    color: primaryColor 
+                                    color: primaryColor
                                   }}
                                 >
                                   {t}
@@ -551,39 +567,6 @@ export default function TemplateCyber({
               </section>
             )}
 
-            {/* CONTACT FOOTER */}
-            <section className="mb-32">
-              <div 
-                className="p-6 sm:p-10 md:p-16 rounded-[2rem] sm:rounded-[3rem] border relative overflow-hidden text-center"
-                style={{ backgroundColor: `color-mix(in srgb, ${secondaryColor} 90%, ${primaryColor} 10%)`, borderColor: `color-mix(in srgb, ${primaryColor} 20%, transparent)` }}
-              >
-                <div className="relative z-10">
-                  <h3 className="text-3xl sm:text-4xl md:text-6xl font-black mb-6 tracking-tighter break-words" style={{ color: primaryColor }}>
-                    Creemos algo genial
-                  </h3>
-                  <p className="mb-8 max-w-2xl mx-auto text-lg leading-relaxed font-medium" style={{ color: secondaryTextColor }}>
-                    Disponible para oportunidades freelance, contratos y posiciones a tiempo completo. El sistema está en línea y listo para un nuevo input.
-                  </p>
-                  <div className="flex flex-wrap justify-center gap-6">
-                    {portfolio.email && (
-                      <a
-                        href={`mailto:${portfolio.email}`}
-                        className="text-2xl font-bold uppercase tracking-widest transition-colors hover:opacity-80 underline underline-offset-[12px]"
-                        style={{ color: primaryColor }}
-                      >
-                        {String(portfolio.email)}
-                      </a>
-                    )}
-                  </div>
-                </div>
-                {/* Decorative element */}
-                <div 
-                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full blur-[140px] rounded-full pointer-events-none opacity-20" 
-                  style={{ backgroundColor: primaryColor }}
-                />
-              </div>
-            </section>
-
             <PortfolioInquiryForm
               portfolioSlug={portfolio.slug}
               primaryColor={primaryColor}
@@ -596,7 +579,7 @@ export default function TemplateCyber({
       </div>
 
       {/* Footer */}
-      <footer 
+      <footer
         className="py-12 px-6 border-t text-center text-sm font-mono tracking-widest font-bold flex flex-col items-center gap-2"
         style={{ borderColor: `color-mix(in srgb, ${primaryColor} 20%, transparent)`, color: secondaryTextColor }}
       >
