@@ -40,6 +40,7 @@ import {
   AlertCircle,
   Terminal,
   Pencil,
+  Trash2,
   MessageSquareMore,
   Menu,
   PanelLeftClose,
@@ -168,6 +169,7 @@ export default function AdminDashboard() {
   const [totalPages, setTotalPages] = useState(1);
   const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
+  const [clientView, setClientView] = useState<"list" | "create" | "edit" | "details">("list");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedPortfolio, setSelectedPortfolio] = useState<Portfolio | null>(
@@ -295,7 +297,7 @@ export default function AdminDashboard() {
     try {
       await api.post("/users", newClient);
       toast.success("Cliente creado exitosamente");
-      setShowCreateModal(false);
+      setClientView("list");
       setNewClient({ name: "", email: "", password: "" });
       fetchClients();
     } catch (error: unknown) {
@@ -340,7 +342,7 @@ export default function AdminDashboard() {
     setSelectedClient(client);
     setSelectedPortfolio(portfolio);
     setDetailsTab("overview");
-    setShowDetailsModal(true);
+    setClientView("details");
   };
 
   const openEditModal = (client: Client) => {
@@ -350,7 +352,7 @@ export default function AdminDashboard() {
       email: client.email,
       password: "",
     });
-    setShowEditModal(true);
+    setClientView("edit");
   };
 
   const handleEditClient = async (e: React.FormEvent) => {
@@ -367,7 +369,7 @@ export default function AdminDashboard() {
       if (editClient.password) payload.password = editClient.password;
       await api.put(`/users/${editClient.id}`, payload);
       toast.success("Cliente actualizado correctamente");
-      setShowEditModal(false);
+      setClientView("list");
       fetchClients();
     } catch (error: unknown) {
       toast.error(getErrorMessage(error, "Error al actualizar"));
@@ -384,6 +386,19 @@ export default function AdminDashboard() {
       fetchClients();
     } catch (error: unknown) {
       toast.error(getErrorMessage(error, "Error al cambiar estado"));
+    }
+  };
+
+  const handleDeleteClient = async (client: Client) => {
+    if (window.confirm(`¿Estás seguro de que deseas eliminar permanentemente a ${client.name}? Esta acción eliminará su cuenta y su portfolio y es irreversible.`)) {
+      try {
+        await api.delete(`/users/${client.id}`);
+        toast.success("Cliente eliminado exitosamente");
+        fetchClients();
+        fetchPortfolios();
+      } catch (error: unknown) {
+        toast.error(getErrorMessage(error, "Error al eliminar cliente"));
+      }
     }
   };
 
@@ -621,7 +636,7 @@ export default function AdminDashboard() {
             </div>
             {activeMainTab === "Clientes" && (
               <button
-                onClick={() => setShowCreateModal(true)}
+                onClick={() => setClientView("create")}
                 className="w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 border border-white text-white font-bold px-3 sm:px-5 py-2.5 sm:py-3 transition-all text-sm hover:bg-white hover:text-black rounded-md shrink-0"
               >
                 <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -691,7 +706,7 @@ export default function AdminDashboard() {
           )}
 
           {/* CLIENTS TABLE / LIST */}
-          {activeMainTab === "Clientes" && (
+          {activeMainTab === "Clientes" && clientView === "list" && (
             <div className="bg-black border border-gray-200/70 dark:border-gray-800 shadow-sm rounded-lg overflow-hidden">
               <div className="px-3 sm:px-6 py-3 sm:py-5 border-b border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <h2 className="font-black text-white flex items-center gap-2 text-sm sm:text-base">
@@ -836,6 +851,14 @@ export default function AdminDashboard() {
                                   }`}
                               >
                                 <Shield className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                              </button>
+
+                              <button
+                                onClick={() => handleDeleteClient(client)}
+                                title="Eliminar"
+                                className="flex items-center gap-1 text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1.5 sm:py-2 border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-all rounded-md"
+                              >
+                                <Trash2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                               </button>
 
                               <button
@@ -1068,6 +1091,16 @@ export default function AdminDashboard() {
 
                                     <button
                                       onClick={() => {
+                                        handleDeleteClient(client);
+                                        setShowMobileActions(null);
+                                      }}
+                                      className="flex items-center justify-center gap-2 text-xs font-bold w-full py-2.5 border border-red-500/50 text-red-400 bg-red-500/10 rounded-lg hover:border-red-500 active:scale-95 transition-all"
+                                    >
+                                      <Trash2 className="w-4 h-4" /> Eliminar
+                                    </button>
+
+                                    <button
+                                      onClick={() => {
                                         openEditModal(client);
                                         setShowMobileActions(null);
                                       }}
@@ -1241,533 +1274,519 @@ export default function AdminDashboard() {
         </main>
       </div>
 
-      {/* ===== CREATE CLIENT MODAL ===== */}
+      {/* ===== CREATE CLIENT INLINE VIEW ===== */}
       <AnimatePresence>
-        {showCreateModal && (
+        {activeMainTab === "Clientes" && clientView === "create" && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 z-[100]"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="w-full max-w-2xl mx-auto p-4 sm:p-8 bg-black shadow-2xl border border-gray-800 rounded-xl"
           >
-            <motion.div
-              initial={{ scale: 0.95, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 20 }}
-              className="bg-black p-4 sm:p-8 w-full max-w-md shadow-2xl border border-gray-700 max-h-[90vh] overflow-y-auto"
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <div>
+                <h3 className="text-lg sm:text-2xl font-black text-white">
+                  Nuevo Cliente
+                </h3>
+                <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
+                  Crea acceso para un nuevo usuario
+                </p>
+              </div>
+              <button
+                onClick={() => setClientView("list")}
+                className="p-1.5 sm:p-2 text-gray-400 hover:bg-red-500/20 hover:text-red-400 rounded-full transition-colors"
+              >
+                <X className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
+            </div>
+            <form
+              onSubmit={handleCreateClient}
+              className="space-y-3 sm:space-y-4"
             >
-              <div className="flex items-center justify-between mb-4 sm:mb-6">
-                <div>
-                  <h3 className="text-lg sm:text-2xl font-black text-white">
-                    Nuevo Cliente
-                  </h3>
-                  <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
-                    Crea acceso para un nuevo usuario
-                  </p>
+              {CLIENT_FIELDS.map(({ label, type, key, placeholder }) => (
+                <div key={key}>
+                  <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-gray-400 mb-1 sm:mb-1.5 block">
+                    {label}
+                  </label>
+                  <input
+                    required
+                    type={type}
+                    value={newClient[key]}
+                    onChange={(e) =>
+                      setNewClient({ ...newClient, [key]: e.target.value })
+                    }
+                    placeholder={placeholder}
+                    className={inp}
+                  />
                 </div>
+              ))}
+              <div className="flex gap-2 sm:gap-3 justify-end mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-gray-800">
                 <button
-                  onClick={() => setShowCreateModal(false)}
-                  className="p-1.5 sm:p-2 text-gray-400 hover:bg-red-500/20 hover:text-red-400 rounded-full transition-colors"
+                  type="button"
+                  onClick={() => setClientView("list")}
+                  className="px-3 sm:px-5 py-2 sm:py-2.5 font-bold transition-all text-xs sm:text-sm border border-gray-600 text-gray-300 hover:border-white hover:text-white rounded-md"
                 >
-                  <X className="w-4 h-4 sm:w-5 sm:h-5" />
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 sm:px-6 py-2 sm:py-2.5 font-bold transition-all text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 border border-white text-white hover:bg-white hover:text-black rounded-md"
+                >
+                  <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Registrar
                 </button>
               </div>
-              <form
-                onSubmit={handleCreateClient}
-                className="space-y-3 sm:space-y-4"
-              >
-                {CLIENT_FIELDS.map(({ label, type, key, placeholder }) => (
-                  <div key={key}>
-                    <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-gray-400 mb-1 sm:mb-1.5 block">
-                      {label}
-                    </label>
-                    <input
-                      required
-                      type={type}
-                      value={newClient[key]}
-                      onChange={(e) =>
-                        setNewClient({ ...newClient, [key]: e.target.value })
-                      }
-                      placeholder={placeholder}
-                      className={inp}
-                    />
-                  </div>
-                ))}
-                <div className="flex gap-2 sm:gap-3 justify-end mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-gray-800">
-                  <button
-                    type="button"
-                    onClick={() => setShowCreateModal(false)}
-                    className="px-3 sm:px-5 py-2 sm:py-2.5 font-bold transition-all text-xs sm:text-sm border border-gray-600 text-gray-300 hover:border-white hover:text-white rounded-md"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 sm:px-6 py-2 sm:py-2.5 font-bold transition-all text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 border border-white text-white hover:bg-white hover:text-black rounded-md"
-                  >
-                    <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Registrar
-                  </button>
-                </div>
-              </form>
-            </motion.div>
+            </form>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* ===== FULL DETAILS MODAL ===== */}
+      {/* ===== FULL DETAILS INLINE VIEW ===== */}
       <AnimatePresence>
-        {showDetailsModal && selectedPortfolio && selectedClient && (
+        {activeMainTab === "Clientes" && clientView === "details" && selectedPortfolio && selectedClient && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-0 sm:p-2 md:p-4 z-[100]"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-black w-full h-[85vh] mt-4 rounded-xl overflow-hidden shadow-2xl border border-gray-800 flex flex-col"
           >
-            <motion.div
-              initial={{ scale: 0.96, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.96, y: 20 }}
-              className="bg-black w-full max-w-5xl h-[100vh] sm:h-[90vh] sm:rounded-3xl overflow-hidden shadow-2xl border-0 sm:border border-gray-700 flex flex-col"
-            >
-              {/* Modal Header */}
-              <div className="p-3 sm:p-6 md:p-8 border-b border-gray-800 flex items-start justify-between sticky top-0 bg-black z-10 shrink-0">
-                <div className="flex items-center gap-2 sm:gap-5 min-w-0">
-                  <div className="w-10 h-10 sm:w-16 sm:h-16 overflow-hidden bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center shrink-0 rounded-lg">
-                    {selectedPortfolio.logoUrl ? (
-                      <img
-                        src={selectedPortfolio.logoUrl}
-                        alt=""
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-white font-black text-lg sm:text-2xl">
-                        {selectedClient.name.charAt(0)}
-                      </span>
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="text-base sm:text-2xl font-black text-white truncate">
-                      {selectedClient.name}
-                    </h3>
-                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-3 mt-1 sm:mt-2">
-                      {selectedPortfolio.profession && (
-                        <span className="text-[10px] sm:text-sm text-gray-400 flex items-center gap-0.5 sm:gap-1">
-                          <Briefcase className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                          <span className="truncate">
-                            {selectedPortfolio.profession}
-                          </span>
-                        </span>
-                      )}
-                      {selectedPortfolio.location && (
-                        <span className="text-[10px] sm:text-sm text-gray-400 flex items-center gap-0.5 sm:gap-1 hidden sm:flex">
-                          <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                          {selectedPortfolio.location}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-                  <a
-                    href={`/p/${selectedPortfolio.slug}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="hidden sm:flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-bold px-2 sm:px-4 py-1.5 sm:py-2.5 border border-white text-white hover:bg-white hover:text-black transition-all rounded-md"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                    <span className="hidden md:inline">Ver Portfolio</span>
-                    <span className="md:hidden">Ver</span>
-                  </a>
-                  <button
-                    onClick={() => setShowDetailsModal(false)}
-                    className="p-1.5 sm:p-2.5 bg-transparent text-gray-400 hover:bg-red-500/20 hover:text-red-400 transition-colors rounded-md"
-                  >
-                    <X className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Tabs - Scrollable horizontal en móvil */}
-              <div className="flex gap-1 px-2 sm:px-6 py-2 sm:py-3 border-b border-gray-800 bg-black overflow-x-auto scrollbar-hide shrink-0">
-                {[
-                  { id: "overview", label: "General", icon: BarChart2 },
-                  { id: "experience", label: "Experiencia", icon: Briefcase },
-                  { id: "projects", label: "Proyectos", icon: Layers },
-                  { id: "courses", label: "Educación", icon: GraduationCap },
-                  { id: "skills", label: "Habilidades", icon: Wrench },
-                  {
-                    id: "inquiries",
-                    label: "Consultas",
-                    icon: MessageSquareMore,
-                  },
-                  { id: "social", label: "Redes Sociales", icon: Globe },
-                ].map(({ id, label, icon: Icon }) => (
-                  <button
-                    key={id}
-                    onClick={() => setDetailsTab(id)}
-                    className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 text-[10px] sm:text-xs font-black whitespace-nowrap transition-all border rounded-md ${detailsTab === id
-                      ? "border-white bg-white text-black"
-                      : "border-gray-700 text-gray-400 hover:border-gray-500 hover:text-white"
-                      }`}
-                  >
-                    <div className="flex items-center gap-1 sm:gap-1.5">
-                      <Icon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                      <span className="hidden sm:inline">{label}</span>
-                    </div>
-                    {id === "inquiries" && selectedClientInquiries.length > 0 && (
-                      <span className={`flex items-center justify-center min-w-[20px] h-[20px] px-1 text-[10px] font-black rounded-full transition-all ${detailsTab === id
-                        ? "bg-black text-white"
-                        : "bg-red-500 text-white border border-red-400 shadow-[0_0_8px_rgba(239,68,68,0.6)] animate-pulse"
-                        }`}>
-                        {selectedClientInquiries.length}
-                      </span>
-                    )}
-                  </button>
-                ))}
-              </div>
-
-              {/* Modal Body - Scrollable */}
-              <div className="flex-1 overflow-y-auto p-3 sm:p-6 md:p-8 bg-black">
-                {/* OVERVIEW TAB */}
-                {detailsTab === "overview" && (
-                  <div className="space-y-4 sm:space-y-6">
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
-                      <div className="bg-black border border-gray-800 p-3 sm:p-5 rounded-lg">
-                        <p className="text-[10px] sm:text-xs text-gray-400 font-bold mb-1 sm:mb-2">
-                          Plantilla
-                        </p>
-                        <span
-                          className={`text-[10px] sm:text-sm font-black px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg bg-gradient-to-r ${TEMPLATE_COLORS[selectedPortfolio.templateId] || "from-gray-600 to-gray-800"} text-white`}
-                        >
-                          {TEMPLATE_NAMES[selectedPortfolio.templateId] ||
-                            `T${selectedPortfolio.templateId}`}
-                        </span>
-                      </div>
-                      <div className="bg-black border border-gray-800 p-3 sm:p-5 rounded-lg">
-                        <p className="text-[10px] sm:text-xs text-gray-400 font-bold mb-1 sm:mb-2">
-                          Tipografía
-                        </p>
-                        <p className="font-black text-white text-xs sm:text-sm">
-                          {selectedPortfolio.fontFamily || "Inter"}
-                        </p>
-                      </div>
-                      <div className="bg-black border border-gray-800 p-3 sm:p-5 rounded-lg">
-                        <p className="text-[10px] sm:text-xs text-gray-400 font-bold mb-1 sm:mb-2">
-                          Logo Posición
-                        </p>
-                        <p className="font-black text-white text-xs sm:text-sm capitalize">
-                          {selectedPortfolio.logoPosition || "center"}
-                        </p>
-                      </div>
-                      <div className="bg-black border border-gray-800 p-3 sm:p-5 rounded-lg">
-                        <p className="text-[10px] sm:text-xs text-gray-400 font-bold mb-1 sm:mb-2">
-                          Colores
-                        </p>
-                        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                          {[
-                            selectedPortfolio.primaryColor,
-                            selectedPortfolio.secondaryColor,
-                            selectedPortfolio.secondaryTextColor,
-                          ]
-                            .filter(Boolean)
-                            .map((c, i) => (
-                              <div
-                                key={i}
-                                className="w-5 h-5 sm:w-6 sm:h-6 rounded-full border border-gray-600"
-                                style={{ backgroundColor: c as string }}
-                                title={c as string}
-                              />
-                            ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
-                      {[
-                        {
-                          label: "Experiencias",
-                          count: selectedPortfolio.experience?.length || 0,
-                          icon: Briefcase,
-                          color: "text-blue-400",
-                          bg: "bg-blue-500/10",
-                        },
-                        {
-                          label: "Proyectos",
-                          count: selectedPortfolio.projects?.length || 0,
-                          icon: Layers,
-                          color: "text-purple-400",
-                          bg: "bg-purple-500/10",
-                        },
-                        {
-                          label: "Cursos",
-                          count: selectedPortfolio.courses?.length || 0,
-                          icon: GraduationCap,
-                          color: "text-emerald-400",
-                          bg: "bg-emerald-500/10",
-                        },
-                        {
-                          label: "Habilidades",
-                          count: selectedPortfolio.skills?.length || 0,
-                          icon: Wrench,
-                          color: "text-amber-400",
-                          bg: "bg-amber-500/10",
-                        },
-                      ].map(({ label, count, icon: Icon, color, bg }) => (
-                        <div
-                          key={label}
-                          className={`bg-black border border-gray-800 p-3 sm:p-5 text-center rounded-lg ${bg}`}
-                        >
-                          <Icon
-                            className={`w-6 h-6 sm:w-8 sm:h-8 ${color} mx-auto mb-1.5 sm:mb-2`}
-                          />
-                          <p className="text-xl sm:text-3xl font-black text-white">
-                            {count}
-                          </p>
-                          <p className="text-[10px] sm:text-xs font-bold text-gray-400 mt-0.5 sm:mt-1">
-                            {label}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* EXPERIENCE TAB */}
-                {detailsTab === "experience" && (
-                  <div className="space-y-2 sm:space-y-4">
-                    {(selectedPortfolio.experience?.length ?? 0) > 0 ? (
-                      selectedPortfolio.experience?.map((exp, i) => (
-                        <div
-                          key={i}
-                          className="bg-black border border-gray-800 p-3 sm:p-6 rounded-lg"
-                        >
-                          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-1 sm:gap-3 mb-2 sm:mb-3">
-                            <div className="min-w-0">
-                              <h4 className="font-black text-white text-sm sm:text-lg">
-                                {exp.role}
-                              </h4>
-                              <p className="text-violet-400 font-bold text-xs sm:text-sm">
-                                {exp.company}
-                              </p>
-                            </div>
-                            <span className="text-[10px] sm:text-xs font-bold bg-gray-800 text-gray-400 px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg flex items-center gap-1 w-fit">
-                              <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                              {exp.period}
-                            </span>
-                          </div>
-                          {exp.description && (
-                            <p className="text-xs sm:text-sm text-gray-400 leading-relaxed">
-                              {exp.description}
-                            </p>
-                          )}
-                        </div>
-                      ))
-                    ) : (
-                      <div className="text-center py-12 sm:py-16 text-gray-400">
-                        <Briefcase className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 opacity-30" />
-                        <p className="font-bold text-xs sm:text-sm">
-                          Sin experiencia registrada
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* PROJECTS TAB */}
-                {detailsTab === "projects" && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4">
-                    {(selectedPortfolio.projects?.length ?? 0) > 0 ? (
-                      selectedPortfolio.projects?.map((proj, i) => (
-                        <div
-                          key={i}
-                          className="bg-black border border-gray-800 p-3 sm:p-6 rounded-lg"
-                        >
-                          <div className="flex items-start justify-between gap-2 mb-2 sm:mb-3">
-                            <h4 className="font-black text-white text-sm sm:text-base line-clamp-1">
-                              {proj.name}
-                            </h4>
-                            {proj.link && (
-                              <a
-                                href={proj.link}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="p-1 sm:p-1.5 text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors shrink-0"
-                              >
-                                <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                              </a>
-                            )}
-                          </div>
-                          {proj.imageUrl && (
-                            <div className="w-full h-24 sm:h-32 rounded-lg overflow-hidden bg-gray-800 mb-2 sm:mb-3 border border-gray-700">
-                              <img
-                                src={proj.imageUrl}
-                                alt={proj.name}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          )}
-                          {proj.description && (
-                            <p className="text-xs sm:text-sm text-gray-400 mb-2 sm:mb-3 line-clamp-2 sm:line-clamp-3">
-                              {proj.description}
-                            </p>
-                          )}
-                          {proj.tools && (
-                            <div className="flex flex-wrap gap-1">
-                              {(typeof proj.tools === "string"
-                                ? proj.tools.split(",")
-                                : proj.tools
-                              ).map((t: string, j: number) => (
-                                <span
-                                  key={j}
-                                  className="text-[9px] sm:text-[10px] font-bold bg-purple-500/20 text-purple-300 px-1.5 sm:px-2 py-0.5 rounded"
-                                >
-                                  {t.trim()}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      ))
-                    ) : (
-                      <div className="col-span-2 text-center py-12 sm:py-16 text-gray-400">
-                        <Layers className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 opacity-30" />
-                        <p className="font-bold text-xs sm:text-sm">
-                          Sin proyectos
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* COURSES TAB */}
-                {detailsTab === "courses" && (
-                  <div className="space-y-2 sm:space-y-4">
-                    {(selectedPortfolio.courses?.length ?? 0) > 0 ? (
-                      selectedPortfolio.courses?.map((course, i) => (
-                        <div
-                          key={i}
-                          className="bg-black border border-gray-800 p-3 sm:p-5 flex items-start sm:items-center gap-3 sm:gap-4 rounded-lg"
-                        >
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-500/10 flex items-center justify-center shrink-0 rounded-lg">
-                            <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-400" />
-                          </div>
-                          <div className="min-w-0">
-                            <h4 className="font-black text-white text-sm sm:text-base line-clamp-1">
-                              {course.name}
-                            </h4>
-                            <p className="text-xs sm:text-sm text-emerald-400 font-bold">
-                              {course.institution} • {course.year}
-                            </p>
-                            {course.description && (
-                              <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5 sm:mt-1 line-clamp-2">
-                                {course.description}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="text-center py-12 sm:py-16 text-gray-400">
-                        <GraduationCap className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 opacity-30" />
-                        <p className="font-bold text-xs sm:text-sm">
-                          Sin cursos
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* SKILLS TAB */}
-                {detailsTab === "skills" && (
-                  <div className="space-y-2 sm:space-y-3">
-                    {(selectedPortfolio.skills?.length ?? 0) > 0 ? (
-                      selectedPortfolio.skills?.map((skill, i) => (
-                        <div
-                          key={i}
-                          className="bg-black border border-gray-800 p-3 sm:p-4 rounded-lg"
-                        >
-                          <div className="flex items-center justify-between mb-1.5 sm:mb-2">
-                            <span className="font-black text-white text-xs sm:text-sm">
-                              {skill.name || "Skill"}
-                            </span>
-                            <span className="text-[10px] sm:text-xs font-bold text-amber-400">
-                              {skill.level ?? 80}%
-                            </span>
-                          </div>
-                          <div className="h-1.5 sm:h-2 bg-gray-800 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full"
-                              style={{ width: `${skill.level ?? 80}%` }}
-                            />
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="text-center py-12 sm:py-16 text-gray-400">
-                        <Wrench className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 opacity-30" />
-                        <p className="font-bold text-xs sm:text-sm">
-                          Sin habilidades
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* INQUIRIES TAB */}
-                {detailsTab === "inquiries" && (
-                  <div className="space-y-3 sm:space-y-4 h-full">
-                    <WhatsAppInquiryInbox
-                      title="Consultas del cliente"
-                      subtitle="La bandeja de mensajes ahora replica una conversación de WhatsApp para revisar cada contacto de forma más real y clara."
-                      ownerLabel={user?.name?.trim() || "Admin"}
-                      inquiries={selectedClientInquiries}
-                      loading={loadingInquiries}
-                      emptyMessage="Este cliente aun no tiene consultas."
-                      emptyHint="Cuando alguien escriba desde su portafolio, la conversación aparecerá aquí."
+            {/* Modal Header */}
+            <div className="p-3 sm:p-6 md:p-8 border-b border-gray-800 flex items-start justify-between sticky top-0 bg-black z-10 shrink-0">
+              <div className="flex items-center gap-2 sm:gap-5 min-w-0">
+                <div className="w-10 h-10 sm:w-16 sm:h-16 overflow-hidden bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center shrink-0 rounded-lg">
+                  {selectedPortfolio.logoUrl ? (
+                    <img
+                      src={selectedPortfolio.logoUrl}
+                      alt=""
+                      className="w-full h-full object-cover"
                     />
+                  ) : (
+                    <span className="text-white font-black text-lg sm:text-2xl">
+                      {selectedClient.name.charAt(0)}
+                    </span>
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <h3 className="text-base sm:text-2xl font-black text-white truncate">
+                    {selectedClient.name}
+                  </h3>
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-3 mt-1 sm:mt-2">
+                    {selectedPortfolio.profession && (
+                      <span className="text-[10px] sm:text-sm text-gray-400 flex items-center gap-0.5 sm:gap-1">
+                        <Briefcase className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                        <span className="truncate">
+                          {selectedPortfolio.profession}
+                        </span>
+                      </span>
+                    )}
+                    {selectedPortfolio.location && (
+                      <span className="text-[10px] sm:text-sm text-gray-400 flex items-center gap-0.5 sm:gap-1 hidden sm:flex">
+                        <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                        {selectedPortfolio.location}
+                      </span>
+                    )}
                   </div>
-                )}
+                </div>
+              </div>
+              <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+                <a
+                  href={`/p/${selectedPortfolio.slug}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hidden sm:flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-bold px-2 sm:px-4 py-1.5 sm:py-2.5 border border-white text-white hover:bg-white hover:text-black transition-all rounded-md"
+                >
+                  <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <span className="hidden md:inline">Ver Portfolio</span>
+                  <span className="md:hidden">Ver</span>
+                </a>
+                <button
+                  onClick={() => setClientView("list")}
+                  className="p-1.5 sm:p-2.5 bg-transparent text-gray-400 hover:bg-red-500/20 hover:text-red-400 transition-colors rounded-md"
+                >
+                  <X className="w-4 h-4 sm:w-5 sm:h-5" />
+                </button>
+              </div>
+            </div>
 
-                {/* SOCIAL TAB */}
-                {detailsTab === "social" && (
-                  <div className="p-2 sm:p-6">
-                    {selectedPortfolio.socialLinks &&
-                      Object.keys(selectedPortfolio.socialLinks).length > 0 ? (
-                      <div className="space-y-2 sm:space-y-3">
-                        {Object.entries(selectedPortfolio.socialLinks)
-                          .filter(([, v]) => v)
-                          .map(([key, val]) => (
-                            <a
-                              key={key}
-                              href={val as string}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="flex items-center justify-between p-3 sm:p-4 hover:bg-white/5 transition-colors border border-gray-800 rounded-lg"
-                            >
-                              <span className="capitalize font-black text-gray-300 text-xs sm:text-sm">
-                                {key}
-                              </span>
-                              <span className="text-blue-400 text-xs sm:text-sm font-medium truncate max-w-[150px] sm:max-w-[250px] flex items-center gap-1">
-                                <span className="truncate">
-                                  {val as string}
-                                </span>
-                                <ExternalLink className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
-                              </span>
-                            </a>
+            {/* Tabs - Scrollable horizontal en móvil */}
+            <div className="flex gap-1 px-2 sm:px-6 py-2 sm:py-3 border-b border-gray-800 bg-black overflow-x-auto scrollbar-hide shrink-0">
+              {[
+                { id: "overview", label: "General", icon: BarChart2 },
+                { id: "experience", label: "Experiencia", icon: Briefcase },
+                { id: "projects", label: "Proyectos", icon: Layers },
+                { id: "courses", label: "Educación", icon: GraduationCap },
+                { id: "skills", label: "Habilidades", icon: Wrench },
+                {
+                  id: "inquiries",
+                  label: "Consultas",
+                  icon: MessageSquareMore,
+                },
+                { id: "social", label: "Redes Sociales", icon: Globe },
+              ].map(({ id, label, icon: Icon }) => (
+                <button
+                  key={id}
+                  onClick={() => setDetailsTab(id)}
+                  className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 text-[10px] sm:text-xs font-black whitespace-nowrap transition-all border rounded-md ${detailsTab === id
+                    ? "border-white bg-white text-black"
+                    : "border-gray-700 text-gray-400 hover:border-gray-500 hover:text-white"
+                    }`}
+                >
+                  <div className="flex items-center gap-1 sm:gap-1.5">
+                    <Icon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                    <span className="hidden sm:inline">{label}</span>
+                  </div>
+                  {id === "inquiries" && selectedClientInquiries.length > 0 && (
+                    <span className={`flex items-center justify-center min-w-[20px] h-[20px] px-1 text-[10px] font-black rounded-full transition-all ${detailsTab === id
+                      ? "bg-black text-white"
+                      : "bg-red-500 text-white border border-red-400 shadow-[0_0_8px_rgba(239,68,68,0.6)] animate-pulse"
+                      }`}>
+                      {selectedClientInquiries.length}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+
+            {/* Modal Body - Scrollable */}
+            <div className="flex-1 overflow-y-auto p-3 sm:p-6 md:p-8 bg-black">
+              {/* OVERVIEW TAB */}
+              {detailsTab === "overview" && (
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+                    <div className="bg-black border border-gray-800 p-3 sm:p-5 rounded-lg">
+                      <p className="text-[10px] sm:text-xs text-gray-400 font-bold mb-1 sm:mb-2">
+                        Plantilla
+                      </p>
+                      <span
+                        className={`text-[10px] sm:text-sm font-black px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg bg-gradient-to-r ${TEMPLATE_COLORS[selectedPortfolio.templateId] || "from-gray-600 to-gray-800"} text-white`}
+                      >
+                        {TEMPLATE_NAMES[selectedPortfolio.templateId] ||
+                          `T${selectedPortfolio.templateId}`}
+                      </span>
+                    </div>
+                    <div className="bg-black border border-gray-800 p-3 sm:p-5 rounded-lg">
+                      <p className="text-[10px] sm:text-xs text-gray-400 font-bold mb-1 sm:mb-2">
+                        Tipografía
+                      </p>
+                      <p className="font-black text-white text-xs sm:text-sm">
+                        {selectedPortfolio.fontFamily || "Inter"}
+                      </p>
+                    </div>
+                    <div className="bg-black border border-gray-800 p-3 sm:p-5 rounded-lg">
+                      <p className="text-[10px] sm:text-xs text-gray-400 font-bold mb-1 sm:mb-2">
+                        Logo Posición
+                      </p>
+                      <p className="font-black text-white text-xs sm:text-sm capitalize">
+                        {selectedPortfolio.logoPosition || "center"}
+                      </p>
+                    </div>
+                    <div className="bg-black border border-gray-800 p-3 sm:p-5 rounded-lg">
+                      <p className="text-[10px] sm:text-xs text-gray-400 font-bold mb-1 sm:mb-2">
+                        Colores
+                      </p>
+                      <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                        {[
+                          selectedPortfolio.primaryColor,
+                          selectedPortfolio.secondaryColor,
+                          selectedPortfolio.secondaryTextColor,
+                        ]
+                          .filter(Boolean)
+                          .map((c, i) => (
+                            <div
+                              key={i}
+                              className="w-5 h-5 sm:w-6 sm:h-6 rounded-full border border-gray-600"
+                              style={{ backgroundColor: c as string }}
+                              title={c as string}
+                            />
                           ))}
                       </div>
-                    ) : (
-                      <div className="text-center py-8 sm:py-10 text-gray-400">
-                        <Globe className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-2 sm:mb-3 opacity-30" />
-                        <p className="font-bold text-xs sm:text-sm">
-                          Sin redes configuradas
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+                    {[
+                      {
+                        label: "Experiencias",
+                        count: selectedPortfolio.experience?.length || 0,
+                        icon: Briefcase,
+                        color: "text-blue-400",
+                        bg: "bg-blue-500/10",
+                      },
+                      {
+                        label: "Proyectos",
+                        count: selectedPortfolio.projects?.length || 0,
+                        icon: Layers,
+                        color: "text-purple-400",
+                        bg: "bg-purple-500/10",
+                      },
+                      {
+                        label: "Cursos",
+                        count: selectedPortfolio.courses?.length || 0,
+                        icon: GraduationCap,
+                        color: "text-emerald-400",
+                        bg: "bg-emerald-500/10",
+                      },
+                      {
+                        label: "Habilidades",
+                        count: selectedPortfolio.skills?.length || 0,
+                        icon: Wrench,
+                        color: "text-amber-400",
+                        bg: "bg-amber-500/10",
+                      },
+                    ].map(({ label, count, icon: Icon, color, bg }) => (
+                      <div
+                        key={label}
+                        className={`bg-black border border-gray-800 p-3 sm:p-5 text-center rounded-lg ${bg}`}
+                      >
+                        <Icon
+                          className={`w-6 h-6 sm:w-8 sm:h-8 ${color} mx-auto mb-1.5 sm:mb-2`}
+                        />
+                        <p className="text-xl sm:text-3xl font-black text-white">
+                          {count}
+                        </p>
+                        <p className="text-[10px] sm:text-xs font-bold text-gray-400 mt-0.5 sm:mt-1">
+                          {label}
                         </p>
                       </div>
-                    )}
+                    ))}
                   </div>
-                )}
-              </div>
-            </motion.div>
+                </div>
+              )}
+
+              {/* EXPERIENCE TAB */}
+              {detailsTab === "experience" && (
+                <div className="space-y-2 sm:space-y-4">
+                  {(selectedPortfolio.experience?.length ?? 0) > 0 ? (
+                    selectedPortfolio.experience?.map((exp, i) => (
+                      <div
+                        key={i}
+                        className="bg-black border border-gray-800 p-3 sm:p-6 rounded-lg"
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-1 sm:gap-3 mb-2 sm:mb-3">
+                          <div className="min-w-0">
+                            <h4 className="font-black text-white text-sm sm:text-lg">
+                              {exp.role}
+                            </h4>
+                            <p className="text-violet-400 font-bold text-xs sm:text-sm">
+                              {exp.company}
+                            </p>
+                          </div>
+                          <span className="text-[10px] sm:text-xs font-bold bg-gray-800 text-gray-400 px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg flex items-center gap-1 w-fit">
+                            <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                            {exp.period}
+                          </span>
+                        </div>
+                        {exp.description && (
+                          <p className="text-xs sm:text-sm text-gray-400 leading-relaxed">
+                            {exp.description}
+                          </p>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-12 sm:py-16 text-gray-400">
+                      <Briefcase className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 opacity-30" />
+                      <p className="font-bold text-xs sm:text-sm">
+                        Sin experiencia registrada
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* PROJECTS TAB */}
+              {detailsTab === "projects" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4">
+                  {(selectedPortfolio.projects?.length ?? 0) > 0 ? (
+                    selectedPortfolio.projects?.map((proj, i) => (
+                      <div
+                        key={i}
+                        className="bg-black border border-gray-800 p-3 sm:p-6 rounded-lg"
+                      >
+                        <div className="flex items-start justify-between gap-2 mb-2 sm:mb-3">
+                          <h4 className="font-black text-white text-sm sm:text-base line-clamp-1">
+                            {proj.name}
+                          </h4>
+                          {proj.link && (
+                            <a
+                              href={proj.link}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="p-1 sm:p-1.5 text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors shrink-0"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                            </a>
+                          )}
+                        </div>
+                        {proj.imageUrl && (
+                          <div className="w-full h-24 sm:h-32 rounded-lg overflow-hidden bg-gray-800 mb-2 sm:mb-3 border border-gray-700">
+                            <img
+                              src={proj.imageUrl}
+                              alt={proj.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+                        {proj.description && (
+                          <p className="text-xs sm:text-sm text-gray-400 mb-2 sm:mb-3 line-clamp-2 sm:line-clamp-3">
+                            {proj.description}
+                          </p>
+                        )}
+                        {proj.tools && (
+                          <div className="flex flex-wrap gap-1">
+                            {(typeof proj.tools === "string"
+                              ? proj.tools.split(",")
+                              : proj.tools
+                            ).map((t: string, j: number) => (
+                              <span
+                                key={j}
+                                className="text-[9px] sm:text-[10px] font-bold bg-purple-500/20 text-purple-300 px-1.5 sm:px-2 py-0.5 rounded"
+                              >
+                                {t.trim()}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="col-span-2 text-center py-12 sm:py-16 text-gray-400">
+                      <Layers className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 opacity-30" />
+                      <p className="font-bold text-xs sm:text-sm">
+                        Sin proyectos
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* COURSES TAB */}
+              {detailsTab === "courses" && (
+                <div className="space-y-2 sm:space-y-4">
+                  {(selectedPortfolio.courses?.length ?? 0) > 0 ? (
+                    selectedPortfolio.courses?.map((course, i) => (
+                      <div
+                        key={i}
+                        className="bg-black border border-gray-800 p-3 sm:p-5 flex items-start sm:items-center gap-3 sm:gap-4 rounded-lg"
+                      >
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-500/10 flex items-center justify-center shrink-0 rounded-lg">
+                          <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-400" />
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="font-black text-white text-sm sm:text-base line-clamp-1">
+                            {course.name}
+                          </h4>
+                          <p className="text-xs sm:text-sm text-emerald-400 font-bold">
+                            {course.institution} • {course.year}
+                          </p>
+                          {course.description && (
+                            <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5 sm:mt-1 line-clamp-2">
+                              {course.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-12 sm:py-16 text-gray-400">
+                      <GraduationCap className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 opacity-30" />
+                      <p className="font-bold text-xs sm:text-sm">
+                        Sin cursos
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* SKILLS TAB */}
+              {detailsTab === "skills" && (
+                <div className="space-y-2 sm:space-y-3">
+                  {(selectedPortfolio.skills?.length ?? 0) > 0 ? (
+                    selectedPortfolio.skills?.map((skill, i) => (
+                      <div
+                        key={i}
+                        className="bg-black border border-gray-800 p-3 sm:p-4 rounded-lg"
+                      >
+                        <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                          <span className="font-black text-white text-xs sm:text-sm">
+                            {skill.name || "Skill"}
+                          </span>
+                          <span className="text-[10px] sm:text-xs font-bold text-amber-400">
+                            {skill.level ?? 80}%
+                          </span>
+                        </div>
+                        <div className="h-1.5 sm:h-2 bg-gray-800 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full"
+                            style={{ width: `${skill.level ?? 80}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-12 sm:py-16 text-gray-400">
+                      <Wrench className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 opacity-30" />
+                      <p className="font-bold text-xs sm:text-sm">
+                        Sin habilidades
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* INQUIRIES TAB */}
+              {detailsTab === "inquiries" && (
+                <div className="space-y-3 sm:space-y-4 h-full">
+                  <WhatsAppInquiryInbox
+                    title="Consultas del cliente"
+                    subtitle="La bandeja de mensajes ahora replica una conversación de WhatsApp para revisar cada contacto de forma más real y clara."
+                    ownerLabel={user?.name?.trim() || "Admin"}
+                    inquiries={selectedClientInquiries}
+                    loading={loadingInquiries}
+                    emptyMessage="Este cliente aun no tiene consultas."
+                    emptyHint="Cuando alguien escriba desde su portafolio, la conversación aparecerá aquí."
+                  />
+                </div>
+              )}
+
+              {/* SOCIAL TAB */}
+              {detailsTab === "social" && (
+                <div className="p-2 sm:p-6">
+                  {selectedPortfolio.socialLinks &&
+                    Object.keys(selectedPortfolio.socialLinks).length > 0 ? (
+                    <div className="space-y-2 sm:space-y-3">
+                      {Object.entries(selectedPortfolio.socialLinks)
+                        .filter(([, v]) => v)
+                        .map(([key, val]) => (
+                          <a
+                            key={key}
+                            href={val as string}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center justify-between p-3 sm:p-4 hover:bg-white/5 transition-colors border border-gray-800 rounded-lg"
+                          >
+                            <span className="capitalize font-black text-gray-300 text-xs sm:text-sm">
+                              {key}
+                            </span>
+                            <span className="text-blue-400 text-xs sm:text-sm font-medium truncate max-w-[150px] sm:max-w-[250px] flex items-center gap-1">
+                              <span className="truncate">
+                                {val as string}
+                              </span>
+                              <ExternalLink className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+                            </span>
+                          </a>
+                        ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 sm:py-10 text-gray-400">
+                      <Globe className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-2 sm:mb-3 opacity-30" />
+                      <p className="font-bold text-xs sm:text-sm">
+                        Sin redes configuradas
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -1780,106 +1799,99 @@ export default function AdminDashboard() {
         />
       )}
 
-      {/* ===== EDIT CLIENT MODAL ===== */}
+      {/* ===== EDIT CLIENT INLINE VIEW ===== */}
       <AnimatePresence>
-        {showEditModal && (
+        {activeMainTab === "Clientes" && clientView === "edit" && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 z-[100]"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="w-full max-w-2xl mx-auto p-4 sm:p-8 bg-black shadow-2xl border border-gray-800 rounded-xl mt-6"
           >
-            <motion.div
-              initial={{ scale: 0.95, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 20 }}
-              className="bg-black p-4 sm:p-8 w-full max-w-md shadow-2xl border border-gray-700 max-h-[90vh] overflow-y-auto"
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <div>
+                <h3 className="text-lg sm:text-2xl font-black text-white flex items-center gap-2">
+                  <Pencil className="w-4 h-4 sm:w-5 sm:h-5 text-violet-400" />
+                  Editar Cliente
+                </h3>
+                <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
+                  Modifica el nombre y correo del cliente
+                </p>
+              </div>
+              <button
+                onClick={() => setClientView("list")}
+                className="p-1.5 sm:p-2 text-gray-400 hover:bg-red-500/20 hover:text-red-400 rounded-full transition-colors"
+              >
+                <X className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
+            </div>
+
+            <form
+              onSubmit={handleEditClient}
+              className="space-y-3 sm:space-y-5"
             >
-              <div className="flex items-center justify-between mb-4 sm:mb-6">
-                <div>
-                  <h3 className="text-lg sm:text-2xl font-black text-white flex items-center gap-2">
-                    <Pencil className="w-4 h-4 sm:w-5 sm:h-5 text-violet-400" />
-                    Editar Cliente
-                  </h3>
-                  <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
-                    Modifica el nombre y correo del cliente
-                  </p>
-                </div>
-                <button
-                  onClick={() => setShowEditModal(false)}
-                  className="p-1.5 sm:p-2 text-gray-400 hover:bg-red-500/20 hover:text-red-400 rounded-full transition-colors"
-                >
-                  <X className="w-4 h-4 sm:w-5 sm:h-5" />
-                </button>
+              <div>
+                <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-gray-400 mb-1 sm:mb-1.5 block">
+                  Nombre Completo
+                </label>
+                <input
+                  required
+                  type="text"
+                  value={editClient.name}
+                  onChange={(e) =>
+                    setEditClient({ ...editClient, name: e.target.value })
+                  }
+                  placeholder="Nombre del cliente"
+                  className={inp}
+                />
+              </div>
+              <div>
+                <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-gray-400 mb-1 sm:mb-1.5 block">
+                  Correo Electrónico
+                </label>
+                <input
+                  required
+                  type="email"
+                  value={editClient.email}
+                  onChange={(e) =>
+                    setEditClient({ ...editClient, email: e.target.value })
+                  }
+                  placeholder="correo@ejemplo.com"
+                  className={inp}
+                />
+              </div>
+              <div>
+                <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-gray-400 mb-1 sm:mb-1.5 block">
+                  Nueva Contraseña (Opcional)
+                </label>
+                <input
+                  type="password"
+                  value={editClient.password || ""}
+                  onChange={(e) =>
+                    setEditClient({ ...editClient, password: e.target.value })
+                  }
+                  placeholder="••••••••"
+                  className={inp}
+                />
               </div>
 
-              <form
-                onSubmit={handleEditClient}
-                className="space-y-3 sm:space-y-5"
-              >
-                <div>
-                  <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-gray-400 mb-1 sm:mb-1.5 block">
-                    Nombre Completo
-                  </label>
-                  <input
-                    required
-                    type="text"
-                    value={editClient.name}
-                    onChange={(e) =>
-                      setEditClient({ ...editClient, name: e.target.value })
-                    }
-                    placeholder="Nombre del cliente"
-                    className={inp}
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-gray-400 mb-1 sm:mb-1.5 block">
-                    Correo Electrónico
-                  </label>
-                  <input
-                    required
-                    type="email"
-                    value={editClient.email}
-                    onChange={(e) =>
-                      setEditClient({ ...editClient, email: e.target.value })
-                    }
-                    placeholder="correo@ejemplo.com"
-                    className={inp}
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-gray-400 mb-1 sm:mb-1.5 block">
-                    Nueva Contraseña (Opcional)
-                  </label>
-                  <input
-                    type="password"
-                    value={editClient.password || ""}
-                    onChange={(e) =>
-                      setEditClient({ ...editClient, password: e.target.value })
-                    }
-                    placeholder="••••••••"
-                    className={inp}
-                  />
-                </div>
-
-                <div className="flex gap-2 sm:gap-3 justify-end pt-3 sm:pt-4 border-t border-gray-800">
-                  <button
-                    type="button"
-                    onClick={() => setShowEditModal(false)}
-                    className="px-3 sm:px-5 py-2 sm:py-2.5 font-bold text-xs sm:text-sm border border-gray-600 text-gray-300 hover:border-white hover:text-white rounded-md transition-all"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 sm:px-6 py-2 sm:py-2.5 font-bold text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 border border-white text-white hover:bg-white hover:text-black rounded-md transition-all"
-                  >
-                    <Pencil className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                    Guardar
-                  </button>
-                </div>
-              </form>
-            </motion.div>
+              <div className="flex gap-2 sm:gap-3 justify-end pt-3 sm:pt-4 border-t border-gray-800">
+                <button
+                  type="button"
+                  onClick={() => setClientView("list")}
+                  className="px-3 sm:px-5 py-2 sm:py-2.5 font-bold text-xs sm:text-sm border border-gray-600 text-gray-300 hover:border-white hover:text-white rounded-md transition-all"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 sm:px-6 py-2 sm:py-2.5 font-bold text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 border border-white text-white hover:bg-white hover:text-black rounded-md transition-all"
+                >
+                  <Pencil className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  Guardar
+                </button>
+              </div>
+            </form>
           </motion.div>
         )}
       </AnimatePresence>

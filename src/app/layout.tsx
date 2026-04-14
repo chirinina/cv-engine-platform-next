@@ -26,7 +26,7 @@ export default function RootLayout({
               background: 'rgba(0, 0, 0, 0.7)',
               backdropFilter: 'blur(12px)',
               WebkitBackdropFilter: 'blur(12px)',
-              border: 'none',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
               color: '#fff',
               fontSize: '14px',
               fontWeight: '500',
@@ -34,7 +34,7 @@ export default function RootLayout({
             success: {
               style: {
                 background: 'rgba(16, 185, 129, 0.15)',
-                border: 'none',
+                border: '1px solid rgba(16, 185, 129, 0.3)',
                 color: '#fff',
               },
               iconTheme: {
@@ -45,7 +45,7 @@ export default function RootLayout({
             error: {
               style: {
                 background: 'rgba(239, 68, 68, 0.15)',
-                border: 'none',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
                 color: '#fff',
               },
               iconTheme: {
