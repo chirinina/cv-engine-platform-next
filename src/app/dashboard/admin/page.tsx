@@ -162,6 +162,49 @@ const CLIENT_FIELDS: ClientField[] = [
   },
 ];
 
+const ClientRowSkeleton = () => (
+  <div className="px-4 sm:px-6 py-4 animate-pulse border-b border-gray-800/50">
+    <div className="grid grid-cols-12 gap-4 items-center">
+      <div className="col-span-1 h-3 w-4 bg-gray-800 rounded" />
+      <div className="col-span-3 flex items-center gap-3">
+        <div className="w-10 h-10 bg-gray-800 rounded shadow-sm" />
+        <div className="space-y-2 flex-1">
+          <div className="h-4 bg-gray-800 rounded w-3/4" />
+          <div className="h-3 bg-gray-800 rounded w-1/2" />
+        </div>
+      </div>
+      <div className="col-span-3 h-8 bg-gray-800 rounded-lg w-28" />
+      <div className="col-span-2 h-6 bg-gray-800 rounded-lg w-20" />
+      <div className="col-span-3 flex justify-end gap-2">
+        <div className="w-10 h-9 bg-gray-800 rounded" />
+        <div className="w-10 h-9 bg-gray-800 rounded" />
+        <div className="w-10 h-9 bg-gray-800 rounded" />
+      </div>
+    </div>
+  </div>
+);
+
+const ClientCardSkeleton = () => (
+  <div className="p-4 animate-pulse border-b border-gray-800/50">
+    <div className="flex items-start gap-3">
+      <div className="w-12 h-12 bg-gray-800 rounded shadow-sm" />
+      <div className="flex-1 space-y-3">
+        <div className="flex justify-between items-start">
+          <div className="space-y-2 flex-1">
+            <div className="h-4 bg-gray-800 rounded w-2/3" />
+            <div className="h-3 bg-gray-800 rounded w-1/2" />
+          </div>
+          <div className="w-4 h-4 bg-gray-800 rounded" />
+        </div>
+        <div className="flex gap-2">
+          <div className="h-6 bg-gray-800 rounded w-20" />
+          <div className="h-6 bg-gray-800 rounded w-20" />
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 export default function AdminDashboard() {
   const router = useRouter();
   const { user, logout, checkAuth, isLoading } = useAuthStore();
@@ -197,6 +240,7 @@ export default function AdminDashboard() {
     password: "",
   });
   const [loadingInquiries, setLoadingInquiries] = useState(false);
+  const [loadingClients, setLoadingClients] = useState(true);
   const [activeMainTab, setActiveMainTab] = useState("Dashboard");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showMobileActions, setShowMobileActions] = useState<number | null>(
@@ -262,6 +306,7 @@ export default function AdminDashboard() {
   }, [user, isLoading]);
 
   const fetchClients = async () => {
+    setLoadingClients(true);
     try {
       const res = await api.get(`/users?page=${currentPage}&limit=6&search=${searchQuery}&isActive=${statusFilter}&hasPortfolio=${portfolioFilter}`);
       if (res.data.data !== undefined) {
@@ -275,6 +320,8 @@ export default function AdminDashboard() {
       }
     } catch {
       toast.error("Error cargando clientes");
+    } finally {
+      setLoadingClients(false);
     }
   };
 
@@ -639,13 +686,11 @@ export default function AdminDashboard() {
                     setSearchQuery(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="w-full pl-8 sm:pl-9 pr-3 sm:pr-4 py-2 sm:py-2.5 bg-white/5 border border-white/5 focus:border-violet-500/50 text-xs sm:text-sm text-white outline-none transition-all placeholder-gray-500 font-medium rounded-lg"
+                  className="w-full pl-8 sm:pl-9 pr-3 sm:pr-4 py-2 sm:py-2.5 focus:border-violet-500/50 text-xs sm:text-sm text-white outline-none transition-all placeholder-gray-500 font-medium rounded-lg"
                 />
               </div>
             )}
           </div>
-
-
         </header>
 
         {/* PAGE CONTENT */}
@@ -698,7 +743,7 @@ export default function AdminDashboard() {
                       setStatusFilter(e.target.value);
                       setCurrentPage(1);
                     }}
-                    className="appearance-none bg-white/5 hover:border-violet-500/30 transition-all text-white text-[11px] font-bold pl-3 pr-8 py-2 rounded-lg outline-none cursor-pointer"
+                    className="appearance-none transition-all text-white text-[11px] font-bold pl-3 pr-8 py-2 rounded-lg outline-none cursor-pointer"
                   >
                     <option value="all" className="bg-black">Todos los Estados</option>
                     <option value="active" className="bg-black">Activos</option>
@@ -714,11 +759,11 @@ export default function AdminDashboard() {
                       setPortfolioFilter(e.target.value);
                       setCurrentPage(1);
                     }}
-                    className="appearance-none bg-white/5 border border-white/5 hover:border-violet-500/30 transition-all text-white text-[11px] font-bold pl-3 pr-8 py-2 rounded-lg outline-none cursor-pointer"
+                    className="appearance-none transition-all text-white text-[11px] font-bold pl-3 pr-8 py-2 rounded-lg outline-none cursor-pointer"
                   >
                     <option value="all" className="bg-black">Cualquier Portfolio</option>
-                    <option value="with" className="bg-black">Con Portfolio</option>
-                    <option value="without" className="bg-black">Sin Portfolio</option>
+                    <option value="with" className="bg-black">Asignados</option>
+                    <option value="without" className="bg-black">Sin Asignar</option>
                   </select>
                   <ChevronRight className="w-3 h-3 text-gray-600 absolute right-2.5 top-1/2 -translate-y-1/2 rotate-90 pointer-events-none group-hover:text-violet-400 transition-colors" />
                 </div>
@@ -731,11 +776,11 @@ export default function AdminDashboard() {
                       setSearchQuery("");
                       setCurrentPage(1);
                     }}
-                    className="flex items-center gap-1.5 px-3 py-2 text-[9px] font-black text-red-500/80 hover:text-red-400 hover:bg-red-500/5 transition-all rounded-lg"
+                    className="flex items-center gap-1.5 px-3 py-2 text-[9px] font-black text-red-500/80 hover:text-red-400 transition-all"
                     title="Limpiar todos los filtros"
                   >
                     <X className="w-3 h-3" />
-                    <span>LIMPIAR</span>
+                    <span>Limpiar Filtro</span>
                   </button>
                 )}
               </div>
@@ -828,30 +873,328 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="divide-y divide-gray-800">
-                  <AnimatePresence>
-                    {filteredClients.map((client, index) => {
-                      const clientPortfolios = portfolios.filter(
-                        (p) => p.userId === client.id,
-                      );
-                      const hasPortfolio = clientPortfolios.length > 0;
-                      const pf = hasPortfolio ? clientPortfolios[0] : null;
+                  <AnimatePresence mode="wait">
+                    {loadingClients ? (
+                      <motion.div
+                        key="skeletons"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                      >
+                        {[...Array(6)].map((_, i) => (
+                          <ClientRowSkeleton key={i} />
+                        ))}
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="content"
+                        initial="hidden"
+                        animate="show"
+                        variants={{
+                          show: {
+                            transition: {
+                              staggerChildren: 0.05,
+                            },
+                          },
+                        }}
+                      >
+                        {filteredClients.map((client, index) => {
+                          const clientPortfolios = portfolios.filter(
+                            (p) => p.userId === client.id,
+                          );
+                          const hasPortfolio = clientPortfolios.length > 0;
+                          const pf = hasPortfolio ? clientPortfolios[0] : null;
 
-                      return (
-                        <motion.div
-                          key={client.id}
-                          initial={{ opacity: 0, y: 5 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0 }}
-                          className="px-4 sm:px-6 py-3 sm:py-4 hover:bg-white/5 transition-colors"
+                          return (
+                            <motion.div
+                              key={client.id}
+                              variants={{
+                                hidden: { opacity: 0, y: 10 },
+                                show: { opacity: 1, y: 0 },
+                              }}
+                              className="px-4 sm:px-6 py-3 sm:py-4 hover:bg-white/[0.03] transition-colors border-b border-gray-800/50 last:border-0 group"
+                            >
+                              <div className="grid grid-cols-12 gap-2 sm:gap-3 items-center">
+                                {/* Number */}
+                                <div className="col-span-1 text-gray-500 font-mono text-xs group-hover:text-violet-400 transition-colors">
+                                  {(currentPage - 1) * 6 + index + 1}
+                                </div>
+                                {/* Client Info */}
+                                <div className="col-span-3 flex items-center gap-2 sm:gap-3 min-w-0">
+                                  <div className="w-8 h-8 sm:w-10 sm:h-10 overflow-hidden bg-white/10 flex items-center justify-center shrink-0 rounded-lg group-hover:scale-110 transition-transform shadow-lg border border-white/5">
+                                    {pf?.logoUrl ? (
+                                      <img
+                                        src={pf.logoUrl}
+                                        alt=""
+                                        className="w-full h-full object-cover"
+                                      />
+                                    ) : (
+                                      <span className="text-white font-black text-xs sm:text-sm">
+                                        {client.name.charAt(0)}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="min-w-0">
+                                    <p className="font-bold text-white text-xs sm:text-sm truncate flex items-center gap-1.5 sm:gap-2">
+                                      {client.name}
+                                    </p>
+                                    <p className="text-[10px] sm:text-xs text-gray-400 flex items-center gap-1 truncate">
+                                      <Mail className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                                      <span className="truncate">
+                                        {client.email}
+                                      </span>
+                                    </p>
+                                  </div>
+                                </div>
+
+                                {/* Portfolio status */}
+                                <div className="col-span-3">
+                                  {hasPortfolio && pf ? (
+                                    <div className="flex items-center gap-2">
+                                      {client.isActive === false ? (
+                                        <span className="flex items-center gap-1 text-[10px] sm:text-xs font-bold text-red-400 bg-red-500/10 px-2 sm:px-3 py-1 rounded-lg border border-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.1)]">
+                                          <Shield className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                                          Inactivo
+                                        </span>
+                                      ) : (
+                                        <span className="flex items-center gap-1 text-[10px] sm:text-xs font-bold text-blue-400 bg-blue-500/10 px-2 sm:px-3 py-1 rounded-lg border border-blue-500/20 shadow-[0_0_10px_rgba(59,130,246,0.1)]">
+                                          <UserCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                                          Activo
+                                        </span>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center gap-2">
+                                      <span className="flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-amber-400 px-2 sm:px-3 py-1 rounded-lg border border-amber-500/20">
+                                        <AlertCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                                        Sin Asignar
+                                      </span>
+                                      {client.isActive === false && (
+                                        <span className="flex items-center gap-1 text-[10px] sm:text-xs font-bold text-red-400 bg-red-500/10 px-2 sm:px-3 py-1 rounded-lg border border-red-500/20">
+                                          <Shield className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                                          Inactivo
+                                        </span>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Template */}
+                                <div className="col-span-2">
+                                  {hasPortfolio && pf ? (
+                                    <span
+                                      className={`text-[10px] sm:text-xs font-black px-2 sm:px-3 py-1 rounded-lg bg-gradient-to-r ${TEMPLATE_COLORS[pf.templateId] || "from-gray-400 to-gray-600"} text-white shadow-sm border border-white/10`}
+                                    >
+                                      {TEMPLATE_NAMES[pf.templateId] ||
+                                        `T${pf.templateId}`}
+                                    </span>
+                                  ) : (
+                                    <div className="flex gap-1 sm:gap-1.5 flex-wrap">
+                                      {[1, 2, 3, 4].map((num) => (
+                                        <button
+                                          key={num}
+                                          onClick={() =>
+                                            handleAssignTemplate(client.id, num)
+                                          }
+                                          className="text-[8px] sm:text-[10px] font-black px-1.5 sm:px-2.5 py-1 rounded-md border border-white/20 text-white hover:bg-white hover:text-black transition-all hover:scale-105 active:scale-95"
+                                        >
+                                          T{num}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Acciones */}
+                                <div className="col-span-3 flex items-center justify-end gap-1 sm:gap-2">
+                                  <button
+                                    onClick={() => handleToggleClientStatus(client)}
+                                    title={
+                                      client.isActive === false
+                                        ? "Activar"
+                                        : "Inactivar"
+                                    }
+                                    className={`flex items-center gap-1 text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-2 border rounded-md transition-all active:scale-95 ${client.isActive === false
+                                      ? "border-emerald-500/50 text-emerald-400 hover:bg-emerald-500 hover:text-white"
+                                      : "border-red-500/50 text-red-400 hover:bg-red-500 hover:text-white"
+                                      }`}
+                                  >
+                                    <Shield className="w-3.5 h-3.5" />
+                                  </button>
+
+                                  <button
+                                    onClick={() => handleDeleteClient(client)}
+                                    title="Eliminar"
+                                    className="flex items-center gap-1 text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-2 border border-red-500/50 text-red-500 hover:bg-red-500 hover:text-white transition-all active:scale-95 rounded-md"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+
+                                  <button
+                                    onClick={() => openEditModal(client)}
+                                    title="Editar"
+                                    className="flex items-center gap-1 text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-2 border border-white/20 text-white hover:bg-white hover:text-black transition-all active:scale-95 rounded-md"
+                                  >
+                                    <Pencil className="w-3.5 h-3.5" />
+                                  </button>
+
+                                  {hasPortfolio && pf && (
+                                    <>
+                                      <button
+                                        onClick={() => openDetails(client, pf)}
+                                        className="flex items-center gap-1 text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-2 border border-white/20 text-white hover:bg-white hover:text-black transition-all active:scale-95 rounded-md"
+                                      >
+                                        <Eye className="w-3.5 h-3.5" />
+                                      </button>
+
+                                      <div className="relative">
+                                        <button
+                                          onClick={() =>
+                                            setActiveDropdown(
+                                              activeDropdown === pf.id
+                                                ? null
+                                                : pf.id,
+                                            )
+                                          }
+                                          className="p-2 text-white bg-transparent border border-white/20 rounded-md transition-all hover:bg-white hover:text-black active:scale-95"
+                                        >
+                                          <Settings2 className="w-4 h-4" />
+                                        </button>
+
+                                        {activeDropdown === pf.id && (
+                                          <motion.div
+                                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            className="absolute right-0 bottom-full mb-2 w-44 sm:w-52 bg-black border border-gray-700 shadow-2xl z-50 overflow-hidden rounded-lg backdrop-blur-xl bg-black/80"
+                                          >
+                                            <div className="px-3 sm:px-4 py-3 bg-gray-900/50 border-b border-gray-700">
+                                              <p className="text-[10px] sm:text-xs font-black tracking-widest text-gray-400">
+                                                Cambiar Plantilla
+                                              </p>
+                                            </div>
+                                            <div className="p-2 space-y-1">
+                                              {[1, 2, 3, 4].map((num) => (
+                                                <button
+                                                  key={num}
+                                                  onClick={() =>
+                                                    handleChangeTemplate(pf.id, num)
+                                                  }
+                                                  className={`w-full text-left px-4 py-2 text-xs sm:text-sm font-bold transition-all flex items-center justify-between rounded-md ${pf.templateId === num
+                                                    ? "bg-white text-black"
+                                                    : "text-white hover:bg-white/10"
+                                                    }`}
+                                                >
+                                                  <span>{TEMPLATE_NAMES[num]}</span>
+                                                  {pf.templateId === num && (
+                                                    <Zap className="w-3.5 h-3.5" />
+                                                  )}
+                                                </button>
+                                              ))}
+                                            </div>
+                                          </motion.div>
+                                        )}
+                                      </div>
+
+                                      <a
+                                        href={`/p/${pf.slug}`}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="p-2 border border-white/20 text-white transition-all hover:bg-white hover:text-black active:scale-95 rounded-md"
+                                      >
+                                        <ExternalLink className="w-4 h-4" />
+                                      </a>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            </motion.div>
+                          );
+                        })}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {filteredClients.length === 0 && !loadingClients && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="flex flex-col items-center py-12 sm:py-24 gap-4"
+                    >
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-b from-gray-800 to-black border border-gray-700 flex items-center justify-center rounded-2xl shadow-xl">
+                        <Users className="w-8 h-8 sm:w-10 sm:h-10 text-gray-600" />
+                      </div>
+                      <div className="text-center space-y-1">
+                        <p className="text-white font-black text-lg">
+                          {searchQuery
+                            ? "Sin coincidencias"
+                            : "Directorio vacío"}
+                        </p>
+                        <p className="text-gray-500 font-medium text-xs sm:text-sm max-w-xs mx-auto">
+                          {searchQuery
+                            ? `No encontramos resultados para "${searchQuery}". Intenta con otros términos.`
+                            : "Comienza registrando a tu primer cliente para ver su portfolio aquí."}
+                        </p>
+                      </div>
+                      {searchQuery && (
+                        <button
+                          onClick={() => setSearchQuery("")}
+                          className="mt-2 text-xs font-black text-violet-400 hover:text-white transition-colors"
                         >
-                          <div className="grid grid-cols-12 gap-2 sm:gap-3 items-center">
-                            {/* Number */}
-                            <div className="col-span-1 text-gray-500 font-mono text-xs">
-                              {(currentPage - 1) * 6 + index + 1}
-                            </div>
-                            {/* Client Info */}
-                            <div className="col-span-3 flex items-center gap-2 sm:gap-3 min-w-0">
-                              <div className="w-8 h-8 sm:w-10 sm:h-10 overflow-hidden bg-white/10 flex items-center justify-center shrink-0">
+                          Limpiar búsqueda
+                        </button>
+                      )}
+                    </motion.div>
+                  )}
+                </div>
+              </div>
+
+              {/* Vista Móvil - Cards */}
+              <div className="md:hidden divide-y divide-gray-800">
+                <AnimatePresence mode="wait">
+                  {loadingClients ? (
+                    <motion.div
+                      key="skeletons-mobile"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                    >
+                      {[...Array(6)].map((_, i) => (
+                        <ClientCardSkeleton key={i} />
+                      ))}
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="content-mobile"
+                      initial="hidden"
+                      animate="show"
+                      variants={{
+                        show: {
+                          transition: {
+                            staggerChildren: 0.05,
+                          },
+                        },
+                      }}
+                    >
+                      {filteredClients.map((client, index) => {
+                        const clientPortfolios = portfolios.filter(
+                          (p) => p.userId === client.id,
+                        );
+                        const hasPortfolio = clientPortfolios.length > 0;
+                        const pf = hasPortfolio ? clientPortfolios[0] : null;
+                        const isMobileMenuOpen = showMobileActions === client.id;
+
+                        return (
+                          <motion.div
+                            key={client.id}
+                            variants={{
+                              hidden: { opacity: 0, x: -10 },
+                              show: { opacity: 1, x: 0 },
+                            }}
+                            className="p-4 hover:bg-white/[0.03] transition-colors border-b border-gray-800/50 group"
+                          >
+                            <div className="flex items-start gap-4">
+                              {/* Avatar */}
+                              <div className="w-12 h-12 sm:w-14 sm:h-14 overflow-hidden bg-white/10 flex items-center justify-center shrink-0 rounded-xl shadow-lg border border-white/5">
                                 {pf?.logoUrl ? (
                                   <img
                                     src={pf.logoUrl}
@@ -859,451 +1202,225 @@ export default function AdminDashboard() {
                                     className="w-full h-full object-cover"
                                   />
                                 ) : (
-                                  <span className="text-white font-black text-xs sm:text-sm">
+                                  <span className="text-white font-black text-xl">
                                     {client.name.charAt(0)}
                                   </span>
                                 )}
                               </div>
-                              <div className="min-w-0">
-                                <p className="font-bold text-white text-xs sm:text-sm truncate flex items-center gap-1.5 sm:gap-2">
-                                  {client.name}
 
-                                </p>
-                                <p className="text-[10px] sm:text-xs text-gray-400 flex items-center gap-1 truncate">
-                                  <Mail className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                                  <span className="truncate">
-                                    {client.email}
-                                  </span>
-                                </p>
-                              </div>
-                            </div>
-
-                            {/* Portfolio status */}
-                            {/* Portfolio status + Estado del cliente UNIFICADO */}
-                            <div className="col-span-3">
-                              {hasPortfolio && pf ? (
-                                <div className="flex items-center gap-2">
-                                  {/* Badge de Estado del Cliente - SOLO AQUÍ */}
-                                  {client.isActive === false ? (
-                                    <span className="flex items-center gap-1 text-[10px] sm:text-xs font-bold text-red-400 bg-red-500/10 px-2 sm:px-3 py-1 rounded-lg border border-red-500/20">
-                                      <Shield className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                                      Inactivo
-                                    </span>
-                                  ) : (
-                                    <span className="flex items-center gap-1 text-[10px] sm:text-xs font-bold text-blue-400 bg-blue-500/10 px-2 sm:px-3 py-1 rounded-lg border border-blue-500/20">
-                                      <UserCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                                      Activo
-                                    </span>
-                                  )}
-                                </div>
-                              ) : (
-                                <div className="flex items-center gap-2">
-                                  {/* Sin portfolio */}
-                                  <span className="flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-amber-400 bg-amber-500/10 px-2 sm:px-3 py-1 rounded-lg">
-                                    <AlertCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                                    Sin Portfolio
-                                  </span>
-
-                                  {/* Estado del cliente cuando no tiene portfolio */}
-                                  {client.isActive === false ? (
-                                    <span className="flex items-center gap-1 text-[10px] sm:text-xs font-bold text-red-400 bg-red-500/10 px-2 sm:px-3 py-1 rounded-lg border border-red-500/20">
-                                      <Shield className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                                      Inactivo
-                                    </span>
-                                  ) : null}
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Template */}
-                            <div className="col-span-2">
-                              {hasPortfolio && pf ? (
-                                <span
-                                  className={`text-[10px] sm:text-xs font-black px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg bg-gradient-to-r ${TEMPLATE_COLORS[pf.templateId] || "from-gray-400 to-gray-600"} text-white`}
-                                >
-                                  {TEMPLATE_NAMES[pf.templateId] ||
-                                    `T${pf.templateId}`}
-                                </span>
-                              ) : (
-                                <div className="flex gap-1 sm:gap-1.5 flex-wrap">
-                                  {[1, 2, 3, 4].map((num) => (
-                                    <button
-                                      key={num}
-                                      onClick={() =>
-                                        handleAssignTemplate(client.id, num)
-                                      }
-                                      className="text-[8px] sm:text-[10px] font-black px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-md border border-white/50 text-white hover:bg-white hover:text-black transition-colors"
-                                    >
-                                      T{num}
-                                    </button>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Acciones */}
-                            <div className="col-span-3 flex items-center justify-end gap-1 sm:gap-2">
-                              <button
-                                onClick={() => handleToggleClientStatus(client)}
-                                title={
-                                  client.isActive === false
-                                    ? "Activar"
-                                    : "Inactivar"
-                                }
-                                className={`flex items-center gap-1 text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1.5 sm:py-2 border rounded-md transition-all ${client.isActive === false
-                                  ? "border-emerald-500 text-emerald-400 hover:bg-emerald-500 hover:text-white"
-                                  : "border-red-500 text-red-400 hover:bg-red-500 hover:text-white"
-                                  }`}
-                              >
-                                <Shield className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                              </button>
-
-                              <button
-                                onClick={() => handleDeleteClient(client)}
-                                title="Eliminar"
-                                className="flex items-center gap-1 text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1.5 sm:py-2 border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-all rounded-md"
-                              >
-                                <Trash2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                              </button>
-
-                              <button
-                                onClick={() => openEditModal(client)}
-                                title="Editar"
-                                className="flex items-center gap-1 text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1.5 sm:py-2 border border-white text-white hover:bg-white hover:text-black transition-all rounded-md"
-                              >
-                                <Pencil className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                              </button>
-
-                              {hasPortfolio && pf && (
-                                <>
-                                  <button
-                                    onClick={() => openDetails(client, pf)}
-                                    className="flex items-center gap-1 text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1.5 sm:py-2 border border-white text-white hover:bg-white hover:text-black transition-all rounded-md"
-                                  >
-                                    <Eye className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                                  </button>
-
-                                  <div className="relative">
-                                    <button
-                                      onClick={() =>
-                                        setActiveDropdown(
-                                          activeDropdown === pf.id
-                                            ? null
-                                            : pf.id,
-                                        )
-                                      }
-                                      className="p-1.5 sm:p-2 text-white bg-transparent border border-white rounded-md transition-all hover:bg-white hover:text-black"
-                                    >
-                                      <Settings2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                    </button>
-
-                                    {activeDropdown === pf.id && (
-                                      <div className="absolute right-0 bottom-full mb-2 w-44 sm:w-52 bg-black border border-gray-700 shadow-2xl z-50 overflow-hidden rounded-lg">
-                                        <div className="px-3 sm:px-4 py-2 sm:py-3 bg-gray-900 border-b border-gray-700">
-                                          <p className="text-[10px] sm:text-xs font-black tracking-widest text-gray-400">
-                                            Cambiar Plantilla
-                                          </p>
-                                        </div>
-                                        <div className="p-1.5 sm:p-2 space-y-1">
-                                          {[1, 2, 3, 4].map((num) => (
-                                            <button
-                                              key={num}
-                                              onClick={() =>
-                                                handleChangeTemplate(pf.id, num)
-                                              }
-                                              className={`w-full text-left px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold transition-all flex items-center justify-between rounded-md ${pf.templateId === num
-                                                ? "bg-white text-black"
-                                                : "text-white hover:bg-white/10"
-                                                }`}
-                                            >
-                                              <span>{TEMPLATE_NAMES[num]}</span>
-                                              {pf.templateId === num && (
-                                                <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                              )}
-                                            </button>
-                                          ))}
-                                        </div>
-                                      </div>
-                                    )}
+                              {/* Info */}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="min-w-0">
+                                    <p className="font-bold text-white text-base truncate flex items-center gap-2">
+                                      <span className="text-gray-500 font-mono text-xs">{((currentPage - 1) * 6) + index + 1}.</span>
+                                      {client.name}
+                                    </p>
+                                    <p className="text-xs text-gray-400 truncate flex items-center gap-1">
+                                      <Mail className="w-3 h-3" />
+                                      {client.email}
+                                    </p>
                                   </div>
 
-                                  <a
-                                    href={`/p/${pf.slug}`}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="p-1.5 sm:p-2 border border-white text-white transition-all hover:bg-white hover:text-black rounded-md"
+                                  {/* Menu móvil */}
+                                  <button
+                                    onClick={() =>
+                                      setShowMobileActions(
+                                        isMobileMenuOpen ? null : client.id,
+                                      )
+                                    }
+                                    className="p-2 text-gray-400 hover:text-white transition-colors bg-white/5 rounded-lg active:scale-90"
                                   >
-                                    <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                  </a>
-                                </>
-                              )}
-                            </div>
-                          </div>
-                        </motion.div>
-                      );
-                    })}
-                  </AnimatePresence>
+                                    <MoreVertical className="w-5 h-5" />
+                                  </button>
+                                </div>
 
-                  {filteredClients.length === 0 && (
-                    <div className="flex flex-col items-center py-12 sm:py-20 gap-3 sm:gap-4">
-                      <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-800 flex items-center justify-center rounded-lg">
-                        <Users className="w-6 h-6 sm:w-8 sm:h-8 text-gray-500" />
-                      </div>
-                      <p className="text-gray-400 font-bold text-xs sm:text-sm text-center px-4">
-                        {searchQuery
-                          ? "Sin resultados para tu búsqueda"
-                          : "Aún no hay clientes"}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
+                                {/* Estado y Template */}
+                                <div className="flex items-center gap-2 mt-3 flex-wrap">
+                                  {hasPortfolio && pf ? (
+                                    <>
+                                      <span className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.1)]">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                        Portfolio
+                                      </span>
 
-              {/* Vista Móvil - Cards */}
-              <div className="md:hidden divide-y divide-gray-800">
-                <AnimatePresence>
-                  {filteredClients.map((client, index) => {
-                    const clientPortfolios = portfolios.filter(
-                      (p) => p.userId === client.id,
-                    );
-                    const hasPortfolio = clientPortfolios.length > 0;
-                    const pf = hasPortfolio ? clientPortfolios[0] : null;
-                    const isMobileMenuOpen = showMobileActions === client.id;
+                                      {client.isActive === false ? (
+                                        <span className="flex items-center gap-1.5 text-[10px] font-bold text-red-400 bg-red-500/10 px-2.5 py-1 rounded-full border border-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.1)]">
+                                          <Shield className="w-3.5 h-3.5" />
+                                          Inactivo
+                                        </span>
+                                      ) : (
+                                        <span className="flex items-center gap-1.5 text-[10px] font-bold text-blue-400 bg-blue-500/10 px-2.5 py-1 rounded-full border border-blue-500/20 shadow-[0_0_10px_rgba(59,130,246,0.1)]">
+                                          <UserCheck className="w-3.5 h-3.5" />
+                                          Activo
+                                        </span>
+                                      )}
 
-                    return (
-                      <motion.div
-                        key={client.id}
-                        initial={{ opacity: 0, y: 5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        className="p-3 sm:p-4 hover:bg-white/5 transition-colors"
-                      >
-                        <div className="flex items-start gap-3">
-                          {/* Avatar */}
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 overflow-hidden bg-white/10 flex items-center justify-center shrink-0">
-                            {pf?.logoUrl ? (
-                              <img
-                                src={pf.logoUrl}
-                                alt=""
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <span className="text-white font-black text-lg">
-                                {client.name.charAt(0)}
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Info */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="min-w-0">
-                                <p className="font-bold text-white text-sm truncate flex items-center gap-1.5">
-                                  <span className="text-gray-500 font-mono text-[10px]">{((currentPage - 1) * 6) + index + 1}.</span>
-                                  {client.name}
-                                  {client.isActive === false && (
-                                    <span className="bg-red-500/20 text-red-400 text-[9px] px-1.5 py-0.5 rounded-full uppercase font-black">
-                                      Inact
-                                    </span>
-                                  )}
-                                </p>
-                                <p className="text-xs text-gray-400 truncate">
-                                  {client.email}
-                                </p>
-                              </div>
-
-                              {/* Menu móvil */}
-                              <button
-                                onClick={() =>
-                                  setShowMobileActions(
-                                    isMobileMenuOpen ? null : client.id,
-                                  )
-                                }
-                                className="p-1.5 text-gray-400 hover:text-white transition-colors"
-                              >
-                                <MoreVertical className="w-4 h-4" />
-                              </button>
-                            </div>
-
-                            {/* Estado y Template */}
-                            {/* Estado y Template - UNIFICADO */}
-                            <div className="flex items-center gap-2 mt-2 flex-wrap">
-                              {hasPortfolio && pf ? (
-                                <>
-                                  <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                    Portfolio
-                                  </span>
-
-                                  {/* Estado del cliente - SOLO AQUÍ */}
-                                  {client.isActive === false ? (
-                                    <span className="flex items-center gap-1 text-[10px] font-bold text-red-400 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20">
-                                      <Shield className="w-3 h-3" />
-                                      Inactivo
-                                    </span>
+                                      <span className={`text-[10px] font-black px-2.5 py-1 rounded-full bg-gradient-to-r ${TEMPLATE_COLORS[pf.templateId]} text-white border border-white/10 shadow-sm`}>
+                                        {TEMPLATE_NAMES[pf.templateId]}
+                                      </span>
+                                    </>
                                   ) : (
-                                    <span className="flex items-center gap-1 text-[10px] font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
-                                      <UserCheck className="w-3 h-3" />
-                                      Activo
-                                    </span>
+                                    <>
+                                      <span className="flex items-center gap-1.5 text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/20">
+                                        <AlertCircle className="w-3.5 h-3.5" />
+                                        Sin asignar
+                                      </span>
+
+                                      {client.isActive === false && (
+                                        <span className="flex items-center gap-1.5 text-[10px] font-bold text-red-400 bg-red-500/10 px-2.5 py-1 rounded-full border border-red-500/20">
+                                          <Shield className="w-3.5 h-3.5" />
+                                          Inactivo
+                                        </span>
+                                      )}
+                                    </>
                                   )}
+                                </div>
 
-                                  <span className="text-[10px] font-black px-2 py-0.5 rounded bg-gradient-to-r from-violet-600 to-purple-600 text-white">
-                                    {TEMPLATE_NAMES[pf.templateId] || `T${pf.templateId}`}
-                                  </span>
-                                </>
-                              ) : (
-                                <>
-                                  <span className="flex items-center gap-1 text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">
-                                    <AlertCircle className="w-3 h-3" />
-                                    Sin asignar
-                                  </span>
-
-                                  {client.isActive === false && (
-                                    <span className="flex items-center gap-1 text-[10px] font-bold text-red-400 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20">
-                                      <Shield className="w-3 h-3" />
-                                      Inactivo
-                                    </span>
-                                  )}
-                                </>
-                              )}
-                            </div>
-
-                            {/* Acciones móvil expandibles */}
-                            <AnimatePresence>
-                              {isMobileMenuOpen && (
-                                <motion.div
-                                  initial={{ height: 0, opacity: 0 }}
-                                  animate={{ height: "auto", opacity: 1 }}
-                                  exit={{ height: 0, opacity: 0 }}
-                                  className="overflow-hidden"
-                                >
-                                  <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-gray-800">
-                                    <button
-                                      onClick={() => {
-                                        handleToggleClientStatus(client);
-                                        setShowMobileActions(null);
-                                      }}
-                                      className={`flex items-center justify-center gap-2 text-xs font-bold w-full py-2.5 border rounded-lg active:scale-95 transition-transform ${client.isActive === false
-                                        ? "border-emerald-500 text-emerald-400 bg-emerald-500/10"
-                                        : "border-red-500 text-red-400 bg-red-500/10"
-                                        }`}
+                                {/* Acciones móvil expandibles */}
+                                <AnimatePresence>
+                                  {isMobileMenuOpen && (
+                                    <motion.div
+                                      initial={{ height: 0, opacity: 0 }}
+                                      animate={{ height: "auto", opacity: 1 }}
+                                      exit={{ height: 0, opacity: 0 }}
+                                      className="overflow-hidden"
                                     >
-                                      <Shield className="w-4 h-4" />
-                                      {client.isActive === false
-                                        ? "Activar"
-                                        : "Inactivar"}
-                                    </button>
-
-                                    <button
-                                      onClick={() => {
-                                        handleDeleteClient(client);
-                                        setShowMobileActions(null);
-                                      }}
-                                      className="flex items-center justify-center gap-2 text-xs font-bold w-full py-2.5 border border-red-500/50 text-red-400 bg-red-500/10 rounded-lg hover:border-red-500 active:scale-95 transition-all"
-                                    >
-                                      <Trash2 className="w-4 h-4" /> Eliminar
-                                    </button>
-
-                                    <button
-                                      onClick={() => {
-                                        openEditModal(client);
-                                        setShowMobileActions(null);
-                                      }}
-                                      className="flex items-center justify-center gap-2 text-xs font-bold w-full py-2.5 border border-gray-600 text-white rounded-lg hover:border-white active:scale-95 transition-all"
-                                    >
-                                      <Pencil className="w-4 h-4" /> Editar
-                                    </button>
-
-                                    {hasPortfolio && pf && (
-                                      <>
+                                      <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-gray-800">
                                         <button
                                           onClick={() => {
-                                            openDetails(client, pf);
+                                            handleToggleClientStatus(client);
                                             setShowMobileActions(null);
                                           }}
-                                          className="flex items-center justify-center gap-2 text-xs font-bold w-full py-2.5 border border-blue-500/50 text-blue-400 bg-blue-500/10 rounded-lg hover:border-blue-500 active:scale-95 transition-all"
+                                          className={`flex items-center justify-center gap-2 text-xs font-bold w-full py-3 border rounded-xl active:scale-95 transition-all ${client.isActive === false
+                                            ? "border-emerald-500/50 text-emerald-400 bg-emerald-500/10"
+                                            : "border-red-500/50 text-red-400 bg-red-500/10"
+                                            }`}
                                         >
-                                          <Eye className="w-4 h-4" /> Ver
+                                          <Shield className="w-4 h-4" />
+                                          {client.isActive === false
+                                            ? "Activar"
+                                            : "Inactivar"}
                                         </button>
 
-                                        <a
-                                          href={`/p/${pf.slug}`}
-                                          target="_blank"
-                                          rel="noreferrer"
-                                          className="flex items-center justify-center gap-2 text-xs font-bold w-full py-2.5 border border-emerald-500/50 text-emerald-400 bg-emerald-500/10 rounded-lg hover:border-emerald-500 active:scale-95 transition-all"
+                                        <button
+                                          onClick={() => {
+                                            handleDeleteClient(client);
+                                            setShowMobileActions(null);
+                                          }}
+                                          className="flex items-center justify-center gap-2 text-xs font-bold w-full py-3 border border-red-500/30 text-red-400 bg-red-500/10 rounded-xl hover:border-red-500 active:scale-95 transition-all"
                                         >
-                                          <ExternalLink className="w-4 h-4" />{" "}
-                                          Link
-                                        </a>
-                                      </>
-                                    )}
-                                  </div>
+                                          <Trash2 className="w-4 h-4" /> Eliminar
+                                        </button>
 
-                                  {/* Templates sin asignar */}
-                                  {!hasPortfolio && (
-                                    <div className="mt-2">
-                                      <p className="text-[10px] text-gray-500 mb-1.5">
-                                        Asignar template:
-                                      </p>
-                                      <div className="grid grid-cols-2 gap-2">
-                                        {[1, 2, 3, 4].map((num) => (
-                                          <button
-                                            key={num}
-                                            onClick={() => {
-                                              handleAssignTemplate(
-                                                client.id,
-                                                num,
-                                              );
-                                              setShowMobileActions(null);
-                                            }}
-                                            className="text-xs font-black w-full py-2.5 rounded-lg border border-gray-600 text-white hover:border-white hover:bg-white hover:text-black active:scale-95 transition-all flex items-center justify-center"
-                                          >
-                                            T{num} - {TEMPLATE_NAMES[num]}
-                                          </button>
-                                        ))}
+                                        <button
+                                          onClick={() => {
+                                            openEditModal(client);
+                                            setShowMobileActions(null);
+                                          }}
+                                          className="flex items-center justify-center gap-2 text-xs font-bold w-full py-3 border border-white/10 text-white bg-white/5 rounded-xl hover:border-white active:scale-95 transition-all"
+                                        >
+                                          <Pencil className="w-4 h-4" /> Editar
+                                        </button>
+
+                                        {hasPortfolio && pf && (
+                                          <>
+                                            <button
+                                              onClick={() => {
+                                                openDetails(client, pf);
+                                                setShowMobileActions(null);
+                                              }}
+                                              className="flex items-center justify-center gap-2 text-xs font-bold w-full py-3 border border-blue-500/30 text-blue-400 bg-blue-500/10 rounded-xl hover:border-blue-500 active:scale-95 transition-all"
+                                            >
+                                              <Eye className="w-4 h-4" /> Ver
+                                            </button>
+
+                                            <a
+                                              href={`/p/${pf.slug}`}
+                                              target="_blank"
+                                              rel="noreferrer"
+                                              className="flex items-center justify-center gap-2 text-xs font-bold col-span-2 py-3 border border-emerald-500/30 text-emerald-400 bg-emerald-500/10 rounded-xl hover:border-emerald-500 active:scale-95 transition-all"
+                                            >
+                                              <ExternalLink className="w-4 h-4" />{" "}
+                                              Abrir Portfolio
+                                            </a>
+                                          </>
+                                        )}
                                       </div>
-                                    </div>
+
+                                      {/* Templates sin asignar */}
+                                      {!hasPortfolio && (
+                                        <div className="mt-3">
+                                          <p className="text-[10px] uppercase font-black tracking-widest text-gray-500 mb-2 px-1">
+                                            Asignar Diseño:
+                                          </p>
+                                          <div className="grid grid-cols-2 gap-2">
+                                            {[1, 2, 3, 4].map((num) => (
+                                              <button
+                                                key={num}
+                                                onClick={() => {
+                                                  handleAssignTemplate(
+                                                    client.id,
+                                                    num,
+                                                  );
+                                                  setShowMobileActions(null);
+                                                }}
+                                                className={`text-[10px] font-black w-full py-3 rounded-xl border border-white/10 text-white bg-gradient-to-r ${TEMPLATE_COLORS[num]} hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center shadow-lg`}
+                                              >
+                                                {TEMPLATE_NAMES[num]}
+                                              </button>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+                                    </motion.div>
                                   )}
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </div>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
+                                </AnimatePresence>
+                              </div>
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                    </motion.div>
+                  )}
                 </AnimatePresence>
 
-                {filteredClients.length === 0 && (
-                  <div className="flex flex-col items-center py-12 gap-3">
-                    <div className="w-12 h-12 bg-gray-800 flex items-center justify-center rounded-lg">
-                      <Users className="w-6 h-6 text-gray-500" />
+                {filteredClients.length === 0 && !loadingClients && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex flex-col items-center py-16 gap-4"
+                  >
+                    <div className="w-16 h-16 bg-gradient-to-b from-gray-800/50 to-black border border-gray-700 flex items-center justify-center rounded-2xl shadow-xl">
+                      <Users className="w-8 h-8 text-gray-600" />
                     </div>
-                    <p className="text-gray-400 font-bold text-xs text-center px-4">
-                      {searchQuery ? "Sin resultados" : "Aún no hay clientes"}
-                    </p>
-                  </div>
+                    <div className="text-center px-6">
+                      <p className="text-white font-black text-lg">No hay clientes</p>
+                      <p className="text-gray-500 font-medium text-xs mt-1">
+                        {searchQuery ? `Sin resultados para "${searchQuery}"` : "Tu directorio está esperando a su primer cliente."}
+                      </p>
+                    </div>
+                  </motion.div>
                 )}
               </div>
 
               {/* PAGINATION CONTROLS */}
               {totalPages > 1 && (
                 <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 sm:px-6 border-t border-gray-800 bg-black gap-4">
-                  <div className="flex w-full sm:w-auto justify-between sm:hidden">
+                  <div className="flex w-full sm:w-auto justify-between sm:hidden px-2">
                     <button
                       onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                       disabled={currentPage === 1}
-                      className="relative inline-flex items-center rounded-md border border-gray-700 bg-black px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 disabled:opacity-50"
+                      className="relative inline-flex items-center rounded-xl border border-gray-700 bg-white/5 px-6 py-3 text-sm font-black text-gray-300 hover:bg-white/10 active:scale-95 disabled:opacity-30 disabled:pointer-events-none transition-all"
                     >
-                      Anterior
+                      <ChevronLeft className="w-4 h-4 mr-2" /> Anterior
                     </button>
                     <button
                       onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                       disabled={currentPage === totalPages}
-                      className="relative ml-3 inline-flex items-center rounded-md border border-gray-700 bg-black px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 disabled:opacity-50"
+                      className="relative inline-flex items-center rounded-xl border border-gray-700 bg-white/5 px-6 py-3 text-sm font-black text-gray-300 hover:bg-white/10 active:scale-95 disabled:opacity-30 disabled:pointer-events-none transition-all"
                     >
-                      Siguiente
+                      Siguiente <ChevronRightIcon className="w-4 h-4 ml-2" />
                     </button>
                   </div>
                   <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
@@ -1327,7 +1444,7 @@ export default function AdminDashboard() {
                           <button
                             key={i}
                             onClick={() => setCurrentPage(i + 1)}
-                            className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold focus:z-20 focus:outline-offset-0 ring-1 ring-inset ring-gray-700 ${currentPage === i + 1 ? 'z-10 bg-violet-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600' : 'text-gray-300 hover:bg-gray-800'}`}
+                            className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold focus:z-20 focus:outline-offset-0 ring-1 ring-inset ring-gray-700 ${currentPage === i + 1 ? 'z-10 bg-white text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600' : 'text-gray-300 hover:bg-gray-800'}`}
                           >
                             {i + 1}
                           </button>
@@ -1479,10 +1596,10 @@ export default function AdminDashboard() {
                 href={`/p/${selectedPortfolio?.slug}`}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-2 text-sm font-bold px-4 py-2.5 bg-white/5 border border-white/10 text-white hover:bg-white hover:text-black transition-all rounded-xl shadow-sm"
+                className="flex items-center gap-2 text-sm font-bold px-4 py-2.5 border border-white/10 text-white hover:bg-white hover:text-black transition-all rounded-xl shadow-sm"
               >
                 <ExternalLink className="w-4 h-4" />
-                Ver Online
+                Ver CV
               </a>
             </div>
 

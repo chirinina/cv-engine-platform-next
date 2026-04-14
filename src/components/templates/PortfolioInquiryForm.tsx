@@ -33,8 +33,7 @@ const INITIAL_FORM: InquiryFormState = {
 const variantMap: Record<Variant, Record<string, string>> = {
   minimal: {
     wrapper:
-      " border backdrop-blur-xl shadow-[0_30px_80px_rgba(0,0,0,0.08)]",
-    title: "text-neutral-950",
+      "",
     description: "text-neutral-600",
     label: "text-neutral-500",
     input:
@@ -45,7 +44,7 @@ const variantMap: Record<Variant, Record<string, string>> = {
   },
   cyber: {
     wrapper:
-      " border border-cyan-500/20 bg-gray-950/80 backdrop-blur-xl shadow-[0_30px_80px_rgba(0,255,204,0.08)]",
+      " border border-cyan-500/20",
     title: "text-white",
     description: "text-gray-400",
     label: "text-cyan-300/80",
@@ -57,12 +56,12 @@ const variantMap: Record<Variant, Record<string, string>> = {
   },
   corporate: {
     wrapper:
-      " border border-neutral-200 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.08)]",
+      "shadow-sm",
     title: "text-neutral-900",
     description: "text-neutral-600",
     label: "text-neutral-500",
     input:
-      "bg-neutral-50 border border-neutral-200 text-neutral-900 placeholder:text-neutral-400",
+      "border border-neutral-200 text-neutral-900 placeholder:text-neutral-400 focus:border-opacity-50",
     helper: "text-neutral-500",
     buttonText: "text-white",
     success: "border-emerald-200 bg-emerald-50 text-emerald-700",
@@ -253,22 +252,34 @@ export default function PortfolioInquiryForm({
             </div>
           )}
 
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-end mt-4">
             <button
               type="submit"
               disabled={submitting}
-              className={`inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3 font-bold transition-all disabled:cursor-not-allowed disabled:opacity-60`}
-              style={{ backgroundColor: primaryColor }}
+              className={`
+                group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-2xl px-10 py-4 
+                font-black uppercase tracking-widest text-sm transition-all duration-300
+                hover:scale-[1.03] hover:-translate-y-1 active:scale-95
+                disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:translate-y-0
+                ${styles.buttonText}
+              `}
+              style={{
+                backgroundColor: primaryColor,
+                boxShadow: `0 10px 30px -10px ${primaryColor}66`,
+              }}
             >
+              {/* Shine effect */}
+              <div className="absolute inset-0 block h-full w-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] pointer-events-none" />
+
               {submitting ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Enviando...
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Enviando...</span>
                 </>
               ) : (
                 <>
-                  <Send className="w-4 h-4" />
-                  Enviar
+                  <Send className="w-4 h-4 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
+                  <span>Enviar</span>
                 </>
               )}
             </button>
