@@ -52,6 +52,8 @@ import {
   ArrowUpDown,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Modal from "@/components/dashboard/Modal";
+import ConfirmModal from "@/components/dashboard/ConfirmModal";
 
 const TEMPLATE_NAMES: Record<number, string> = {
   1: "Minimal",
@@ -198,6 +200,18 @@ export default function AdminDashboard() {
   const [showMobileActions, setShowMobileActions] = useState<number | null>(
     null,
   );
+  const [confirmConfig, setConfirmConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    variant?: "danger" | "warning" | "info";
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: () => { },
+  });
 
   useEffect(() => {
     const saved = localStorage.getItem("admin-theme");
@@ -376,30 +390,47 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleToggleClientStatus = async (client: Client) => {
-    try {
-      const payload = { isActive: client.isActive === false ? true : false };
-      await api.put(`/users/${client.id}`, payload);
-      toast.success(
-        `Cliente ${client.isActive === false ? "activado" : "inactivado"} correctamente`,
-      );
-      fetchClients();
-    } catch (error: unknown) {
-      toast.error(getErrorMessage(error, "Error al cambiar estado"));
-    }
+  const handleToggleClientStatus = (client: Client) => {
+    const isActivating = client.isActive === false;
+    setConfirmConfig({
+      isOpen: true,
+      title: isActivating ? "Activar Cliente" : "Inactivar Cliente",
+      message: `¿Estás seguro de que deseas ${isActivating ? "activar" : "inactivar"} a ${client.name}? ${isActivating ? "Esto permitirá que su portfolio sea visible." : "Esto desactivará el acceso a su portfolio."}`,
+      variant: isActivating ? "info" : "warning",
+      onConfirm: async () => {
+        try {
+          const payload = { isActive: isActivating };
+          await api.put(`/users/${client.id}`, payload);
+          toast.success(
+            `Cliente ${isActivating ? "activado" : "inactivado"} correctamente`,
+          );
+          fetchClients();
+          setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+        } catch (error: unknown) {
+          toast.error(getErrorMessage(error, "Error al cambiar estado"));
+        }
+      },
+    });
   };
 
-  const handleDeleteClient = async (client: Client) => {
-    if (window.confirm(`¿Estás seguro de que deseas eliminar permanentemente a ${client.name}? Esta acción eliminará su cuenta y su portfolio y es irreversible.`)) {
-      try {
-        await api.delete(`/users/${client.id}`);
-        toast.success("Cliente eliminado exitosamente");
-        fetchClients();
-        fetchPortfolios();
-      } catch (error: unknown) {
-        toast.error(getErrorMessage(error, "Error al eliminar cliente"));
-      }
-    }
+  const handleDeleteClient = (client: Client) => {
+    setConfirmConfig({
+      isOpen: true,
+      title: "Eliminar Cliente",
+      message: `¿Estás seguro de que deseas eliminar permanentemente a ${client.name}? Esta acción eliminará su cuenta y su portfolio y es irreversible.`,
+      variant: "danger",
+      onConfirm: async () => {
+        try {
+          await api.delete(`/users/${client.id}`);
+          toast.success("Cliente eliminado exitosamente");
+          fetchClients();
+          fetchPortfolios();
+          setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+        } catch (error: unknown) {
+          toast.error(getErrorMessage(error, "Error al eliminar cliente"));
+        }
+      },
+    });
   };
 
   const filteredClients = clients;
@@ -1274,138 +1305,111 @@ export default function AdminDashboard() {
         </main>
       </div>
 
-      {/* ===== CREATE CLIENT INLINE VIEW ===== */}
-      <AnimatePresence>
-        {activeMainTab === "Clientes" && clientView === "create" && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="w-full max-w-2xl mx-auto p-4 sm:p-8 bg-black shadow-2xl border border-gray-800 rounded-xl"
+      {/* ===== CREATE CLIENT MODAL ===== */}
+      <Modal
+        isOpen={activeMainTab === "Clientes" && clientView === "create"}
+        onClose={() => setClientView("list")}
+        title="Nuevo Cliente"
+      >
+        <div className="p-6 sm:p-8">
+          <p className="text-xs sm:text-sm text-gray-400 mb-6">
+            Crea acceso para un nuevo usuario administrador o cliente.
+          </p>
+          <form
+            onSubmit={handleCreateClient}
+            className="space-y-4 sm:space-y-5"
           >
-            <div className="flex items-center justify-between mb-4 sm:mb-6">
-              <div>
-                <h3 className="text-lg sm:text-2xl font-black text-white">
-                  Nuevo Cliente
-                </h3>
-                <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
-                  Crea acceso para un nuevo usuario
-                </p>
+            {CLIENT_FIELDS.map(({ label, type, key, placeholder }) => (
+              <div key={key}>
+                <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-gray-400 mb-1.5 block">
+                  {label}
+                </label>
+                <input
+                  required
+                  type={type}
+                  value={newClient[key]}
+                  onChange={(e) =>
+                    setNewClient({ ...newClient, [key]: e.target.value })
+                  }
+                  placeholder={placeholder}
+                  className={inp}
+                />
               </div>
+            ))}
+            <div className="flex gap-3 justify-end mt-8 pt-6 border-t border-white/5">
               <button
+                type="button"
                 onClick={() => setClientView("list")}
-                className="p-1.5 sm:p-2 text-gray-400 hover:bg-red-500/20 hover:text-red-400 rounded-full transition-colors"
+                className="px-5 py-2.5 font-bold transition-all text-sm border border-white/10 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl"
               >
-                <X className="w-4 h-4 sm:w-5 sm:h-5" />
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="px-6 py-2.5 font-bold transition-all text-sm flex items-center gap-2 bg-white text-black hover:bg-gray-200 rounded-xl"
+              >
+                <Plus className="w-4 h-4" /> Registrar Cliente
               </button>
             </div>
-            <form
-              onSubmit={handleCreateClient}
-              className="space-y-3 sm:space-y-4"
-            >
-              {CLIENT_FIELDS.map(({ label, type, key, placeholder }) => (
-                <div key={key}>
-                  <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-gray-400 mb-1 sm:mb-1.5 block">
-                    {label}
-                  </label>
-                  <input
-                    required
-                    type={type}
-                    value={newClient[key]}
-                    onChange={(e) =>
-                      setNewClient({ ...newClient, [key]: e.target.value })
-                    }
-                    placeholder={placeholder}
-                    className={inp}
-                  />
-                </div>
-              ))}
-              <div className="flex gap-2 sm:gap-3 justify-end mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-gray-800">
-                <button
-                  type="button"
-                  onClick={() => setClientView("list")}
-                  className="px-3 sm:px-5 py-2 sm:py-2.5 font-bold transition-all text-xs sm:text-sm border border-gray-600 text-gray-300 hover:border-white hover:text-white rounded-md"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 sm:px-6 py-2 sm:py-2.5 font-bold transition-all text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 border border-white text-white hover:bg-white hover:text-black rounded-md"
-                >
-                  <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Registrar
-                </button>
-              </div>
-            </form>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </form>
+        </div>
+      </Modal>
 
-      {/* ===== FULL DETAILS INLINE VIEW ===== */}
-      <AnimatePresence>
-        {activeMainTab === "Clientes" && clientView === "details" && selectedPortfolio && selectedClient && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="bg-black w-full h-[85vh] mt-4 rounded-xl overflow-hidden shadow-2xl border border-gray-800 flex flex-col"
-          >
-            {/* Modal Header */}
-            <div className="p-3 sm:p-6 md:p-8 border-b border-gray-800 flex items-start justify-between sticky top-0 bg-black z-10 shrink-0">
-              <div className="flex items-center gap-2 sm:gap-5 min-w-0">
-                <div className="w-10 h-10 sm:w-16 sm:h-16 overflow-hidden bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center shrink-0 rounded-lg">
-                  {selectedPortfolio.logoUrl ? (
-                    <img
-                      src={selectedPortfolio.logoUrl}
-                      alt=""
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-white font-black text-lg sm:text-2xl">
-                      {selectedClient.name.charAt(0)}
+      {/* ===== FULL DETAILS MODAL ===== */}
+      <Modal
+        isOpen={activeMainTab === "Clientes" && clientView === "details" && !!selectedPortfolio && !!selectedClient}
+        onClose={() => setClientView("list")}
+        title={selectedClient?.name || "Detalles del Cliente"}
+        maxWidth="max-w-4xl"
+      >
+        {selectedPortfolio && selectedClient && (
+          <div className="flex flex-col h-[80vh]">
+          {/* Info Header inside modal */}
+          <div className="p-6 border-b border-white/5 flex items-start justify-between bg-white/[0.02]">
+            <div className="flex items-center gap-5">
+              <div className="w-16 h-16 overflow-hidden bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center rounded-2xl shadow-lg shrink-0">
+                {selectedPortfolio?.logoUrl ? (
+                  <img
+                    src={selectedPortfolio.logoUrl}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-white font-black text-2xl">
+                    {selectedClient?.name.charAt(0)}
+                  </span>
+                )}
+              </div>
+              <div>
+                <h3 className="text-2xl font-black text-white leading-tight">
+                  {selectedClient?.name}
+                </h3>
+                <div className="flex items-center gap-4 mt-1.5">
+                  {selectedPortfolio?.profession && (
+                    <span className="text-sm text-gray-400 flex items-center gap-1.5">
+                      <Briefcase className="w-4 h-4 text-violet-400" />
+                      {selectedPortfolio.profession}
+                    </span>
+                  )}
+                  {selectedPortfolio?.location && (
+                    <span className="text-sm text-gray-400 flex items-center gap-1.5">
+                      <MapPin className="w-4 h-4 text-emerald-400" />
+                      {selectedPortfolio.location}
                     </span>
                   )}
                 </div>
-                <div className="min-w-0">
-                  <h3 className="text-base sm:text-2xl font-black text-white truncate">
-                    {selectedClient.name}
-                  </h3>
-                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-3 mt-1 sm:mt-2">
-                    {selectedPortfolio.profession && (
-                      <span className="text-[10px] sm:text-sm text-gray-400 flex items-center gap-0.5 sm:gap-1">
-                        <Briefcase className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                        <span className="truncate">
-                          {selectedPortfolio.profession}
-                        </span>
-                      </span>
-                    )}
-                    {selectedPortfolio.location && (
-                      <span className="text-[10px] sm:text-sm text-gray-400 flex items-center gap-0.5 sm:gap-1 hidden sm:flex">
-                        <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                        {selectedPortfolio.location}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-                <a
-                  href={`/p/${selectedPortfolio.slug}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="hidden sm:flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-bold px-2 sm:px-4 py-1.5 sm:py-2.5 border border-white text-white hover:bg-white hover:text-black transition-all rounded-md"
-                >
-                  <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  <span className="hidden md:inline">Ver Portfolio</span>
-                  <span className="md:hidden">Ver</span>
-                </a>
-                <button
-                  onClick={() => setClientView("list")}
-                  className="p-1.5 sm:p-2.5 bg-transparent text-gray-400 hover:bg-red-500/20 hover:text-red-400 transition-colors rounded-md"
-                >
-                  <X className="w-4 h-4 sm:w-5 sm:h-5" />
-                </button>
               </div>
             </div>
+            <a
+              href={`/p/${selectedPortfolio?.slug}`}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-2 text-sm font-bold px-4 py-2.5 bg-white/5 border border-white/10 text-white hover:bg-white hover:text-black transition-all rounded-xl shadow-sm"
+            >
+              <ExternalLink className="w-4 h-4" />
+              Ver Online
+            </a>
+          </div>
 
             {/* Tabs - Scrollable horizontal en móvil */}
             <div className="flex gap-1 px-2 sm:px-6 py-2 sm:py-3 border-b border-gray-800 bg-black overflow-x-auto scrollbar-hide shrink-0">
@@ -1787,9 +1791,9 @@ export default function AdminDashboard() {
                 </div>
               )}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </div>
+          )}
+        </Modal>
 
       {/* Close dropdown on outside click */}
       {activeDropdown !== null && (
@@ -1799,102 +1803,94 @@ export default function AdminDashboard() {
         />
       )}
 
-      {/* ===== EDIT CLIENT INLINE VIEW ===== */}
-      <AnimatePresence>
-        {activeMainTab === "Clientes" && clientView === "edit" && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="w-full max-w-2xl mx-auto p-4 sm:p-8 bg-black shadow-2xl border border-gray-800 rounded-xl mt-6"
+      {/* ===== EDIT CLIENT MODAL ===== */}
+      <Modal
+        isOpen={activeMainTab === "Clientes" && clientView === "edit"}
+        onClose={() => setClientView("list")}
+        title="Editar Cliente"
+      >
+        <div className="p-6 sm:p-8">
+          <p className="text-xs sm:text-sm text-gray-400 mb-6">
+            Actualiza la información de acceso del cliente.
+          </p>
+          <form
+            onSubmit={handleEditClient}
+            className="space-y-4 sm:space-y-5"
           >
-            <div className="flex items-center justify-between mb-4 sm:mb-6">
-              <div>
-                <h3 className="text-lg sm:text-2xl font-black text-white flex items-center gap-2">
-                  <Pencil className="w-4 h-4 sm:w-5 sm:h-5 text-violet-400" />
-                  Editar Cliente
-                </h3>
-                <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
-                  Modifica el nombre y correo del cliente
-                </p>
-              </div>
-              <button
-                onClick={() => setClientView("list")}
-                className="p-1.5 sm:p-2 text-gray-400 hover:bg-red-500/20 hover:text-red-400 rounded-full transition-colors"
-              >
-                <X className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
+            <div>
+              <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-gray-400 mb-1.5 block">
+                Nombre Completo
+              </label>
+              <input
+                required
+                type="text"
+                value={editClient.name}
+                onChange={(e) =>
+                  setEditClient({ ...editClient, name: e.target.value })
+                }
+                placeholder="Nombre del cliente"
+                className={inp}
+              />
+            </div>
+            <div>
+              <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-gray-400 mb-1.5 block">
+                Correo Electrónico
+              </label>
+              <input
+                required
+                type="email"
+                value={editClient.email}
+                onChange={(e) =>
+                  setEditClient({ ...editClient, email: e.target.value })
+                }
+                placeholder="correo@ejemplo.com"
+                className={inp}
+              />
+            </div>
+            <div>
+              <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-gray-400 mb-1.5 block">
+                Nueva Contraseña (Opcional)
+              </label>
+              <input
+                type="password"
+                value={editClient.password || ""}
+                onChange={(e) =>
+                  setEditClient({ ...editClient, password: e.target.value })
+                }
+                placeholder="••••••••"
+                className={inp}
+              />
             </div>
 
-            <form
-              onSubmit={handleEditClient}
-              className="space-y-3 sm:space-y-5"
-            >
-              <div>
-                <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-gray-400 mb-1 sm:mb-1.5 block">
-                  Nombre Completo
-                </label>
-                <input
-                  required
-                  type="text"
-                  value={editClient.name}
-                  onChange={(e) =>
-                    setEditClient({ ...editClient, name: e.target.value })
-                  }
-                  placeholder="Nombre del cliente"
-                  className={inp}
-                />
-              </div>
-              <div>
-                <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-gray-400 mb-1 sm:mb-1.5 block">
-                  Correo Electrónico
-                </label>
-                <input
-                  required
-                  type="email"
-                  value={editClient.email}
-                  onChange={(e) =>
-                    setEditClient({ ...editClient, email: e.target.value })
-                  }
-                  placeholder="correo@ejemplo.com"
-                  className={inp}
-                />
-              </div>
-              <div>
-                <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-gray-400 mb-1 sm:mb-1.5 block">
-                  Nueva Contraseña (Opcional)
-                </label>
-                <input
-                  type="password"
-                  value={editClient.password || ""}
-                  onChange={(e) =>
-                    setEditClient({ ...editClient, password: e.target.value })
-                  }
-                  placeholder="••••••••"
-                  className={inp}
-                />
-              </div>
+            <div className="flex gap-3 justify-end pt-6 mt-6 border-t border-white/5">
+              <button
+                type="button"
+                onClick={() => setClientView("list")}
+                className="px-5 py-2.5 font-bold text-sm border border-white/10 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="px-6 py-2.5 font-bold text-sm flex items-center gap-2 bg-white text-black hover:bg-gray-200 rounded-xl transition-all shadow-lg"
+              >
+                <Pencil className="w-4 h-4" />
+                Guardar Cambios
+              </button>
+            </div>
+          </form>
+        </div>
+      </Modal>
 
-              <div className="flex gap-2 sm:gap-3 justify-end pt-3 sm:pt-4 border-t border-gray-800">
-                <button
-                  type="button"
-                  onClick={() => setClientView("list")}
-                  className="px-3 sm:px-5 py-2 sm:py-2.5 font-bold text-xs sm:text-sm border border-gray-600 text-gray-300 hover:border-white hover:text-white rounded-md transition-all"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 sm:px-6 py-2 sm:py-2.5 font-bold text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 border border-white text-white hover:bg-white hover:text-black rounded-md transition-all"
-                >
-                  <Pencil className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  Guardar
-                </button>
-              </div>
-            </form>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* ===== GLOBAL CONFIRM MODAL ===== */}
+      <ConfirmModal
+        isOpen={confirmConfig.isOpen}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        onClose={() => setConfirmConfig(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmConfig.onConfirm}
+        variant={confirmConfig.variant}
+      />
     </div>
   );
 }
