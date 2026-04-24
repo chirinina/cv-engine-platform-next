@@ -1,7 +1,13 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import React, { useEffect, useState, useRef } from "react";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useSpring,
+  AnimatePresence,
+} from "framer-motion";
 import {
   Mail,
   Briefcase,
@@ -11,6 +17,8 @@ import {
   Calendar,
   Layers,
   ArrowUpRight,
+  ExternalLink,
+  ChevronRight,
 } from "lucide-react";
 import PortfolioInquiryForm from "./PortfolioInquiryForm";
 import {
@@ -22,7 +30,25 @@ import {
   PortfolioSkillEntry,
 } from "@/types/portfolio";
 
-// Social Icons
+// --- Animaciones Variants ---
+const fadeInUp = {
+  hidden: { opacity: 0, y: 40 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] },
+  },
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1, delayChildren: 0.2 },
+  },
+};
+
+// --- Iconos Sociales ---
 const GithubIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     {...props}
@@ -68,7 +94,7 @@ const TwitterIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-// Dynamic Ambient Background
+// --- Fondo Dinámico ---
 const AmbientBackground = ({
   primaryColor,
   secondaryColor,
@@ -76,49 +102,46 @@ const AmbientBackground = ({
   primaryColor: string;
   secondaryColor: string;
 }) => {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const mouseX = useSpring(0, { stiffness: 50, damping: 20 });
+  const mouseY = useSpring(0, { stiffness: 50, damping: 20 });
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({
-        x: (e.clientX / window.innerWidth) * 100,
-        y: (e.clientY / window.innerHeight) * 100,
-      });
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
     };
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
+  }, [mouseX, mouseY]);
 
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden bg-slate-950">
+    <div className="fixed inset-0 -z-10 overflow-hidden bg-[#020617]">
       <motion.div
-        animate={{
-          x: `${mousePosition.x * 0.5}%`,
-          y: `${mousePosition.y * 0.5}%`,
-        }}
-        transition={{ type: "spring", damping: 50, stiffness: 10 }}
-        className="absolute -top-1/4 -right-1/4 w-3/4 h-3/4 rounded-full mix-blend-screen filter blur-[120px] opacity-40"
         style={{
-          background: `radial-gradient(circle, ${primaryColor} 0%, transparent 70%)`,
+          x: mouseX,
+          y: mouseY,
+          translateX: "-50%",
+          translateY: "-50%",
+          background: `radial-gradient(circle, ${primaryColor}33 0%, transparent 70%)`,
         }}
+        className="absolute w-[800px] h-[800px] rounded-full blur-[120px] pointer-events-none opacity-60"
       />
       <motion.div
-        animate={{
-          x: `-${mousePosition.x * 0.3}%`,
-          y: `-${mousePosition.y * 0.3}%`,
-        }}
-        transition={{ type: "spring", damping: 50, stiffness: 10 }}
-        className="absolute -bottom-1/4 -left-1/4 w-3/4 h-3/4 rounded-full mix-blend-screen filter blur-[100px] opacity-30"
         style={{
-          background: `radial-gradient(circle, ${secondaryColor} 0%, transparent 70%)`,
+          x: mouseX,
+          y: mouseY,
+          translateX: "-20%",
+          translateY: "-20%",
+          background: `radial-gradient(circle, ${secondaryColor}22 0%, transparent 70%)`,
         }}
+        className="absolute w-[600px] h-[600px] rounded-full blur-[100px] pointer-events-none opacity-40"
       />
-      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.15] mix-blend-overlay"></div>
     </div>
   );
 };
 
-// Glass Card Component
+// --- Glass Card ---
 const GlassCard = ({
   children,
   className = "",
@@ -129,13 +152,14 @@ const GlassCard = ({
   delay?: number;
 }) => (
   <motion.div
-    initial={{ opacity: 0, y: 30 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, margin: "-50px" }}
-    transition={{ duration: 0.7, delay, ease: "easeOut" }}
-    className={`bg-white/[0.04] backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] rounded-3xl p-8 hover:bg-white/[0.06] hover:border-white/20 transition-all duration-500 ${className}`}
+    initial="hidden"
+    whileInView="visible"
+    viewport={{ once: true, margin: "-100px" }}
+    variants={fadeInUp}
+    className={`group relative overflow-hidden bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-6 md:p-10 hover:bg-white/[0.05] hover:border-white/20 transition-all duration-700 ${className}`}
   >
-    {children}
+    <div className="absolute inset-0 bg-gradient-to-br from-white/[0.05] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+    <div className="relative z-10">{children}</div>
   </motion.div>
 );
 
@@ -147,21 +171,23 @@ export default function TemplateGlass({
   sections: PortfolioSection[];
 }) {
   const { scrollYProgress } = useScroll();
-  const yImage = useTransform(scrollYProgress, [0, 1], [0, 200]);
+  const scaleProgress = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+  });
 
   const heroSection = sections.find((s) => s.type === "hero");
   const title = heroSection?.content?.title || "Creative Vision";
   const subtitle =
     heroSection?.content?.subtitle ||
     "Designing interactive experiences through code and imagination.";
-
   const avatarUrl =
     portfolio.logoUrl ||
     heroSection?.content?.avatarUrl ||
     "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80";
 
-  const primaryColor = portfolio.primaryColor || "#ec4899"; // default pink
-  const secondaryColor = portfolio.secondaryColor || "#8b5cf6"; // default purple
+  const primaryColor = portfolio.primaryColor || "#ec4899";
+  const secondaryColor = portfolio.secondaryColor || "#8b5cf6";
   const projects = portfolio.projects ?? [];
   const experience = portfolio.experience ?? [];
   const courses = portfolio.courses ?? [];
@@ -172,7 +198,7 @@ export default function TemplateGlass({
     if (typeof tools === "string")
       return tools
         .split(",")
-        .map((t: string) => t.trim())
+        .map((t) => t.trim())
         .filter(Boolean);
     if (Array.isArray(tools)) return tools.map(String);
     return [];
@@ -180,13 +206,12 @@ export default function TemplateGlass({
 
   const getSkillName = (s: PortfolioSkillEntry): string => {
     if (typeof s === "string") return s;
-    if (s && typeof s === "object" && s.name) return String(s.name);
-    return "";
+    return s?.name ? String(s.name) : "";
   };
 
   return (
     <div
-      className="min-h-screen text-slate-100 font-sans selection:bg-white/20"
+      className="min-h-screen text-slate-100 font-sans selection:bg-white/30 selection:text-white overflow-x-hidden"
       style={{ fontFamily: portfolio.fontFamily }}
     >
       <AmbientBackground
@@ -194,304 +219,288 @@ export default function TemplateGlass({
         secondaryColor={secondaryColor}
       />
 
-      {/* Navigation - Floating Glass Pill */}
+      {/* Barra de progreso superior */}
+      <motion.div
+        style={{ scaleX: scaleProgress }}
+        className="fixed top-0 left-0 right-0 h-1 z-[100] origin-left bg-gradient-to-r from-transparent via-white to-transparent opacity-50"
+      />
+
+      {/* Navegación - Ultra Slim Glass */}
       <motion.nav
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4"
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        className="fixed top-4 left-0 right-0 z-50 flex justify-center px-4"
       >
-        <div className="flex items-center gap-6 px-8 py-4 bg-white/5 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-full">
-          <a
-            href="#home"
-            className="text-sm font-medium hover:text-white text-slate-300 transition-colors"
-          >
-            Inicio
-          </a>
-          <a
-            href="#projects"
-            className="text-sm font-medium hover:text-white text-slate-300 transition-colors"
-          >
-            Proyectos
-          </a>
-          <a
-            href="#experience"
-            className="text-sm font-medium hover:text-white text-slate-300 transition-colors"
-          >
-            Experiencia
-          </a>
-          <a
-            href="#skills"
-            className="text-sm font-medium hover:text-white text-slate-300 transition-colors"
-          >
-            Habilidades
-          </a>
+        <div className="flex items-center gap-2 md:gap-8 px-6 py-3 bg-black/20 backdrop-blur-3xl border border-white/10 rounded-full shadow-2xl overflow-x-auto no-scrollbar max-w-full">
+          {["Inicio", "Proyectos", "Experiencia", "Habilidades"].map((item) => (
+            <a
+              key={item}
+              href={`#${item.toLowerCase()}`}
+              className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-bold text-slate-400 hover:text-white transition-all whitespace-nowrap"
+            >
+              {item}
+            </a>
+          ))}
         </div>
       </motion.nav>
 
-      <main className="relative z-10 max-w-6xl mx-auto px-6 py-32 md:py-40 flex flex-col gap-32">
-        {/* Hero Section */}
+      <main className="relative z-10 w-full px-2 md:px-6 lg:px-10 pt-24 md:pt-32 flex flex-col gap-16 md:gap-32 max-w-[1600px] mx-auto">
+        {/* Hero Section - Inmersiva */}
         <section
-          id="home"
-          className="flex flex-col lg:flex-row items-center gap-16 min-h-[70vh]"
+          id="inicio"
+          className="flex flex-col lg:flex-row items-center justify-between gap-12 min-h-[85vh] py-10"
         >
-          <div className="flex-1 space-y-8">
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+            className="flex-1 space-y-6 md:space-y-10 text-center lg:text-left"
+          >
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm backdrop-blur-md"
+              variants={fadeInUp}
+              className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md"
             >
-              <span
-                className="w-2 h-2 rounded-full animate-pulse"
-                style={{ backgroundColor: primaryColor }}
-              />
-              Disponible para nuevas oportunidades
+              <span className="relative flex h-2 w-2">
+                <span
+                  className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                  style={{ backgroundColor: primaryColor }}
+                ></span>
+                <span
+                  className="relative inline-flex rounded-full h-2 w-2"
+                  style={{ backgroundColor: primaryColor }}
+                ></span>
+              </span>
+              <span className="text-[10px] uppercase tracking-widest font-bold text-slate-300">
+                Disponible ahora
+              </span>
             </motion.div>
 
             <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-6xl md:text-8xl font-black tracking-tight leading-[1.1]"
+              variants={fadeInUp}
+              className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tighter leading-[0.9] text-white"
             >
-              <span className="text-transparent bg-clip-text bg-gradient-to-br from-white to-white/50">
-                {title}
-              </span>
+              {title.split(" ").map((word, i) => (
+                <span key={i} className="inline-block mr-4 last:mr-0">
+                  {word}
+                </span>
+              ))}
             </motion.h1>
 
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              className="text-xl md:text-2xl text-slate-400 font-light max-w-2xl leading-relaxed"
+              variants={fadeInUp}
+              className="text-lg md:text-2xl text-slate-400 font-light max-w-2xl mx-auto lg:mx-0 leading-relaxed"
             >
               {subtitle}
             </motion.p>
 
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="flex flex-wrap gap-4 pt-4"
+              variants={fadeInUp}
+              className="flex flex-wrap items-center justify-center lg:justify-start gap-6 pt-4"
             >
               {portfolio.email && (
                 <a
                   href={`mailto:${portfolio.email}`}
-                  className="flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-slate-900 font-semibold hover:bg-slate-200 transition-all hover:scale-105 active:scale-95"
+                  className="group relative px-8 py-4 rounded-2xl bg-white text-slate-900 font-bold overflow-hidden transition-all hover:scale-105 active:scale-95"
                 >
-                  <Mail className="w-5 h-5" />
-                  Let&apos;s Talk
+                  <span className="relative z-10 flex items-center gap-2">
+                    Hablemos <Mail className="w-5 h-5" />
+                  </span>
                 </a>
               )}
 
-              <div className="flex gap-4 items-center pl-4 bg-white/5 border border-white/10 rounded-xl px-4 backdrop-blur-md">
-                {portfolio.socialLinks?.linkedin && (
-                  <a
-                    href={portfolio.socialLinks.linkedin}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-2 text-slate-400 hover:text-white transition-colors"
-                  >
-                    <LinkedinIcon className="w-5 h-5" />
-                  </a>
-                )}
-                {portfolio.socialLinks?.github && (
-                  <a
-                    href={portfolio.socialLinks.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-2 text-slate-400 hover:text-white transition-colors"
-                  >
-                    <GithubIcon className="w-5 h-5" />
-                  </a>
-                )}
-                {portfolio.socialLinks?.twitter && (
-                  <a
-                    href={portfolio.socialLinks.twitter}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-2 text-slate-400 hover:text-white transition-colors"
-                  >
-                    <TwitterIcon className="w-5 h-5" />
-                  </a>
+              <div className="flex gap-2 p-2 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-xl">
+                {[
+                  {
+                    icon: <LinkedinIcon className="w-5 h-5" />,
+                    link: portfolio.socialLinks?.linkedin,
+                  },
+                  {
+                    icon: <GithubIcon className="w-5 h-5" />,
+                    link: portfolio.socialLinks?.github,
+                  },
+                  {
+                    icon: <TwitterIcon className="w-5 h-5" />,
+                    link: portfolio.socialLinks?.twitter,
+                  },
+                ].map(
+                  (social, i) =>
+                    social.link && (
+                      <a
+                        key={i}
+                        href={social.link}
+                        target="_blank"
+                        className="p-3 text-slate-400 hover:text-white hover:bg-white/10 rounded-xl transition-all"
+                      >
+                        {social.icon}
+                      </a>
+                    ),
                 )}
               </div>
             </motion.div>
-          </div>
+          </motion.div>
 
+          {/* Imagen Hero - Efecto Parallax Suave */}
           <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.2 }}
-            className="w-full max-w-md lg:w-1/2 relative"
+            initial={{ opacity: 0, scale: 0.8, rotate: 5 }}
+            animate={{ opacity: 1, scale: 1, rotate: 0 }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
+            className="w-full max-w-[500px] lg:w-[40%] relative aspect-[4/5]"
           >
-            <div className="aspect-[4/5] rounded-[3rem] overflow-hidden relative border border-white/20 shadow-2xl">
-              <motion.img
-                style={{ y: yImage }}
+            <div
+              className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-secondary/20 rounded-[3rem] blur-3xl opacity-30 animate-pulse"
+              style={{ backgroundColor: primaryColor }}
+            />
+            <div className="relative h-full w-full rounded-[3rem] overflow-hidden border border-white/20 shadow-2xl group">
+              <img
                 src={avatarUrl}
                 alt="Profile"
-                className="w-full h-[120%] object-cover absolute top-0 left-0 -mt-[10%]"
+                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/20 to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-transparent to-transparent opacity-60" />
 
-              {/* Floating badges */}
-              {portfolio.profession && (
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.8 }}
-                  className="absolute bottom-8 right-8 px-6 py-3 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl flex items-center gap-3 shadow-xl"
-                >
-                  <Briefcase
-                    className="w-5 h-5"
-                    style={{ color: primaryColor }}
-                  />
-                  <span className="font-medium text-sm text-white">
-                    {portfolio.profession}
-                  </span>
-                </motion.div>
-              )}
-              {portfolio.location && (
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 1 }}
-                  className="absolute top-8 left-8 px-5 py-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl flex items-center gap-2 shadow-xl"
-                >
-                  <MapPin
-                    className="w-4 h-4"
-                    style={{ color: secondaryColor }}
-                  />
-                  <span className="font-medium text-sm text-white">
-                    {portfolio.location}
-                  </span>
-                </motion.div>
-              )}
+              {/* Badges Flotantes */}
+              <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end">
+                {portfolio.profession && (
+                  <div className="px-5 py-3 bg-white/10 backdrop-blur-2xl border border-white/20 rounded-2xl">
+                    <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-1">
+                      Especialidad
+                    </p>
+                    <p className="font-bold text-sm text-white">
+                      {portfolio.profession}
+                    </p>
+                  </div>
+                )}
+                {portfolio.location && (
+                  <div className="p-3 bg-white/10 backdrop-blur-2xl border border-white/20 rounded-2xl">
+                    <MapPin className="w-4 h-4 text-white" />
+                  </div>
+                )}
+              </div>
             </div>
           </motion.div>
         </section>
 
-        {/* Projects Section */}
+        {/* Projects Section - Full Width Grid */}
         {projects.length > 0 && (
-          <section id="projects" className="space-y-12">
-            <GlassCard delay={0}>
-              <div className="flex items-center gap-4 mb-4">
-                <div className="p-3 bg-white/10 rounded-xl">
-                  <Layers className="w-6 h-6" style={{ color: primaryColor }} />
-                </div>
-                <h2 className="text-3xl md:text-5xl font-bold">
-                  Featured Work
+          <section id="proyectos" className="space-y-12">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
+              <div className="space-y-4">
+                <h2 className="text-4xl md:text-7xl font-black tracking-tighter uppercase">
+                  Proyectos <span className="text-white/20">Destacados</span>
                 </h2>
+                <p className="text-slate-400 max-w-xl text-lg font-light">
+                  Soluciones digitales que combinan estética y funcionalidad
+                  técnica.
+                </p>
               </div>
-              <p className="text-slate-400 max-w-2xl text-lg mb-12">
-                A selection of my recent projects, showcasing my ability to
-                solve complex problems through design and code.
-              </p>
+              <div className="h-px flex-1 bg-white/10 hidden md:block mb-6 mx-8" />
+            </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {projects.map((project: PortfolioProject, idx: number) => (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: idx * 0.1 }}
-                    key={idx}
-                    className="group relative flex flex-col justify-between p-8 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 overflow-hidden"
-                  >
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-white/10 to-transparent rounded-bl-[100px] -z-10 group-hover:scale-110 transition-transform"></div>
-
-                    <div className="space-y-6 relative z-10">
-                      {project.imageUrl && (
-                        <div className="w-full h-48 rounded-2xl overflow-hidden border border-white/10 shadow-lg group-hover:border-white/20 transition-all">
-                          <img src={project.imageUrl} alt={project.name || project.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8">
+              {projects.map((project: PortfolioProject, idx: number) => (
+                <GlassCard key={idx} className="!p-0 group/card">
+                  <div className="flex flex-col h-full">
+                    <div className="relative aspect-video overflow-hidden">
+                      {project.imageUrl ? (
+                        <img
+                          src={project.imageUrl}
+                          alt={project.name || project.title}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover/card:scale-105"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-white/5 flex items-center justify-center">
+                          <Layers className="w-12 h-12 text-white/10" />
                         </div>
                       )}
-                      <h3 className="text-2xl font-bold text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-white/70 transition-all">
-                        {project.name || project.title}
-                      </h3>
-                      <p className="text-slate-400 leading-relaxed font-light line-clamp-3">
-                        {project.description}
-                      </p>
-
-                      <div className="flex flex-wrap gap-2 pt-2">
-                        {getTools(project.tools).map((t: string, j: number) => (
-                          <span
-                            key={j}
-                            className="text-xs px-3 py-1 rounded-lg bg-white/5 text-slate-300 border border-white/10"
-                          >
-                            {t}
-                          </span>
-                        ))}
-                      </div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                     </div>
 
-                    {project.link && (
-                      <div className="mt-12 flex justify-end">
-                        <a
-                          href={project.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white font-medium text-sm transition-all border border-white/10 group/btn"
-                        >
-                          View Live
-                          <ArrowUpRight className="w-4 h-4 group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform" />
-                        </a>
+                    <div className="p-8 md:p-10 space-y-6 flex-1 flex flex-col justify-between">
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs font-mono text-white/40">
+                            0{idx + 1}
+                          </span>
+                          <h3 className="text-3xl font-bold text-white tracking-tight">
+                            {project.name || project.title}
+                          </h3>
+                        </div>
+                        <p className="text-slate-400 font-light leading-relaxed line-clamp-3 text-lg">
+                          {project.description}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {getTools(project.tools).map((tool, i) => (
+                            <span
+                              key={i}
+                              className="text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-slate-300"
+                            >
+                              {tool}
+                            </span>
+                          ))}
+                        </div>
                       </div>
-                    )}
-                  </motion.div>
-                ))}
-              </div>
-            </GlassCard>
+
+                      {project.link && (
+                        <div className="pt-6">
+                          <a
+                            href={project.link}
+                            target="_blank"
+                            className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-white group/link"
+                          >
+                            Ver Proyecto{" "}
+                            <ArrowUpRight className="w-4 h-4 transition-transform group-hover/link:translate-x-1 group-hover/link:-translate-y-1" />
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </GlassCard>
+              ))}
+            </div>
           </section>
         )}
 
-        {/* Experience & Education Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Experience Array */}
+        {/* Experience & Education - Adaptive Layout */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-8">
           {experience.length > 0 && (
-            <GlassCard className="h-full" delay={0.1}>
-              <div className="flex items-center gap-4 mb-10">
-                <div className="p-3 bg-white/10 rounded-xl">
+            <GlassCard id="experiencia">
+              <div className="flex items-center gap-4 mb-12">
+                <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
                   <Briefcase
                     className="w-6 h-6"
                     style={{ color: secondaryColor }}
                   />
                 </div>
-                <h2 className="text-3xl font-bold">Experience</h2>
+                <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter">
+                  Experiencia
+                </h2>
               </div>
-
-              <div className="space-y-10">
+              <div className="space-y-12">
                 {experience.map((exp: PortfolioExperience, idx: number) => (
-                  <div key={idx} className="relative pl-8 group">
+                  <div key={idx} className="relative pl-10 group/item">
+                    <div className="absolute left-0 top-0 bottom-0 w-px bg-white/10 group-hover/item:bg-white/30 transition-colors" />
                     <div
-                      className="absolute left-0 top-1.5 w-3 h-3 rounded-full border-2 border-slate-900 z-10"
+                      className="absolute left-[-4px] top-2 w-2 h-2 rounded-full bg-white transition-all group-hover/item:scale-150"
                       style={{ backgroundColor: secondaryColor }}
                     />
-                    {idx !== experience.length - 1 && (
-                      <div className="absolute left-1.5 top-3 w-px h-full bg-white/10 group-hover:bg-white/20 transition-colors" />
-                    )}
                     <div className="space-y-2">
-                      <div className="flex flex-wrap items-baseline justify-between gap-2">
-                        <h3 className="text-xl font-bold text-white">
+                      <div className="flex flex-wrap items-center justify-between gap-4">
+                        <h3 className="text-xl md:text-2xl font-bold text-white">
                           {exp.role}
                         </h3>
-                        <span className="text-sm px-3 py-1 bg-white/5 rounded-full text-slate-300 flex items-center gap-2">
-                          <Calendar className="w-3 h-3" />
-                          {exp.period}
+                        <span className="text-[10px] uppercase tracking-widest font-bold px-3 py-1 bg-white/5 border border-white/10 rounded-full text-slate-400 flex items-center gap-2">
+                          <Calendar className="w-3 h-3" /> {exp.period}
                         </span>
                       </div>
-                      <h4
-                        className="text-lg font-medium"
+                      <p
+                        className="text-lg font-medium opacity-80"
                         style={{ color: secondaryColor }}
                       >
                         {exp.company}
-                      </h4>
-                      {exp.description && (
-                        <p className="text-slate-400 font-light leading-relaxed pt-2">
-                          {exp.description}
-                        </p>
-                      )}
+                      </p>
+                      <p className="text-slate-400 font-light leading-relaxed pt-2 text-base md:text-lg">
+                        {exp.description}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -499,41 +508,43 @@ export default function TemplateGlass({
             </GlassCard>
           )}
 
-          {/* Education Array */}
           {courses.length > 0 && (
-            <GlassCard className="h-full" delay={0.2}>
-              <div className="flex items-center gap-4 mb-10">
-                <div className="p-3 bg-white/10 rounded-xl">
+            <GlassCard>
+              <div className="flex items-center gap-4 mb-12">
+                <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
                   <GraduationCap
                     className="w-6 h-6"
                     style={{ color: primaryColor }}
                   />
                 </div>
-                <h2 className="text-3xl font-bold">Cursos / Capacitaciones</h2>
+                <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter">
+                  Formación
+                </h2>
               </div>
-
-              <div className="space-y-8">
+              <div className="grid gap-6">
                 {courses.map((course: PortfolioCourse, idx: number) => (
                   <div
                     key={idx}
-                    className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 transition-all"
+                    className="p-6 md:p-8 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/[0.08] transition-all group/course"
                   >
-                    <h3 className="text-xl font-bold text-white mb-2">
-                      {course.name}
-                    </h3>
-                    <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
-                      <span
-                        className="text-[15px] font-medium"
-                        style={{ color: primaryColor }}
-                      >
-                        {course.institution}
-                      </span>
-                      <span className="text-sm px-3 py-1 rounded-md bg-white/5 text-slate-400">
+                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                      <div className="space-y-2">
+                        <h3 className="text-xl font-bold text-white group-hover/course:text-primary transition-colors">
+                          {course.name}
+                        </h3>
+                        <p
+                          className="text-lg opacity-80"
+                          style={{ color: primaryColor }}
+                        >
+                          {course.institution}
+                        </p>
+                      </div>
+                      <span className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-white/10 rounded-lg self-start">
                         {course.year}
                       </span>
                     </div>
                     {course.description && (
-                      <p className="text-slate-400 font-light leading-relaxed">
+                      <p className="text-slate-400 font-light mt-4 leading-relaxed">
                         {course.description}
                       </p>
                     )}
@@ -544,30 +555,32 @@ export default function TemplateGlass({
           )}
         </div>
 
-        {/* Skills Section */}
+        {/* Skills - Modern Cloud */}
         {skills.length > 0 && (
-          <section id="skills">
-            <GlassCard delay={0.3}>
-              <div className="flex items-center gap-4 mb-10">
-                <div className="p-3 bg-white/10 rounded-xl">
+          <section id="habilidades">
+            <GlassCard>
+              <div className="flex items-center gap-4 mb-12">
+                <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
                   <Code2 className="w-6 h-6" style={{ color: primaryColor }} />
                 </div>
-                <h2 className="text-3xl font-bold">Habilidades técnicas</h2>
+                <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter">
+                  Habilidades Técnicas
+                </h2>
               </div>
-
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-3 md:gap-4">
                 {skills.map((skill: PortfolioSkillEntry, idx: number) => {
                   const name = getSkillName(skill);
                   if (!name) return null;
                   return (
                     <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: Math.min(idx * 0.05, 0.5) }}
                       key={idx}
-                      className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 hover:text-white text-slate-300 font-medium transition-all shadow-lg backdrop-blur-md cursor-default"
+                      whileHover={{ scale: 1.05, y: -5 }}
+                      className="px-6 py-4 rounded-2xl bg-white/5 border border-white/10 hover:border-white/30 hover:bg-white/10 text-slate-300 font-bold text-sm md:text-base transition-all cursor-default flex items-center gap-2"
                     >
+                      <div
+                        className="w-1.5 h-1.5 rounded-full"
+                        style={{ backgroundColor: primaryColor }}
+                      />
                       {name}
                     </motion.div>
                   );
@@ -577,37 +590,73 @@ export default function TemplateGlass({
           </section>
         )}
 
-        <PortfolioInquiryForm
-          portfolioSlug={portfolio.slug}
-          primaryColor={primaryColor}
-          secondaryColor={secondaryColor}
-          variant="glass"
-        />
+        {/* Formulario de Contacto */}
+        <div className="px-2">
+          <PortfolioInquiryForm
+            portfolioSlug={portfolio.slug}
+            primaryColor={primaryColor}
+            secondaryColor={secondaryColor}
+            variant="glass"
+          />
+        </div>
       </main>
 
-      {/* Footer */}
-      <footer className="relative z-10 border-t border-white/10 bg-slate-950/50 backdrop-blur-3xl py-12 mt-20">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full border-2 border-white/20 overflow-hidden">
-              <img
-                src={avatarUrl}
-                alt="Footer avatar"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div>
-              <p className="font-bold text-white">{title}</p>
-              <p className="text-xs text-slate-500 uppercase tracking-wider">
-                {portfolio.profession}
-              </p>
+      {/* Footer - Cinematic */}
+      <footer className="relative z-10 w-full mt-32 border-t border-white/5 bg-black/40 backdrop-blur-3xl py-20 overflow-hidden">
+        <div className="max-w-[1600px] mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-12">
+          <div className="flex flex-col items-center md:items-start gap-6">
+            <div className="flex items-center gap-4">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.3em] text-slate-500 font-bold">
+                  {portfolio.profession}
+                </p>
+              </div>
             </div>
           </div>
-          <p className="text-slate-500 text-sm font-medium">
-            © {new Date().getFullYear()} Designed with precision.
-          </p>
+
+          <div className="flex flex-col items-center md:items-end gap-4">
+            <div className="flex gap-6">
+              {portfolio.socialLinks?.linkedin && (
+                <a
+                  href={portfolio.socialLinks.linkedin}
+                  className="text-slate-400 hover:text-white transition-colors"
+                >
+                  <LinkedinIcon className="w-6 h-6" />
+                </a>
+              )}
+              {portfolio.socialLinks?.github && (
+                <a
+                  href={portfolio.socialLinks.github}
+                  className="text-slate-400 hover:text-white transition-colors"
+                >
+                  <GithubIcon className="w-6 h-6" />
+                </a>
+              )}
+            </div>
+            <p className="text-slate-500 text-xs font-medium tracking-widest mt-4">
+              © {new Date().getFullYear()} • Todo los derechos reservados •
+              Desarrollado por Diolay
+            </p>
+          </div>
         </div>
+
+        {/* Decoración de fondo en footer */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
       </footer>
+
+      {/* Estilos Globales Extra */}
+      <style jsx global>{`
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        html {
+          scroll-behavior: smooth;
+        }
+      `}</style>
     </div>
   );
 }
