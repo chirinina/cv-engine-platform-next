@@ -115,14 +115,17 @@ const AmbientBackground = ({
   }, [mouseX, mouseY]);
 
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden bg-[#020617]">
+    <div
+      className="fixed inset-0 -z-10 overflow-hidden"
+      style={{ backgroundColor: secondaryColor || "#020617" }}
+    >
       <motion.div
         style={{
           x: mouseX,
           y: mouseY,
           translateX: "-50%",
           translateY: "-50%",
-          background: `radial-gradient(circle, ${primaryColor}33 0%, transparent 70%)`,
+          background: `radial-gradient(circle, color-mix(in srgb, ${primaryColor} 33%, transparent) 0%, transparent 70%)`,
         }}
         className="absolute w-[800px] h-[800px] rounded-full blur-[120px] pointer-events-none opacity-60"
       />
@@ -132,7 +135,7 @@ const AmbientBackground = ({
           y: mouseY,
           translateX: "-20%",
           translateY: "-20%",
-          background: `radial-gradient(circle, ${secondaryColor}22 0%, transparent 70%)`,
+          background: `radial-gradient(circle, color-mix(in srgb, ${secondaryColor} 22%, transparent) 0%, transparent 70%)`,
         }}
         className="absolute w-[600px] h-[600px] rounded-full blur-[100px] pointer-events-none opacity-40"
       />
@@ -188,6 +191,7 @@ export default function TemplateGlass({
 
   const primaryColor = portfolio.primaryColor || "#ec4899";
   const secondaryColor = portfolio.secondaryColor || "#8b5cf6";
+  const textColor = portfolio.secondaryTextColor || "#f1f5f9";
   const projects = portfolio.projects ?? [];
   const experience = portfolio.experience ?? [];
   const courses = portfolio.courses ?? [];
@@ -209,10 +213,15 @@ export default function TemplateGlass({
     return s?.name ? String(s.name) : "";
   };
 
+  const getSkillLevel = (s: PortfolioSkillEntry): number | null => {
+    if (s && typeof s === "object" && s.level != null) return Number(s.level);
+    return null;
+  };
+
   return (
     <div
-      className="min-h-screen text-slate-100 font-sans selection:bg-white/30 selection:text-white overflow-x-hidden"
-      style={{ fontFamily: portfolio.fontFamily }}
+      className="min-h-screen font-sans selection:bg-white/30 selection:opacity-100 overflow-x-hidden"
+      style={{ fontFamily: portfolio.fontFamily, color: textColor }}
     >
       <AmbientBackground
         primaryColor={primaryColor}
@@ -236,7 +245,7 @@ export default function TemplateGlass({
             <a
               key={item}
               href={`#${item.toLowerCase()}`}
-              className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-bold text-slate-400 hover:text-white transition-all whitespace-nowrap"
+              className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-bold opacity-80 hover:opacity-100 transition-all whitespace-nowrap"
             >
               {item}
             </a>
@@ -270,14 +279,15 @@ export default function TemplateGlass({
                   style={{ backgroundColor: primaryColor }}
                 ></span>
               </span>
-              <span className="text-[10px] uppercase tracking-widest font-bold text-slate-300">
+              <span className="text-[10px] uppercase tracking-widest font-bold opacity-90">
                 Disponible ahora
               </span>
             </motion.div>
 
             <motion.h1
               variants={fadeInUp}
-              className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tighter leading-[0.9] text-white"
+              className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tighter leading-[0.9]"
+              style={{ color: primaryColor }}
             >
               {title.split(" ").map((word, i) => (
                 <span key={i} className="inline-block mr-4 last:mr-0">
@@ -288,7 +298,7 @@ export default function TemplateGlass({
 
             <motion.p
               variants={fadeInUp}
-              className="text-lg md:text-2xl text-slate-400 font-light max-w-2xl mx-auto lg:mx-0 leading-relaxed"
+              className="text-lg md:text-2xl opacity-80 font-light max-w-2xl mx-auto lg:mx-0 leading-relaxed"
             >
               {subtitle}
             </motion.p>
@@ -329,7 +339,7 @@ export default function TemplateGlass({
                         key={i}
                         href={social.link}
                         target="_blank"
-                        className="p-3 text-slate-400 hover:text-white hover:bg-white/10 rounded-xl transition-all"
+                        className="p-3 opacity-80 hover:opacity-100 hover:bg-white/10 rounded-xl transition-all"
                       >
                         {social.icon}
                       </a>
@@ -362,17 +372,17 @@ export default function TemplateGlass({
               <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end">
                 {portfolio.profession && (
                   <div className="px-5 py-3 bg-white/10 backdrop-blur-2xl border border-white/20 rounded-2xl">
-                    <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-1">
+                    <p className="text-[10px] uppercase tracking-widest opacity-80 mb-1">
                       Especialidad
                     </p>
-                    <p className="font-bold text-sm text-white">
+                    <p className="font-bold text-sm opacity-100">
                       {portfolio.profession}
                     </p>
                   </div>
                 )}
                 {portfolio.location && (
                   <div className="p-3 bg-white/10 backdrop-blur-2xl border border-white/20 rounded-2xl">
-                    <MapPin className="w-4 h-4 text-white" />
+                    <MapPin className="w-4 h-4 opacity-100" />
                   </div>
                 )}
               </div>
@@ -386,9 +396,9 @@ export default function TemplateGlass({
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
               <div className="space-y-4">
                 <h2 className="text-4xl md:text-7xl font-black tracking-tighter uppercase">
-                  Proyectos <span className="text-white/20">Destacados</span>
+                  Proyectos <span className="opacity-20">Destacados</span>
                 </h2>
-                <p className="text-slate-400 max-w-xl text-lg font-light">
+                <p className="opacity-80 max-w-xl text-lg font-light">
                   Soluciones digitales que combinan estética y funcionalidad
                   técnica.
                 </p>
@@ -409,7 +419,7 @@ export default function TemplateGlass({
                         />
                       ) : (
                         <div className="w-full h-full bg-white/5 flex items-center justify-center">
-                          <Layers className="w-12 h-12 text-white/10" />
+                          <Layers className="w-12 h-12 opacity-10" />
                         </div>
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
@@ -418,21 +428,22 @@ export default function TemplateGlass({
                     <div className="p-8 md:p-10 space-y-6 flex-1 flex flex-col justify-between">
                       <div className="space-y-4">
                         <div className="flex items-center gap-3">
-                          <span className="text-xs font-mono text-white/40">
+                          <span className="text-xs font-mono opacity-40">
                             0{idx + 1}
                           </span>
-                          <h3 className="text-3xl font-bold text-white tracking-tight">
+                          <h3 className="text-3xl font-bold tracking-tight"
+                            style={{ color: primaryColor }}>
                             {project.name || project.title}
                           </h3>
                         </div>
-                        <p className="text-slate-400 font-light leading-relaxed line-clamp-3 text-lg">
+                        <p className="opacity-80 font-light leading-relaxed line-clamp-3 text-lg">
                           {project.description}
                         </p>
                         <div className="flex flex-wrap gap-2">
                           {getTools(project.tools).map((tool, i) => (
                             <span
                               key={i}
-                              className="text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-slate-300"
+                              className="text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 opacity-90"
                             >
                               {tool}
                             </span>
@@ -445,7 +456,7 @@ export default function TemplateGlass({
                           <a
                             href={project.link}
                             target="_blank"
-                            className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-white group/link"
+                            className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest opacity-100 group/link"
                           >
                             Ver Proyecto{" "}
                             <ArrowUpRight className="w-4 h-4 transition-transform group-hover/link:translate-x-1 group-hover/link:-translate-y-1" />
@@ -485,10 +496,11 @@ export default function TemplateGlass({
                     />
                     <div className="space-y-2">
                       <div className="flex flex-wrap items-center justify-between gap-4">
-                        <h3 className="text-xl md:text-2xl font-bold text-white">
+                        <h3 className="text-xl md:text-2xl font-bold"
+                          style={{ color: primaryColor }}>
                           {exp.role}
                         </h3>
-                        <span className="text-[10px] uppercase tracking-widest font-bold px-3 py-1 bg-white/5 border border-white/10 rounded-full text-slate-400 flex items-center gap-2">
+                        <span className="text-[10px] uppercase tracking-widest font-bold px-3 py-1 bg-white/5 border border-white/10 rounded-full opacity-80 flex items-center gap-2">
                           <Calendar className="w-3 h-3" /> {exp.period}
                         </span>
                       </div>
@@ -498,7 +510,7 @@ export default function TemplateGlass({
                       >
                         {exp.company}
                       </p>
-                      <p className="text-slate-400 font-light leading-relaxed pt-2 text-base md:text-lg">
+                      <p className="opacity-80 font-light leading-relaxed pt-2 text-base md:text-lg">
                         {exp.description}
                       </p>
                     </div>
@@ -529,7 +541,8 @@ export default function TemplateGlass({
                   >
                     <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                       <div className="space-y-2">
-                        <h3 className="text-xl font-bold text-white group-hover/course:text-primary transition-colors">
+                        <h3 className="text-xl font-bold transition-colors"
+                          style={{ color: primaryColor }}>
                           {course.name}
                         </h3>
                         <p
@@ -544,7 +557,7 @@ export default function TemplateGlass({
                       </span>
                     </div>
                     {course.description && (
-                      <p className="text-slate-400 font-light mt-4 leading-relaxed">
+                      <p className="opacity-80 font-light mt-4 leading-relaxed">
                         {course.description}
                       </p>
                     )}
@@ -567,21 +580,43 @@ export default function TemplateGlass({
                   Habilidades Técnicas
                 </h2>
               </div>
-              <div className="flex flex-wrap gap-3 md:gap-4">
+              <div className="flex flex-wrap gap-4 md:gap-6">
                 {skills.map((skill: PortfolioSkillEntry, idx: number) => {
                   const name = getSkillName(skill);
+                  const level = getSkillLevel(skill);
                   if (!name) return null;
                   return (
                     <motion.div
                       key={idx}
                       whileHover={{ scale: 1.05, y: -5 }}
-                      className="px-6 py-4 rounded-2xl bg-white/5 border border-white/10 hover:border-white/30 hover:bg-white/10 text-slate-300 font-bold text-sm md:text-base transition-all cursor-default flex items-center gap-2"
+                      className="group relative px-6 py-5 rounded-2xl bg-white/5 border border-white/10 hover:border-white/30 hover:bg-white/10 transition-all cursor-default flex flex-col gap-3 min-w-[160px] flex-1 sm:flex-none"
                     >
-                      <div
-                        className="w-1.5 h-1.5 rounded-full"
-                        style={{ backgroundColor: primaryColor }}
-                      />
-                      {name}
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-2 h-2 rounded-full shadow-[0_0_10px_rgba(255,255,255,0.5)]"
+                          style={{ backgroundColor: primaryColor }}
+                        />
+                        <span className="font-bold text-sm md:text-base opacity-90 tracking-wide">{name}</span>
+                      </div>
+                      {level !== null && (
+                        <div className="w-full flex flex-col gap-2 mt-1">
+                          <div className="flex justify-end w-full">
+                            <span className="text-[10px] font-bold opacity-60 group-hover:opacity-100 transition-opacity" style={{ color: primaryColor }}>{level}%</span>
+                          </div>
+                          <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden backdrop-blur-sm">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              whileInView={{ width: `${level}%` }}
+                              transition={{ duration: 1.2, delay: idx * 0.1, ease: "easeOut" }}
+                              className="h-full rounded-full"
+                              style={{ 
+                                background: `linear-gradient(90deg, transparent, ${primaryColor})`,
+                                boxShadow: `0 0 10px ${primaryColor}` 
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
                     </motion.div>
                   );
                 })}
@@ -597,6 +632,7 @@ export default function TemplateGlass({
             primaryColor={primaryColor}
             secondaryColor={secondaryColor}
             variant="glass"
+            textColor={textColor}
           />
         </div>
       </main>
@@ -607,8 +643,8 @@ export default function TemplateGlass({
           <div className="flex flex-col items-center md:items-start gap-6">
             <div className="flex items-center gap-4">
               <div>
-                <p className="text-[10px] uppercase tracking-[0.3em] text-slate-500 font-bold">
-                  {portfolio.profession}
+                <p className="text-[10px] uppercase tracking-[0.3em] opacity-70 font-bold">
+                  {portfolio.user?.name || portfolio.name}
                 </p>
               </div>
             </div>
@@ -619,7 +655,7 @@ export default function TemplateGlass({
               {portfolio.socialLinks?.linkedin && (
                 <a
                   href={portfolio.socialLinks.linkedin}
-                  className="text-slate-400 hover:text-white transition-colors"
+                  className="opacity-80 hover:opacity-100 transition-colors"
                 >
                   <LinkedinIcon className="w-6 h-6" />
                 </a>
@@ -627,13 +663,13 @@ export default function TemplateGlass({
               {portfolio.socialLinks?.github && (
                 <a
                   href={portfolio.socialLinks.github}
-                  className="text-slate-400 hover:text-white transition-colors"
+                  className="opacity-80 hover:opacity-100 transition-colors"
                 >
                   <GithubIcon className="w-6 h-6" />
                 </a>
               )}
             </div>
-            <p className="text-slate-500 text-xs font-medium tracking-widest mt-4">
+            <p className="opacity-70 text-xs font-medium tracking-widest mt-4">
               © {new Date().getFullYear()} • Todo los derechos reservados •
               Desarrollado por Diolay
             </p>

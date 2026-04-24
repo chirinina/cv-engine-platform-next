@@ -280,7 +280,7 @@ export default function TemplateCyber({
         className="fixed top-6 left-6 text-[10px] font-mono hidden xl:block tracking-[0.3em] opacity-50"
         style={{ color: secondaryTextColor }}
       >
-        {String(title).split(" ")[0] || "USER-01"}
+        {portfolio.user?.name || portfolio.name || "Portfolio"}
       </div>
       <div
         className="fixed top-6 right-6 text-[10px] font-mono hidden xl:block tracking-[0.3em]"
@@ -620,7 +620,7 @@ export default function TemplateCyber({
                     return name ? (
                       <div
                         key={idx}
-                        className="p-4 border rounded-xl"
+                        className="p-4 border rounded-xl flex flex-col"
                         style={cyberCardStyle}
                       >
                         <div className="text-[10px] font-mono mb-2 opacity-50">
@@ -633,13 +633,22 @@ export default function TemplateCyber({
                           {name}
                         </div>
                         {level !== null && (
-                          <div className="mt-3 h-1 w-full bg-white/5 rounded-full overflow-hidden">
-                            <motion.div
-                              initial={{ width: 0 }}
-                              whileInView={{ width: `${level}%` }}
-                              className="h-full"
-                              style={{ backgroundColor: primaryColor }}
-                            />
+                          <div className="mt-4 space-y-1.5 w-full">
+                            <div className="flex justify-between items-end">
+                              <span className="text-[10px] font-mono" style={{ color: primaryColor }}>LVL</span>
+                              <span className="text-[10px] font-mono font-bold" style={{ color: primaryColor }}>{level}%</span>
+                            </div>
+                            <div className="h-1.5 w-full bg-black/50 rounded-none overflow-hidden border border-white/5">
+                              <motion.div
+                                initial={{ width: 0 }}
+                                whileInView={{ width: `${level}%` }}
+                                transition={{ duration: 1.5, ease: "circOut" }}
+                                className="h-full relative"
+                                style={{ backgroundColor: primaryColor }}
+                              >
+                                <div className="absolute inset-0 bg-white/30 animate-pulse" />
+                              </motion.div>
+                            </div>
                           </div>
                         )}
                       </div>

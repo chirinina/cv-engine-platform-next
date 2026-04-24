@@ -108,7 +108,10 @@ export default function TemplateCorporate({
 
   const heroSection = sections.find((s) => s.type === "hero");
   const title =
-    heroSection?.content?.title || portfolio.name || "Professional Profile";
+    heroSection?.content?.title ||
+    portfolio.user?.name ||
+    portfolio.name ||
+    "Professional Profile";
   const subtitle =
     heroSection?.content?.subtitle ||
     "Strategic thinker and high-impact professional.";
@@ -137,6 +140,11 @@ export default function TemplateCorporate({
     if (typeof s === "string") return s;
     if (s && typeof s === "object" && s.name) return String(s.name);
     return "";
+  };
+
+  const getSkillLevel = (s: PortfolioSkillEntry): number | null => {
+    if (s && typeof s === "object" && s.level != null) return Number(s.level);
+    return null;
   };
 
   const cardVariants = {
@@ -227,7 +235,7 @@ export default function TemplateCorporate({
           className="text-xl font-black tracking-tighter"
           style={{ color: primaryColor }}
         >
-          {portfolio.initials || "Hola"}
+          {portfolio.user?.name || portfolio.name}
         </h2>
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -287,7 +295,7 @@ export default function TemplateCorporate({
                     className="w-14 h-14 rounded-xl flex items-center justify-center text-white text-xl font-black shadow-2xl"
                     style={{ backgroundColor: primaryColor }}
                   >
-                    {portfolio.initials || "Hola"}
+                    {portfolio.user?.name || portfolio.name}
                   </div>
                 )}
                 <div>
@@ -295,14 +303,9 @@ export default function TemplateCorporate({
                     className="text-xl font-bold"
                     style={{ color: primaryColor }}
                   >
-                    {portfolio.name}
+                    {portfolio.user?.name || portfolio.name}
                   </h1>
-                  <p
-                    className="text-[10px] font-black uppercase tracking-widest opacity-60"
-                    style={{ color: primaryColor }}
-                  >
-                    {portfolio.profession}
-                  </p>
+
                 </div>
               </div>
 
@@ -606,23 +609,46 @@ export default function TemplateCorporate({
                 </h2>
               </motion.div>
               <div className="flex flex-wrap gap-3">
-                {skills.map((skill, idx) => (
-                  <motion.div
-                    key={idx}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    whileHover={{
-                      y: -5,
-                      backgroundColor: primaryColor,
-                      color: "#fff",
-                    }}
-                    viewport={{ once: false }}
-                    className="px-8 py-5 rounded-2xl border font-bold text-sm uppercase tracking-widest transition-all cursor-default"
-                    style={{ ...glassStyle, color: primaryColor }}
-                  >
-                    {getSkillName(skill)}
-                  </motion.div>
-                ))}
+                {skills.map((skill, idx) => {
+                  const name = getSkillName(skill);
+                  const level = getSkillLevel(skill);
+                  return (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      whileHover={{
+                        y: -5,
+                        boxShadow: `0 10px 25px -5px color-mix(in srgb, ${primaryColor} 20%, transparent)`
+                      }}
+                      viewport={{ once: false }}
+                      className="group px-6 py-4 rounded-2xl border transition-all cursor-default flex flex-col gap-3 min-w-[200px]"
+                      style={{ ...glassStyle, backgroundColor: `color-mix(in srgb, ${bgColor} 80%, white)` }}
+                    >
+                      <div className="flex justify-between items-center w-full gap-4">
+                        <span className="font-bold text-sm uppercase tracking-widest" style={{ color: primaryColor }}>
+                          {name}
+                        </span>
+                        {level !== null && (
+                          <span className="font-black text-xs opacity-60" style={{ color: primaryColor }}>
+                            {level}%
+                          </span>
+                        )}
+                      </div>
+                      {level !== null && (
+                        <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: `color-mix(in srgb, ${primaryColor} 10%, transparent)` }}>
+                          <motion.div
+                            initial={{ width: 0 }}
+                            whileInView={{ width: `${level}%` }}
+                            transition={{ duration: 1, ease: "easeOut", delay: idx * 0.05 }}
+                            className="h-full rounded-full"
+                            style={{ backgroundColor: primaryColor }}
+                          />
+                        </div>
+                      )}
+                    </motion.div>
+                  );
+                })}
               </div>
             </section>
           )}
@@ -709,7 +735,8 @@ export default function TemplateCorporate({
             className="text-[10px] font-black uppercase tracking-[0.4em] opacity-40"
             style={{ color: primaryColor }}
           >
-            © {new Date().getFullYear()} — {portfolio.name}
+            © {new Date().getFullYear()} —{" "}
+            {portfolio.user?.name || portfolio.name}
           </p>
           <div
             className="flex items-center gap-4 text-[10px] font-black tracking-widest"

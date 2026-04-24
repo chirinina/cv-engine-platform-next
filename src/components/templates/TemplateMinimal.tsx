@@ -140,6 +140,11 @@ export default function TemplateMinimal({
   const skills = portfolio.skills ?? [];
   const courses = portfolio.courses ?? [];
 
+  const getSkillLevel = (s: PortfolioSkillEntry): number | null => {
+    if (s && typeof s === "object" && s.level != null) return Number(s.level);
+    return null;
+  };
+
   const staggerContainer: Variants = {
     hidden: { opacity: 0 },
     show: {
@@ -478,22 +483,42 @@ export default function TemplateMinimal({
                   Stack Tecnológico
                 </h3>
               </div>
-              <div className="flex flex-wrap gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {skills.map((skill: PortfolioSkillEntry, idx: number) => {
                   const name = typeof skill === "string" ? skill : skill.name;
+                  const level = getSkillLevel(skill);
                   return (
-                    <motion.span
+                    <motion.div
                       key={idx}
-                      whileHover={{ scale: 1.05 }}
-                      className="px-5 py-3 rounded-2xl border shadow-sm font-bold cursor-default transition-colors text-sm"
+                      whileHover={{ scale: 1.02 }}
+                      className="p-5 rounded-2xl border shadow-sm flex flex-col gap-3 transition-colors group"
                       style={{
                         borderColor: subtleBorder,
-                        color: primaryColor,
                         backgroundColor: secondaryColor,
                       }}
                     >
-                      {name}
-                    </motion.span>
+                      <div className="flex justify-between items-center w-full">
+                        <span className="font-bold text-sm" style={{ color: primaryColor }}>
+                          {name}
+                        </span>
+                        {level !== null && (
+                          <span className="text-xs font-bold opacity-50 group-hover:opacity-100 transition-opacity" style={{ color: primaryColor }}>
+                            {level}%
+                          </span>
+                        )}
+                      </div>
+                      {level !== null && (
+                        <div className="h-[2px] w-full rounded-full overflow-hidden" style={{ backgroundColor: strongSubtleBg }}>
+                          <motion.div
+                            initial={{ width: 0 }}
+                            whileInView={{ width: `${level}%` }}
+                            transition={{ duration: 1, ease: "easeInOut" }}
+                            className="h-full"
+                            style={{ backgroundColor: primaryColor }}
+                          />
+                        </div>
+                      )}
+                    </motion.div>
                   );
                 })}
               </div>
@@ -583,7 +608,7 @@ export default function TemplateMinimal({
               className="text-2xl font-black mb-2"
               style={{ color: primaryColor }}
             >
-              {portfolio.name || "Portfolio"}
+              {portfolio.user?.name || portfolio.name || "Portfolio"}
             </h2>
             <p className="text-sm font-bold" style={{ color: textColor }}>
               © {new Date().getFullYear()} Desarrollado por Diolay Todo los

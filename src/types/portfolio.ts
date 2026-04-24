@@ -72,4 +72,5 @@ export interface PortfolioData {
   skills?: PortfolioSkillEntry[];
   name?: string;
   initials?: string;
+  user?: any;
 }
