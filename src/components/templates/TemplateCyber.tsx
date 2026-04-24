@@ -10,6 +10,8 @@ import {
   ChevronRight,
   ExternalLink,
   Code2,
+  Heart,
+  ImageIcon,
 } from "lucide-react";
 import React from "react";
 import PortfolioInquiryForm from "./PortfolioInquiryForm";
@@ -170,6 +172,7 @@ export default function TemplateCyber({
   const experience = portfolio.experience ?? [];
   const courses = portfolio.courses ?? [];
   const skills = portfolio.skills ?? [];
+  const hobbies = portfolio.hobbies ?? [];
 
   const getSkillName = (s: PortfolioSkillEntry): string => {
     if (typeof s === "string") return s;
@@ -260,6 +263,7 @@ export default function TemplateCyber({
             { id: "projects", icon: FileText, label: "Proyectos" },
             { id: "experience", icon: FileText, label: "Exp." },
             { id: "skills", icon: FileText, label: "Skills" },
+            { id: "hobbies", icon: Heart, label: "Hobbies" },
             { id: "contact", icon: Mail, label: "Contacto" },
           ].map((item) => (
             <a
@@ -305,6 +309,7 @@ export default function TemplateCyber({
               { href: "#intro", label: "Inicio", active: true },
               { href: "#projects", label: "Proyectos", active: false },
               { href: "#skills", label: "Skills", active: false },
+              { href: "#hobbies", label: "Hobbies", active: false },
               { href: "#contact", label: "Contacto", active: false },
             ].map(({ href, label, active }) => (
               <a
@@ -689,6 +694,54 @@ export default function TemplateCyber({
                       >
                         {String(course.description)}
                       </p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* HOBBIES */}
+            {hobbies.length > 0 && (
+              <section id="hobbies">
+                <h3
+                  className="text-3xl font-black uppercase tracking-tighter mb-10"
+                  style={{ color: primaryColor }}
+                >
+                  Pasatiempos
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {hobbies.map((hobby, idx) => (
+                    <div
+                      key={idx}
+                      className="p-1 border rounded-xl flex flex-col overflow-hidden group"
+                      style={cyberCardStyle}
+                    >
+                      {hobby.link ? (
+                        <a href={hobby.link} target="_blank" rel="noreferrer" className="flex flex-col h-full w-full">
+                          {hobby.imageUrl ? (
+                            <div className="w-full aspect-square overflow-hidden border-b" style={{ borderColor: `color-mix(in srgb, ${primaryColor} 20%, transparent)` }}>
+                              <img src={hobby.imageUrl} alt={hobby.name} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
+                            </div>
+                          ) : (
+                            <div className="w-full aspect-square flex items-center justify-center border-b" style={{ borderColor: `color-mix(in srgb, ${primaryColor} 20%, transparent)`, color: primaryColor }}>
+                              <ImageIcon className="w-10 h-10 opacity-30" />
+                            </div>
+                          )}
+                          <div className="p-4 flex items-center justify-between">
+                            <span className="text-[10px] font-mono font-bold uppercase tracking-widest" style={{ color: primaryColor }}>{hobby.name}</span>
+                            <ExternalLink className="w-3 h-3 opacity-50 group-hover:opacity-100" style={{ color: primaryColor }} />
+                          </div>
+                        </a>
+                      ) : (
+                        <div className="flex flex-col h-full w-full items-center justify-center p-6 gap-4 aspect-square">
+                          {hobby.imageUrl ? (
+                            <img src={hobby.imageUrl} alt={hobby.name} className="w-16 h-16 rounded-full object-cover grayscale border" style={{ borderColor: primaryColor }} />
+                          ) : (
+                            <Heart className="w-10 h-10 opacity-40" style={{ color: primaryColor }} />
+                          )}
+                          <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-center" style={{ color: primaryColor }}>{hobby.name}</span>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

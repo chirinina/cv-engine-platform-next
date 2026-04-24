@@ -36,6 +36,13 @@ export interface PortfolioSkill {
 
 export type PortfolioSkillEntry = string | PortfolioSkill;
 
+export interface PortfolioHobby {
+  name: string;
+  link?: string;
+  imageUrl?: string;
+  icon?: string;
+}
+
 export interface PortfolioSectionContent {
   title?: string;
   subtitle?: string;
@@ -70,6 +77,7 @@ export interface PortfolioData {
   projects?: PortfolioProject[];
   experience?: PortfolioExperience[];
   skills?: PortfolioSkillEntry[];
+  hobbies?: PortfolioHobby[];
   name?: string;
   initials?: string;
   user?: any;

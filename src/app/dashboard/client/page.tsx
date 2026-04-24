@@ -8,7 +8,7 @@ import api from "@/lib/api";
 import { toast } from "react-hot-toast";
 import WhatsAppInquiryInbox from "@/components/dashboard/WhatsAppInquiryInbox";
 import {
-  VisualForm, PerfilForm, ExperienciaForm, ProyectosForm, CursosForm, SkillsForm, RedesForm
+  VisualForm, PerfilForm, ExperienciaForm, ProyectosForm, CursosForm, SkillsForm, RedesForm, HobbiesForm
 } from "@/components/dashboard/ClientForms";
 import {
   LogOut,
@@ -35,11 +35,13 @@ import {
   Settings,
   Clock,
   CalendarDays,
+  Heart,
 } from "lucide-react";
 import {
   PortfolioData,
   PortfolioSection,
   SocialLinks,
+  PortfolioHobby,
 } from "@/types/portfolio";
 
 // ----- Types -----
@@ -84,6 +86,7 @@ const TABS = [
   { id: "cursos", label: "Educación", icon: GraduationCap },
   { id: "skills", label: "Habilidades", icon: Wrench },
   { id: "redes", label: "Redes Sociales", icon: Globe },
+  { id: "pasatiempos", label: "Pasatiempos", icon: Heart },
   { id: "consultas", label: "Mensajes", icon: MessageSquareMore },
 ];
 
@@ -205,6 +208,9 @@ export default function ClientDashboard() {
   // === Skills ===
   const [skills, setSkills] = useState<Skill[]>([]);
 
+  // === Hobbies ===
+  const [hobbies, setHobbies] = useState<PortfolioHobby[]>([]);
+
   // === Social Links ===
   const [socialLinks, setSocialLinks] = useState<SocialLinks>({
     linkedin: "",
@@ -285,6 +291,7 @@ export default function ClientDashboard() {
         setProjects(p.projects || []);
         setCourses(p.courses || []);
         setSkills(p.skills || []);
+        setHobbies(p.hobbies || []);
         fetchSections(p.slug);
         fetchInquiries();
       } else {
@@ -389,6 +396,7 @@ export default function ClientDashboard() {
         projects,
         courses,
         skills,
+        hobbies,
       });
 
       // 2. Save hero section
@@ -413,6 +421,7 @@ export default function ClientDashboard() {
           projects,
           experience,
           skills,
+          hobbies,
         },
         order: 1,
         isVisible: true,
@@ -483,6 +492,29 @@ export default function ClientDashboard() {
     const updated = [...skills];
     updated[i] = { ...updated[i], [field]: val };
     setSkills(updated);
+  };
+
+  const addHobby = () => setHobbies([...hobbies, { name: "", link: "", imageUrl: "", icon: "" }]);
+  const removeHobby = (i: number) => setHobbies(hobbies.filter((_, idx) => idx !== i));
+  const updateHobby = (i: number, field: keyof PortfolioHobby, val: string) => {
+    const updated = [...hobbies];
+    updated[i] = { ...updated[i], [field]: val };
+    setHobbies(updated);
+  };
+  const fetchLinkPreview = async (i: number, url: string) => {
+    if (!url) return;
+    const loadingToast = toast.loading("Obteniendo imagen del enlace...");
+    try {
+      const res = await api.get(`/portfolios/link-preview?url=${encodeURIComponent(url)}`);
+      if (res.data && res.data.images && res.data.images.length > 0) {
+        updateHobby(i, "imageUrl", res.data.images[0]);
+        toast.success("Imagen obtenida con éxito", { id: loadingToast });
+      } else {
+        toast.error("No se encontró imagen en el enlace", { id: loadingToast });
+      }
+    } catch {
+      toast.error("Error al obtener la imagen del enlace", { id: loadingToast });
+    }
   };
 
   // === Loading ===
@@ -819,6 +851,15 @@ export default function ClientDashboard() {
                 {activeTab === "redes" && (
                   <RedesForm
                     socialLinks={socialLinks} setSocialLinks={setSocialLinks}
+                    inp={inp} label={label} card={card}
+                  />
+                )}
+
+                {/* ========== TAB: PASATIEMPOS ========== */}
+                {activeTab === "pasatiempos" && (
+                  <HobbiesForm
+                    hobbies={hobbies} addHobby={addHobby} removeHobby={removeHobby}
+                    updateHobby={updateHobby} fetchLinkPreview={fetchLinkPreview}
                     inp={inp} label={label} card={card}
                   />
                 )}

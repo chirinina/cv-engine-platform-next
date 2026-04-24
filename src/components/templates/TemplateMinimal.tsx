@@ -14,6 +14,9 @@ import {
   GraduationCap,
   ArrowUpRight,
   Cpu,
+  Heart,
+  ImageIcon,
+  ExternalLink,
 } from "lucide-react";
 import PortfolioInquiryForm from "./PortfolioInquiryForm";
 import {
@@ -139,6 +142,7 @@ export default function TemplateMinimal({
   const experience = portfolio.experience ?? [];
   const skills = portfolio.skills ?? [];
   const courses = portfolio.courses ?? [];
+  const hobbies = portfolio.hobbies ?? [];
 
   const getSkillLevel = (s: PortfolioSkillEntry): number | null => {
     if (s && typeof s === "object" && s.level != null) return Number(s.level);
@@ -588,6 +592,80 @@ export default function TemplateMinimal({
             </div>
           )}
         </div>
+
+        {/* HOBBIES SECTION */}
+        {hobbies.length > 0 && (
+          <section className="mb-40">
+            <div
+              className="p-10 md:p-12 rounded-[3rem] border shadow-sm"
+              style={{
+                borderColor: subtleBorder,
+                backgroundColor: strongSubtleBg,
+              }}
+            >
+              <div className="flex items-center gap-4 mb-10">
+                <div
+                  className="p-4 rounded-2xl"
+                  style={{
+                    backgroundColor: primaryColor,
+                    color: secondaryColor,
+                  }}
+                >
+                  <Heart className="w-6 h-6" />
+                </div>
+                <h3
+                  className="text-3xl font-black tracking-tight"
+                  style={{ color: primaryColor }}
+                >
+                  Pasatiempos
+                </h3>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                {hobbies.map((hobby, idx) => (
+                  <motion.div
+                    key={idx}
+                    whileHover={{ scale: 1.05 }}
+                    className="group relative rounded-3xl border shadow-sm flex flex-col overflow-hidden transition-all"
+                    style={{
+                      borderColor: subtleBorder,
+                      backgroundColor: secondaryColor,
+                    }}
+                  >
+                    {hobby.link ? (
+                      <a href={hobby.link} target="_blank" rel="noreferrer" className="flex flex-col w-full h-full">
+                        {hobby.imageUrl ? (
+                          <div className="aspect-square w-full relative overflow-hidden border-b" style={{ borderColor: subtleBorder }}>
+                            <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors z-10" />
+                            <img src={hobby.imageUrl} alt={hobby.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0" />
+                          </div>
+                        ) : (
+                          <div className="aspect-square w-full flex items-center justify-center border-b" style={{ borderColor: subtleBorder, backgroundColor: strongSubtleBg }}>
+                            <ImageIcon className="w-10 h-10 opacity-20" style={{ color: primaryColor }} />
+                          </div>
+                        )}
+                        <div className="p-4 flex items-center justify-between">
+                          <span className="font-bold text-xs" style={{ color: primaryColor }}>{hobby.name}</span>
+                          <ExternalLink className="w-3 h-3 opacity-50 group-hover:opacity-100" style={{ color: primaryColor }} />
+                        </div>
+                      </a>
+                    ) : (
+                      <div className="flex flex-col w-full h-full items-center justify-center p-6 gap-3 aspect-square">
+                        {hobby.imageUrl ? (
+                          <div className="w-16 h-16 rounded-full overflow-hidden shadow-md">
+                            <img src={hobby.imageUrl} alt={hobby.name} className="w-full h-full object-cover grayscale" />
+                          </div>
+                        ) : (
+                          <Heart className="w-10 h-10 opacity-30" style={{ color: primaryColor }} />
+                        )}
+                        <span className="font-bold text-xs text-center" style={{ color: primaryColor }}>{hobby.name}</span>
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         <PortfolioInquiryForm
           portfolioSlug={portfolio.slug}

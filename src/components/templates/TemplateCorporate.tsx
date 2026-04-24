@@ -17,6 +17,8 @@ import {
   Home,
   User,
   ArrowUpRight,
+  Heart,
+  ImageIcon
 } from "lucide-react";
 import PortfolioInquiryForm from "./PortfolioInquiryForm";
 import {
@@ -124,6 +126,7 @@ export default function TemplateCorporate({
   const projects = portfolio.projects ?? [];
   const experience = portfolio.experience ?? [];
   const skills = portfolio.skills ?? [];
+  const hobbies = portfolio.hobbies ?? [];
 
   const getTools = (tools: PortfolioProject["tools"]): string[] => {
     if (!tools) return [];
@@ -194,6 +197,11 @@ export default function TemplateCorporate({
       name: "Habilidades",
       href: "#skills",
       icon: <Layers className="w-4 h-4" />,
+    },
+    {
+      name: "Pasatiempos",
+      href: "#hobbies",
+      icon: <Heart className="w-4 h-4" />,
     },
     {
       name: "Educación",
@@ -649,6 +657,68 @@ export default function TemplateCorporate({
                     </motion.div>
                   );
                 })}
+              </div>
+            </section>
+          )}
+
+          {/* Hobbies Section */}
+          {hobbies.length > 0 && (
+            <section id="hobbies" className="space-y-16">
+              <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: false }}
+                variants={slideInLeft}
+                className="flex items-center gap-6"
+              >
+                <h2
+                  className="text-sm font-black tracking-[0.3em]"
+                  style={{ color: primaryColor }}
+                >
+                  Mis Pasatiempos
+                </h2>
+              </motion.div>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {hobbies.map((hobby, idx) => (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    whileHover={{ y: -5 }}
+                    viewport={{ once: false }}
+                    className="group overflow-hidden rounded-2xl border"
+                    style={{ ...glassStyle, backgroundColor: `color-mix(in srgb, ${bgColor} 80%, white)` }}
+                  >
+                    {hobby.link ? (
+                      <a href={hobby.link} target="_blank" rel="noreferrer" className="block w-full h-full">
+                        {hobby.imageUrl ? (
+                          <div className="aspect-square relative overflow-hidden">
+                            <img src={hobby.imageUrl} alt={hobby.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                          </div>
+                        ) : (
+                          <div className="aspect-square flex items-center justify-center bg-black/5" style={{ color: primaryColor }}>
+                            <ImageIcon className="w-12 h-12 opacity-20" />
+                          </div>
+                        )}
+                        <div className="p-4 flex items-center justify-between">
+                          <span className="font-bold text-sm" style={{ color: primaryColor }}>{hobby.name}</span>
+                          <ExternalLink className="w-4 h-4 opacity-50 group-hover:opacity-100" style={{ color: primaryColor }} />
+                        </div>
+                      </a>
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center p-6 gap-3 aspect-square">
+                        {hobby.imageUrl ? (
+                          <div className="w-20 h-20 rounded-full overflow-hidden">
+                            <img src={hobby.imageUrl} alt={hobby.name} className="w-full h-full object-cover" />
+                          </div>
+                        ) : (
+                          <Heart className="w-10 h-10 opacity-30" style={{ color: primaryColor }} />
+                        )}
+                        <span className="font-bold text-sm text-center" style={{ color: primaryColor }}>{hobby.name}</span>
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
               </div>
             </section>
           )}

@@ -15,9 +15,10 @@ import {
   FolderKanban,
   GraduationCap,
   Wrench,
-  Globe
+  Globe,
+  Heart
 } from "lucide-react";
-import { PortfolioData, SocialLinks } from "@/types/portfolio";
+import { PortfolioData, SocialLinks, PortfolioHobby } from "@/types/portfolio";
 
 export const FONTS = [
   "Inter",
@@ -633,3 +634,103 @@ export const RedesForm = ({ socialLinks, setSocialLinks, inp, label, card }: any
   </div>
 );
 
+// ============================================
+// PASATIEMPOS (HOBBIES)
+// ============================================
+export const HobbiesForm = ({
+  hobbies,
+  addHobby,
+  removeHobby,
+  updateHobby,
+  fetchLinkPreview,
+  inp,
+  label,
+  card
+}: any) => (
+  <div>
+    <div className={card}>
+      <div className="flex items-center justify-between mb-5">
+        <h3 className="font-black text-gray-900 dark:text-white flex items-center gap-2">
+          <Heart className="w-5 h-5 text-red-500" /> Pasatiempos
+        </h3>
+        <button
+          onClick={addHobby}
+          className="flex items-center gap-1.5 text-sm font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 px-3 py-2 hover:bg-red-100 dark:hover:bg-red-800/30 transition-all border border-red-200 dark:border-red-800"
+        >
+          <Plus className="w-4 h-4" /> Añadir
+        </button>
+      </div>
+      {hobbies.length === 0 && (
+        <div className="text-center py-10 text-gray-400 dark:text-gray-600">
+          <Heart className="w-10 h-10 mx-auto mb-3 opacity-30" />
+          <p className="text-sm font-medium">Sin pasatiempos. Añade el primero.</p>
+        </div>
+      )}
+      {hobbies.map((hobby: any, i: number) => (
+        <div key={i} className="bg-black p-5 mb-4 relative group">
+          <button
+            onClick={() => removeHobby(i)}
+            className="absolute top-3 right-3 p-1.5 text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+          <p className="text-xs font-black uppercase text-white/80 mb-4">
+            Pasatiempo #{i + 1}
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+            <div>
+              <p className={label}>Nombre (Ej: Leer, Música, etc.)</p>
+              <input
+                type="text"
+                value={hobby.name}
+                onChange={(e) => updateHobby(i, "name", e.target.value)}
+                placeholder="Nombre del pasatiempo"
+                className={inp}
+              />
+            </div>
+            <div>
+              <p className={label}>Enlace (Opcional)</p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={hobby.link || ""}
+                  onChange={(e) => updateHobby(i, "link", e.target.value)}
+                  placeholder="https://..."
+                  className={inp}
+                />
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    fetchLinkPreview(i, hobby.link);
+                  }}
+                  disabled={!hobby.link}
+                  className="bg-red-500 text-white font-bold px-3 py-2 text-xs disabled:opacity-50 hover:bg-red-600 transition-colors"
+                  title="Obtener imagen del enlace"
+                >
+                  Obtener Imagen
+                </button>
+              </div>
+            </div>
+          </div>
+          <div>
+            <p className={label}>Imagen Automática (Open Graph)</p>
+            <div className="flex items-center gap-4 mt-2">
+              {hobby.imageUrl ? (
+                <img src={hobby.imageUrl} alt="preview" className="w-20 h-20 object-cover shadow-sm bg-white" />
+              ) : (
+                <div className="w-20 h-20 bg-gray-100 dark:bg-black flex items-center justify-center shadow-sm shrink-0 border border-dashed border-gray-600">
+                  <ImageIcon className="w-6 h-6 text-gray-400 dark:text-gray-600" />
+                </div>
+              )}
+              {hobby.imageUrl && (
+                <button onClick={() => updateHobby(i, "imageUrl", "")} className="text-xs font-bold text-red-500 hover:text-red-400 transition-colors flex items-center gap-1">
+                  <Trash2 className="w-3 h-3" /> Quitar imagen
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
