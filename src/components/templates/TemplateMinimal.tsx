@@ -1,15 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
-import {
-  motion,
-  useScroll,
-  useTransform,
-  useSpring,
-  type Variants,
-} from "framer-motion";
+import { useRef } from "react";
+import { motion, useScroll, useSpring, type Variants } from "framer-motion";
 import {
   Briefcase,
+  Building2,
+  CalendarDays,
   Mail,
   GraduationCap,
   ArrowUpRight,
@@ -157,14 +153,81 @@ export default function TemplateMinimal({
     },
   };
 
-  const itemFadeUp: Variants = {
-    hidden: { opacity: 0, y: 40, filter: "blur(10px)" },
+  const itemSlideInLeft: Variants = {
+    hidden: { opacity: 0, x: -56, filter: "blur(10px)" },
     show: {
       opacity: 1,
-      y: 0,
+      x: 0,
       filter: "blur(0px)",
       transition: { type: "spring" as const, bounce: 0.3, duration: 1 },
     },
+  };
+
+  const itemSlideInRight: Variants = {
+    hidden: { opacity: 0, x: 56, filter: "blur(10px)" },
+    show: {
+      opacity: 1,
+      x: 0,
+      filter: "blur(0px)",
+      transition: { type: "spring" as const, bounce: 0.3, duration: 1 },
+    },
+  };
+
+  const projectsSectionVariants: Variants = {
+    hidden: {},
+    show: {
+      transition: { staggerChildren: 0.16, delayChildren: 0.05 },
+    },
+  };
+
+  const projectsHeaderVariants: Variants = {
+    hidden: { opacity: 0, x: -32, y: 22, scale: 0.98, filter: "blur(10px)" },
+    show: {
+      opacity: 1,
+      x: 0,
+      y: 0,
+      scale: 1,
+      filter: "blur(0px)",
+      transition: { type: "spring" as const, bounce: 0.25, duration: 1 },
+    },
+  };
+
+  const projectsGridVariants: Variants = {
+    hidden: {},
+    show: {
+      transition: { staggerChildren: 0.1, delayChildren: 0.02 },
+    },
+  };
+
+  const projectCardVariants: Variants = {
+    hidden: (idx: number) => ({
+      opacity: 0,
+      x: 0,
+      y: 64,
+      scale: 0.9,
+      rotate: idx % 2 === 0 ? -1 : 1,
+      filter: "blur(12px)",
+      clipPath: "inset(50% 0% 50% 0% round 2rem)",
+    }),
+    show: (idx: number) => ({
+      opacity: 1,
+      x: [0, idx % 2 === 0 ? 10 : -10, 0],
+      y: [64, -8, 0],
+      scale: [0.9, 1.02, 1],
+      rotate: 0,
+      filter: "blur(0px)",
+      clipPath: "inset(0% 0% 0% 0% round 2rem)",
+      show: (idx: number) => ({
+        opacity: 1,
+        x: idx % 2 === 0 ? 10 : -10,
+        y: -8,
+        scale: 1.02,
+        transition: {
+          type: "spring",
+          bounce: 0.25,
+        },
+      }),
+    }),
   };
 
   const interactiveBg = `color-mix(in srgb, ${primaryColor} 10%, transparent)`;
@@ -187,17 +250,18 @@ export default function TemplateMinimal({
         style={{ scaleX: smoothProgress, backgroundColor: primaryColor }}
       />
 
-      <main className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 py-20 lg:py-32">
+      <main className="relative z-10 max-w-7xl mx-auto px-2 sm:px-4 md:px-5 lg:px-6 py-14 sm:py-20 lg:py-32">
         {/* HERO SECTION */}
         <motion.section
           variants={staggerContainer}
           initial="hidden"
-          animate="show"
-          className="min-h-[80vh] flex flex-col justify-center mb-20 lg:mb-40"
+          whileInView="show"
+          viewport={{ once: false, amount: 0.55 }}
+          className="min-h-[70vh] sm:min-h-[80vh] flex flex-col justify-center mb-16 sm:mb-20 lg:mb-40"
         >
           <motion.div
-            variants={itemFadeUp}
-            className="flex items-center gap-3 mb-8"
+            variants={itemSlideInLeft}
+            className="flex items-center gap-3 mb-6 sm:mb-8"
           >
             <div
               className="w-2.5 h-2.5 rounded-full animate-pulse"
@@ -205,19 +269,19 @@ export default function TemplateMinimal({
             />
           </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-end">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-end">
             <div className="lg:col-span-8">
               <motion.h1
-                variants={itemFadeUp}
-                className="text-6xl md:text-8xl lg:text-[10rem] font-black tracking-tighter leading-[0.85] mb-10"
+                variants={itemSlideInLeft}
+                className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl 2xl:text-8xl font-black tracking-tighter leading-[1.02] sm:leading-[0.98] md:leading-[0.9] mb-6 sm:mb-8 break-words hyphens-auto text-balance"
                 style={{ color: primaryColor }}
               >
                 {heroSection?.content?.title || "Digital Artisan"}
               </motion.h1>
 
               <motion.p
-                variants={itemFadeUp}
-                className="text-2xl md:text-3xl font-medium leading-tight max-w-2xl opacity-90"
+                variants={itemSlideInLeft}
+                className="text-xl md:text-2xl font-medium leading-tight max-w-2xl opacity-90"
                 style={{ color: textColor }}
               >
                 {heroSection?.content?.subtitle ||
@@ -226,7 +290,7 @@ export default function TemplateMinimal({
             </div>
 
             <motion.div
-              variants={itemFadeUp}
+              variants={itemSlideInRight}
               className="lg:col-span-4 flex flex-col items-start lg:items-end gap-6"
             >
               <div className="relative group">
@@ -240,24 +304,24 @@ export default function TemplateMinimal({
                     "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80"
                   }
                   alt="Profile"
-                  className="w-48 h-48 lg:w-64 lg:h-64 object-cover rounded-[2rem] shadow-2xl grayscale group-hover:grayscale-0 transition-all duration-700 relative z-10"
+                  className="w-40 h-40 sm:w-48 sm:h-48 lg:w-64 lg:h-64 object-cover rounded-[2rem] shadow-2xl grayscale group-hover:grayscale-0 transition-all duration-700 relative z-10"
                 />
               </div>
             </motion.div>
           </div>
 
           <motion.div
-            variants={itemFadeUp}
-            className="flex flex-wrap items-center gap-4 mt-16"
+            variants={itemSlideInLeft}
+            className="flex flex-wrap items-center gap-3 sm:gap-4 mt-10 sm:mt-16"
           >
             {portfolio.email && (
               <a
                 href={`mailto:${portfolio.email}`}
-                className="group relative px-8 py-4 rounded-full overflow-hidden shadow-lg transition-transform hover:scale-105"
+                className="group relative px-6 py-3 sm:px-8 sm:py-4 rounded-full overflow-hidden shadow-lg transition-transform hover:scale-105"
                 style={{ backgroundColor: primaryColor }}
               >
                 <span
-                  className="relative z-10 font-bold flex items-center gap-2"
+                  className="relative z-10 font-bold flex items-center gap-2 text-sm sm:text-base"
                   style={{ color: secondaryColor }}
                 >
                   Hablemos <Mail className="w-4 h-4" />
@@ -269,27 +333,27 @@ export default function TemplateMinimal({
               {portfolio.socialLinks?.linkedin && (
                 <a
                   href={portfolio.socialLinks.linkedin}
-                  className="p-4 rounded-full border shadow-sm hover:scale-110 transition-transform"
+                  className="p-3 sm:p-4 rounded-full border shadow-sm hover:scale-110 transition-transform"
                   style={{
                     borderColor: subtleBorder,
                     color: primaryColor,
                     backgroundColor: strongSubtleBg,
                   }}
                 >
-                  <LinkedinIcon className="w-5 h-5" />
+                  <LinkedinIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                 </a>
               )}
               {portfolio.socialLinks?.github && (
                 <a
                   href={portfolio.socialLinks.github}
-                  className="p-4 rounded-full border shadow-sm hover:scale-110 transition-transform"
+                  className="p-3 sm:p-4 rounded-full border shadow-sm hover:scale-110 transition-transform"
                   style={{
                     borderColor: subtleBorder,
                     color: primaryColor,
                     backgroundColor: strongSubtleBg,
                   }}
                 >
-                  <GithubIcon className="w-5 h-5" />
+                  <GithubIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                 </a>
               )}
             </div>
@@ -298,11 +362,16 @@ export default function TemplateMinimal({
 
         {/* PROJECTS SECTION */}
         {projects.length > 0 && (
-          <section className="mb-40">
+          <motion.section
+            variants={projectsSectionVariants}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: false, amount: 0.3 }}
+            className="mb-24 sm:mb-40"
+          >
             <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6"
+              variants={projectsHeaderVariants}
+              className="flex flex-col md:flex-row md:items-end justify-between mb-10 sm:mb-16 gap-4 sm:gap-6"
             >
               <div>
                 <h3
@@ -312,7 +381,7 @@ export default function TemplateMinimal({
                   Proyectos Destacados
                 </h3>
                 <h2
-                  className="text-4xl md:text-6xl font-black tracking-tighter"
+                  className="text-3xl sm:text-4xl md:text-6xl font-black tracking-tighter"
                   style={{ color: primaryColor }}
                 >
                   Obras Seleccionadas
@@ -320,22 +389,24 @@ export default function TemplateMinimal({
               </div>
             </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <motion.div
+              variants={projectsGridVariants}
+              className="grid grid-cols-1 md:grid-cols-2 gap-8"
+            >
               {projects.map((proj: PortfolioProject, idx: number) => (
                 <motion.div
                   key={idx}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.1 }}
-                  className="group relative h-[450px] rounded-[3rem] overflow-hidden border p-10 flex flex-col justify-end transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 shadow-sm"
+                  custom={idx}
+                  variants={projectCardVariants}
+                  className="group relative h-[380px] sm:h-[450px] rounded-[2rem] sm:rounded-[3rem] overflow-hidden border p-6 sm:p-8 lg:p-10 flex flex-col justify-end transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 shadow-sm"
                   style={{
                     borderColor: subtleBorder,
                     backgroundColor: strongSubtleBg,
+                    willChange: "transform, opacity, filter, clip-path",
                   }}
                 >
                   {proj.imageUrl && (
-                    <div className="absolute inset-0 z-0 overflow-hidden rounded-[3rem]">
+                    <div className="absolute inset-0 z-0 overflow-hidden rounded-[2rem] sm:rounded-[3rem]">
                       <img
                         src={proj.imageUrl}
                         alt={proj.name}
@@ -345,11 +416,11 @@ export default function TemplateMinimal({
                     </div>
                   )}
 
-                  <div className="absolute top-8 right-8 flex gap-2 z-10">
+                  <div className="absolute top-6 right-6 sm:top-8 sm:right-8 flex gap-2 z-10">
                     {proj.link && (
                       <a
                         href={proj.link}
-                        className="w-12 h-12 rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg border"
+                        className="w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg border"
                         style={{
                           backgroundColor: secondaryColor,
                           color: primaryColor,
@@ -366,18 +437,16 @@ export default function TemplateMinimal({
                       {(typeof proj.tools === "string"
                         ? proj.tools.split(",")
                         : proj.tools || []
-                      )
-                        .slice(0, 3)
-                        .map((t: string, i: number) => (
-                          <span
-                            key={i}
-                            className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border bg-white/10 text-white border-white/20"
-                          >
-                            {t.trim()}
-                          </span>
-                        ))}
+                      ).map((t: string, i: number) => (
+                        <span
+                          key={i}
+                          className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border bg-white/10 text-white border-white/20"
+                        >
+                          {t.trim()}
+                        </span>
+                      ))}
                     </div>
-                    <h4 className="text-3xl font-bold mb-3 tracking-tight text-white">
+                    <h4 className="text-2xl sm:text-3xl font-bold mb-3 tracking-tight text-white">
                       {proj.name}
                     </h4>
                     <p className="text-sm leading-relaxed max-w-sm text-white/80 line-clamp-2">
@@ -386,102 +455,162 @@ export default function TemplateMinimal({
                   </div>
                 </motion.div>
               ))}
-            </div>
-          </section>
+            </motion.div>
+          </motion.section>
         )}
 
         {/* EXPERIENCE SECTION */}
         {experience.length > 0 && (
-          <section className="mb-40">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-              <div className="lg:col-span-4">
+          <section className="mb-24 sm:mb-40">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 sm:gap-16">
+              <motion.div
+                initial={{ opacity: 0, x: -56, filter: "blur(10px)" }}
+                whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                viewport={{ once: false, amount: 0.3 }}
+                transition={{ type: "spring", bounce: 0.25, duration: 1 }}
+                className="lg:col-span-4"
+              >
                 <h3
-                  className="text-sm font-bold uppercase tracking-[0.4em] mb-4 opacity-70"
+                  className="text-xs sm:text-sm font-bold uppercase tracking-[0.4em] mb-4 opacity-70"
                   style={{ color: textColor }}
                 >
                   Trayectoria
                 </h3>
                 <h2
-                  className="text-4xl md:text-6xl font-black tracking-tighter sticky top-32"
+                  className="text-2xl sm:text-3xl md:text-5xl font-black tracking-tighter lg:sticky lg:top-32 leading-[1.05]"
                   style={{ color: primaryColor }}
                 >
                   Experiencia Profesional
                 </h2>
-              </div>
-              <div className="lg:col-span-8 space-y-12">
-                {experience.map((exp: PortfolioExperience, idx: number) => (
-                  <motion.div
-                    key={idx}
-                    initial={{ opacity: 0, x: 20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    className="group relative pb-12 border-b last:border-0"
-                    style={{ borderColor: subtleBorder }}
-                  >
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                      <div>
-                        <h4
-                          className="text-3xl font-bold transition-transform duration-300"
-                          style={{ color: primaryColor }}
-                        >
-                          {exp.role}
-                        </h4>
-                        <div
-                          className="flex items-center gap-2 mt-2 opacity-80"
-                          style={{ color: textColor }}
-                        >
-                          <span className="font-bold">{exp.company}</span>
-                          <span style={{ color: primaryColor }}>•</span>
-                          <span className="text-sm tracking-wide uppercase font-bold">
-                            {exp.period}
-                          </span>
-                        </div>
-                      </div>
-                      <div
-                        className="w-14 h-14 rounded-2xl flex items-center justify-center border shadow-sm"
-                        style={{
-                          borderColor: subtleBorder,
-                          color: primaryColor,
-                          backgroundColor: strongSubtleBg,
+              </motion.div>
+              <div className="lg:col-span-8">
+                <div className="relative pl-12 sm:pl-14">
+                  <div
+                    className="absolute left-5 sm:left-6 top-1 bottom-1 w-px"
+                    style={{ backgroundColor: subtleBorder }}
+                  />
+
+                  <div className="space-y-6 sm:space-y-8">
+                    {experience.map((exp: PortfolioExperience, idx: number) => (
+                      <motion.div
+                        key={idx}
+                        initial={{
+                          opacity: 0,
+                          x: idx % 2 === 0 ? 56 : -56,
+                          filter: "blur(10px)",
                         }}
+                        whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                        viewport={{ once: false, amount: 0.35 }}
+                        transition={{
+                          type: "spring",
+                          bounce: 0.25,
+                          duration: 1,
+                          delay: idx * 0.04,
+                        }}
+                        className="relative"
                       >
-                        <Briefcase className="w-6 h-6" />
-                      </div>
-                    </div>
-                    <p
-                      className="text-lg leading-relaxed max-w-3xl"
-                      style={{ color: textColor }}
-                    >
-                      {exp.description}
-                    </p>
-                  </motion.div>
-                ))}
+                        <div
+                          className="rounded-2xl sm:rounded-3xl border shadow-sm p-5 sm:p-6 md:p-7"
+                          style={{
+                            borderColor: subtleBorder,
+                            backgroundColor: strongSubtleBg,
+                          }}
+                        >
+                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
+                            <div className="min-w-0">
+                              <h4
+                                className="text-lg sm:text-xl md:text-2xl font-bold leading-snug break-words"
+                                style={{ color: primaryColor }}
+                              >
+                                {exp.role || ""}
+                              </h4>
+                              <div
+                                className="mt-2 flex flex-wrap items-center gap-2 text-xs sm:text-sm font-semibold opacity-90"
+                                style={{ color: textColor }}
+                              >
+                                {exp.company ? (
+                                  <span
+                                    className="inline-flex items-center gap-2 px-2.5 sm:px-3 py-1 rounded-full border"
+                                    style={{
+                                      borderColor: subtleBorder,
+                                      backgroundColor: secondaryColor,
+                                    }}
+                                  >
+                                    <Building2
+                                      className="w-3.5 h-3.5 sm:w-4 sm:h-4"
+                                      style={{ color: primaryColor }}
+                                    />
+                                    <span className="truncate max-w-[12rem] sm:max-w-[18rem]">
+                                      {exp.company}
+                                    </span>
+                                  </span>
+                                ) : null}
+
+                                {exp.period ? (
+                                  <span
+                                    className="inline-flex items-center gap-2 px-2.5 sm:px-3 py-1 rounded-full border"
+                                    style={{
+                                      borderColor: subtleBorder,
+                                      backgroundColor: secondaryColor,
+                                    }}
+                                  >
+                                    <CalendarDays
+                                      className="w-3.5 h-3.5 sm:w-4 sm:h-4"
+                                      style={{ color: primaryColor }}
+                                    />
+                                    <span className="uppercase tracking-wide">
+                                      {exp.period}
+                                    </span>
+                                  </span>
+                                ) : null}
+                              </div>
+                            </div>
+                          </div>
+
+                          {exp.description ? (
+                            <p
+                              className="mt-4 text-sm sm:text-base leading-relaxed max-w-3xl"
+                              style={{ color: textColor }}
+                            >
+                              {exp.description}
+                            </p>
+                          ) : null}
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </section>
         )}
 
         {/* SKILLS & EDUCATION */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-40">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-24 sm:mb-40">
           {skills.length > 0 && (
-            <div
-              className="p-10 md:p-12 rounded-[3rem] border shadow-sm"
+            <motion.div
+              initial={{ opacity: 0, x: -56, filter: "blur(10px)" }}
+              whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+              viewport={{ once: false, amount: 0.25 }}
+              transition={{ type: "spring", bounce: 0.25, duration: 1 }}
+              className="p-6 sm:p-8 md:p-10 lg:p-12 rounded-[2rem] sm:rounded-[3rem] border shadow-sm"
               style={{
                 borderColor: subtleBorder,
                 backgroundColor: strongSubtleBg,
               }}
             >
-              <div className="flex items-center gap-4 mb-10">
+              <div className="flex items-center gap-4 mb-6 sm:mb-10">
                 <div
-                  className="p-4 rounded-2xl"
+                  className="p-3 sm:p-4 rounded-2xl"
                   style={{
                     backgroundColor: primaryColor,
                     color: secondaryColor,
                   }}
                 >
-                  <Cpu className="w-6 h-6" />
+                  <Cpu className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
                 <h3
-                  className="text-3xl font-black tracking-tight"
+                  className="text-2xl sm:text-3xl font-black tracking-tight"
                   style={{ color: primaryColor }}
                 >
                   Stack Tecnológico
@@ -494,28 +623,51 @@ export default function TemplateMinimal({
                   return (
                     <motion.div
                       key={idx}
+                      initial={{
+                        opacity: 0,
+                        x: idx % 2 === 0 ? -24 : 24,
+                        filter: "blur(6px)",
+                      }}
+                      whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                      viewport={{ once: false, amount: 0.4 }}
+                      transition={{
+                        type: "spring",
+                        bounce: 0.2,
+                        duration: 0.9,
+                        delay: idx * 0.015,
+                      }}
                       whileHover={{ scale: 1.02 }}
-                      className="p-5 rounded-2xl border shadow-sm flex flex-col gap-3 transition-colors group"
+                      className="p-4 sm:p-5 rounded-xl sm:rounded-2xl border shadow-sm flex flex-col gap-3 transition-colors group"
                       style={{
                         borderColor: subtleBorder,
                         backgroundColor: secondaryColor,
                       }}
                     >
                       <div className="flex justify-between items-center w-full">
-                        <span className="font-bold text-sm" style={{ color: primaryColor }}>
+                        <span
+                          className="font-bold text-sm"
+                          style={{ color: primaryColor }}
+                        >
                           {name}
                         </span>
                         {level !== null && (
-                          <span className="text-xs font-bold opacity-50 group-hover:opacity-100 transition-opacity" style={{ color: primaryColor }}>
+                          <span
+                            className="text-xs font-bold opacity-50 group-hover:opacity-100 transition-opacity"
+                            style={{ color: primaryColor }}
+                          >
                             {level}%
                           </span>
                         )}
                       </div>
                       {level !== null && (
-                        <div className="h-[2px] w-full rounded-full overflow-hidden" style={{ backgroundColor: strongSubtleBg }}>
+                        <div
+                          className="h-[2px] w-full rounded-full overflow-hidden"
+                          style={{ backgroundColor: strongSubtleBg }}
+                        >
                           <motion.div
                             initial={{ width: 0 }}
                             whileInView={{ width: `${level}%` }}
+                            viewport={{ once: false, amount: 0.8 }}
                             transition={{ duration: 1, ease: "easeInOut" }}
                             className="h-full"
                             style={{ backgroundColor: primaryColor }}
@@ -526,44 +678,64 @@ export default function TemplateMinimal({
                   );
                 })}
               </div>
-            </div>
+            </motion.div>
           )}
 
           {courses.length > 0 && (
-            <div
-              className="p-10 md:p-12 rounded-[3rem] border shadow-sm"
+            <motion.div
+              initial={{ opacity: 0, x: 56, filter: "blur(10px)" }}
+              whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+              viewport={{ once: false, amount: 0.25 }}
+              transition={{ type: "spring", bounce: 0.25, duration: 1 }}
+              className="p-6 sm:p-8 md:p-10 lg:p-12 rounded-[2rem] sm:rounded-[3rem] border shadow-sm"
               style={{
                 borderColor: subtleBorder,
                 backgroundColor: strongSubtleBg,
               }}
             >
-              <div className="flex items-center gap-4 mb-10">
+              <div className="flex items-center gap-4 mb-6 sm:mb-10">
                 <div
-                  className="p-4 rounded-2xl"
+                  className="p-3 sm:p-4 rounded-2xl"
                   style={{
                     backgroundColor: primaryColor,
                     color: secondaryColor,
                   }}
                 >
-                  <GraduationCap className="w-6 h-6" />
+                  <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
                 <h3
-                  className="text-3xl font-black tracking-tight"
+                  className="text-2xl sm:text-3xl font-black tracking-tight"
                   style={{ color: primaryColor }}
                 >
                   Formación
                 </h3>
               </div>
-              <div className="space-y-8">
+              <div className="space-y-6 sm:space-y-8">
                 {courses.map((course: PortfolioCourse, idx: number) => (
-                  <div key={idx} className="flex gap-5 items-start">
+                  <motion.div
+                    key={idx}
+                    initial={{
+                      opacity: 0,
+                      x: idx % 2 === 0 ? 40 : -40,
+                      filter: "blur(8px)",
+                    }}
+                    whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                    viewport={{ once: false, amount: 0.45 }}
+                    transition={{
+                      type: "spring",
+                      bounce: 0.2,
+                      duration: 0.9,
+                      delay: idx * 0.02,
+                    }}
+                    className="flex gap-4 sm:gap-5 items-start"
+                  >
                     <div
                       className="w-1.5 h-16 rounded-full"
                       style={{ backgroundColor: primaryColor, opacity: 0.2 }}
                     />
                     <div>
                       <h4
-                        className="font-bold text-xl leading-tight mb-2"
+                        className="font-bold text-lg sm:text-xl leading-tight mb-2"
                         style={{ color: primaryColor }}
                       >
                         {course.name}
@@ -586,109 +758,181 @@ export default function TemplateMinimal({
                         </p>
                       )}
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
-            </div>
+            </motion.div>
           )}
         </div>
 
         {/* HOBBIES SECTION */}
         {hobbies.length > 0 && (
-          <section className="mb-40">
-            <div
-              className="p-10 md:p-12 rounded-[3rem] border shadow-sm"
+          <section className="mb-24 sm:mb-40">
+            <motion.div
+              initial={{ opacity: 0, x: -56, filter: "blur(10px)" }}
+              whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+              viewport={{ once: false, amount: 0.25 }}
+              transition={{ type: "spring", bounce: 0.25, duration: 1 }}
+              className="p-6 sm:p-8 md:p-10 lg:p-12 rounded-[2rem] sm:rounded-[3rem] border shadow-sm"
               style={{
                 borderColor: subtleBorder,
                 backgroundColor: strongSubtleBg,
               }}
             >
-              <div className="flex items-center gap-4 mb-10">
+              <div className="flex items-center gap-4 mb-6 sm:mb-10">
                 <div
-                  className="p-4 rounded-2xl"
+                  className="p-3 sm:p-4 rounded-2xl"
                   style={{
                     backgroundColor: primaryColor,
                     color: secondaryColor,
                   }}
                 >
-                  <Heart className="w-6 h-6" />
+                  <Heart className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
                 <h3
-                  className="text-3xl font-black tracking-tight"
+                  className="text-2xl sm:text-3xl font-black tracking-tight"
                   style={{ color: primaryColor }}
                 >
                   Pasatiempos
                 </h3>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
                 {hobbies.map((hobby, idx) => (
                   <motion.div
                     key={idx}
+                    initial={{
+                      opacity: 0,
+                      x: idx % 2 === 0 ? -32 : 32,
+                      filter: "blur(8px)",
+                    }}
+                    whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                    viewport={{ once: false, amount: 0.3 }}
+                    transition={{
+                      type: "spring",
+                      bounce: 0.2,
+                      duration: 0.9,
+                      delay: idx * 0.02,
+                    }}
                     whileHover={{ scale: 1.05 }}
-                    className="group relative rounded-3xl border shadow-sm flex flex-col overflow-hidden transition-all"
+                    className="group relative rounded-2xl sm:rounded-3xl border shadow-sm flex flex-col overflow-hidden transition-all"
                     style={{
                       borderColor: subtleBorder,
                       backgroundColor: secondaryColor,
                     }}
                   >
                     {hobby.link ? (
-                      <a href={hobby.link} target="_blank" rel="noreferrer" className="flex flex-col w-full h-full">
+                      <a
+                        href={hobby.link}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex flex-col w-full h-full"
+                      >
                         {hobby.imageUrl ? (
-                          <div className="aspect-square w-full relative overflow-hidden border-b" style={{ borderColor: subtleBorder }}>
+                          <div
+                            className="aspect-square w-full relative overflow-hidden border-b"
+                            style={{ borderColor: subtleBorder }}
+                          >
                             <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors z-10" />
-                            <img src={hobby.imageUrl} alt={hobby.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0" />
+                            <img
+                              src={hobby.imageUrl}
+                              alt={hobby.name}
+                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0"
+                            />
                           </div>
                         ) : (
-                          <div className="aspect-square w-full flex items-center justify-center border-b" style={{ borderColor: subtleBorder, backgroundColor: strongSubtleBg }}>
-                            <ImageIcon className="w-10 h-10 opacity-20" style={{ color: primaryColor }} />
+                          <div
+                            className="aspect-square w-full flex items-center justify-center border-b"
+                            style={{
+                              borderColor: subtleBorder,
+                              backgroundColor: strongSubtleBg,
+                            }}
+                          >
+                            <ImageIcon
+                              className="w-8 h-8 sm:w-10 sm:h-10 opacity-20"
+                              style={{ color: primaryColor }}
+                            />
                           </div>
                         )}
-                        <div className="p-4 flex items-center justify-between">
-                          <span className="font-bold text-xs" style={{ color: primaryColor }}>{hobby.name}</span>
-                          <ExternalLink className="w-3 h-3 opacity-50 group-hover:opacity-100" style={{ color: primaryColor }} />
+                        <div className="p-3 sm:p-4 flex items-center justify-between">
+                          <span
+                            className="font-bold text-xs"
+                            style={{ color: primaryColor }}
+                          >
+                            {hobby.name}
+                          </span>
+                          <ExternalLink
+                            className="w-3 h-3 opacity-50 group-hover:opacity-100"
+                            style={{ color: primaryColor }}
+                          />
                         </div>
                       </a>
                     ) : (
-                      <div className="flex flex-col w-full h-full items-center justify-center p-6 gap-3 aspect-square">
+                      <div className="flex flex-col w-full h-full items-center justify-center p-4 sm:p-6 gap-3 aspect-square">
                         {hobby.imageUrl ? (
-                          <div className="w-16 h-16 rounded-full overflow-hidden shadow-md">
-                            <img src={hobby.imageUrl} alt={hobby.name} className="w-full h-full object-cover grayscale" />
+                          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden shadow-md">
+                            <img
+                              src={hobby.imageUrl}
+                              alt={hobby.name}
+                              className="w-full h-full object-cover grayscale"
+                            />
                           </div>
                         ) : (
-                          <Heart className="w-10 h-10 opacity-30" style={{ color: primaryColor }} />
+                          <Heart
+                            className="w-8 h-8 sm:w-10 sm:h-10 opacity-30"
+                            style={{ color: primaryColor }}
+                          />
                         )}
-                        <span className="font-bold text-xs text-center" style={{ color: primaryColor }}>{hobby.name}</span>
+                        <span
+                          className="font-bold text-xs text-center"
+                          style={{ color: primaryColor }}
+                        >
+                          {hobby.name}
+                        </span>
                       </div>
                     )}
                   </motion.div>
                 ))}
               </div>
-            </div>
+            </motion.div>
           </section>
         )}
 
-        <PortfolioInquiryForm
-          portfolioSlug={portfolio.slug}
-          primaryColor={primaryColor}
-          secondaryColor={secondaryColor}
-          textColor={textColor}
-          variant="minimal"
-          className="mb-40"
-        />
+        <motion.div
+          initial={{ opacity: 0, x: 56, filter: "blur(10px)" }}
+          whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+          viewport={{ once: false, amount: 0.25 }}
+          transition={{ type: "spring", bounce: 0.25, duration: 1 }}
+        >
+          <PortfolioInquiryForm
+            portfolioSlug={portfolio.slug}
+            primaryColor={primaryColor}
+            secondaryColor={secondaryColor}
+            textColor={textColor}
+            variant="minimal"
+            className="mb-24 sm:mb-40"
+          />
+        </motion.div>
 
         {/* FOOTER */}
-        <footer
-          className="relative pt-20 border-t flex flex-col md:flex-row justify-between items-center gap-8 mb-20"
+        <motion.footer
+          initial={{ opacity: 0, x: -56, filter: "blur(10px)" }}
+          whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+          viewport={{ once: false, amount: 0.25 }}
+          transition={{ type: "spring", bounce: 0.25, duration: 1 }}
+          className="relative pt-14 sm:pt-20 border-t flex flex-col md:flex-row justify-between items-center gap-6 sm:gap-8 mb-14 sm:mb-20"
           style={{ borderColor: subtleBorder }}
         >
           <div className="text-center md:text-left">
             <h2
-              className="text-2xl font-black mb-2"
+              className="text-xl sm:text-2xl font-black mb-2"
               style={{ color: primaryColor }}
             >
               {portfolio.user?.name || portfolio.name || "Portfolio"}
             </h2>
-            <p className="text-sm font-bold" style={{ color: textColor }}>
+            <p
+              className="text-xs sm:text-sm font-bold"
+              style={{ color: textColor }}
+            >
               © {new Date().getFullYear()} Desarrollado por Diolay Todo los
               derechos reservados.
             </p>
@@ -697,16 +941,16 @@ export default function TemplateMinimal({
           <motion.button
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             whileHover={{ y: -5, scale: 1.1 }}
-            className="w-16 h-16 rounded-full border flex items-center justify-center shadow-md transition-all"
+            className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border flex items-center justify-center shadow-md transition-all"
             style={{
               borderColor: subtleBorder,
               color: primaryColor,
               backgroundColor: strongSubtleBg,
             }}
           >
-            <ArrowUpRight className="w-6 h-6 -rotate-45" />
+            <ArrowUpRight className="w-5 h-5 sm:w-6 sm:h-6 -rotate-45" />
           </motion.button>
-        </footer>
+        </motion.footer>
       </main>
     </div>
   );

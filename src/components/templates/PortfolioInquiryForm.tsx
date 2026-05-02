@@ -125,11 +125,11 @@ export default function PortfolioInquiryForm({
   };
 
   const baseInputClass =
-    "w-full rounded-2xl px-4 py-3 outline-none transition-all focus:ring-2 resize-none";
+    "w-full rounded-xl px-3 py-2 text-sm outline-none transition-all focus:ring-2 resize-none sm:rounded-2xl sm:px-4 sm:py-3 sm:text-base";
 
   return (
     <section className={className}>
-      <div className={`p-6 md:p-8 lg:p-10 ${styles.wrapper}`}>
+      <div className={`p-4 sm:p-6 md:p-8 lg:p-10 ${styles.wrapper}`}>
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
             <p
@@ -139,7 +139,7 @@ export default function PortfolioInquiryForm({
               Consulta directa
             </p>
             <h3
-              className={`mt-3 text-3xl md:text-4xl font-black ${styles.title}`}
+              className={`mt-3 text-2xl sm:text-3xl md:text-4xl font-black ${styles.title}`}
             >
               Cuentame tu proyecto
             </h3>
@@ -153,8 +153,8 @@ export default function PortfolioInquiryForm({
           </div>
         </div>
 
-        <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
-          <div className="grid gap-5 md:grid-cols-2">
+        <form className="mt-6 sm:mt-8 space-y-4 sm:space-y-5" onSubmit={handleSubmit}>
+          <div className="grid gap-4 sm:gap-5 md:grid-cols-2">
             <div>
               <label
                 className={`mb-2 block text-xs font-bold uppercase tracking-[0.25em] ${styles.label}`}
@@ -207,7 +207,7 @@ export default function PortfolioInquiryForm({
               onChange={(event) =>
                 handleChange("projectDescription", event.target.value)
               }
-              className={`${baseInputClass} ${styles.input} min-h-32`}
+              className={`${baseInputClass} ${styles.input} min-h-28 sm:min-h-32`}
               style={{ borderColor: `${primaryColor}22` }}
               placeholder="Cuentame que necesitas, objetivo del proyecto y lo mas importante."
               maxLength={2000}
@@ -234,7 +234,7 @@ export default function PortfolioInquiryForm({
 
           {(successMessage || errorMessage) && (
             <div
-              className={`rounded-2xl border px-4 py-3 text-sm font-medium ${successMessage
+              className={`rounded-xl sm:rounded-2xl border px-3 py-2 sm:px-4 sm:py-3 text-sm font-medium ${successMessage
                 ? styles.success
                 : "border-red-200 bg-red-50 text-red-700"
                 }`}
@@ -255,8 +255,9 @@ export default function PortfolioInquiryForm({
               type="submit"
               disabled={submitting}
               className={`
-                group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-2xl px-10 py-4 
-                font-black uppercase tracking-widest text-sm transition-all duration-300
+                group relative inline-flex w-full sm:w-auto items-center justify-center gap-2 overflow-hidden
+                rounded-xl px-7 py-3 text-xs sm:rounded-2xl sm:px-10 sm:py-4 sm:text-sm
+                font-black uppercase tracking-widest transition-all duration-300
                 hover:scale-[1.03] hover:-translate-y-1 active:scale-95
                 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:translate-y-0
                 ${styles.buttonText}
